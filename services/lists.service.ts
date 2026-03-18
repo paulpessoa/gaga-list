@@ -12,40 +12,22 @@ export const ListsService = {
    * @param userId ID do usuário autenticado
    */
   async getUserLists(supabase: any): Promise<List[]> {
-    // Pega o usuário logado do cliente autenticado
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Usuário não autenticado');
+    if (!user) return [];
 
-    // Busca listas onde o usuário é dono
-    const { data: ownedLists, error: ownedError } = await supabase
+    // Busca listas onde o usuário é dono ou colaborador usando uma única query se possível,
+    // ou tratando os erros de forma silenciosa para retornar vazio.
+    const { data: lists, error } = await supabase
       .from('lists')
       .select('*')
-      .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (ownedError) throw new Error(`Erro ao buscar listas próprias: ${ownedError.message}`);
+    if (error) {
+      console.error('Erro ao buscar listas:', error.message);
+      return [];
+    }
 
-    // Busca listas onde o usuário é colaborador
-    const { data: collabLists, error: collabError } = await supabase
-      .from('list_collaborators')
-      .select('lists(*)')
-      .eq('user_id', user.id);
-
-    if (collabError) throw new Error(`Erro ao buscar listas colaborativas: ${collabError.message}`);
-
-    // Extrai as listas do resultado do join e combina com as próprias
-    const sharedLists = collabLists
-      .map((c: any) => c.lists)
-      .filter(Boolean) as List[];
-
-    // Remove duplicatas caso existam
-    const allLists = [...(ownedLists || []), ...sharedLists];
-    const uniqueLists = Array.from(new Map(allLists.map(item => [item.id, item])).values());
-
-    // Ordena por data de atualização mais recente
-    return uniqueLists.sort((a, b) => 
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
+    return lists || [];
   },
 
   /**
@@ -53,7 +35,7 @@ export const ListsService = {
    * @param listData Dados da lista a ser criada
    */
   async createList(supabase: any, listData: InsertList): Promise<List> {
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabase
       .from('lists')
       .insert(listData as any)
       .select()
@@ -64,16 +46,7 @@ export const ListsService = {
   },
 
   async updateList(supabase: any, listId: string, updates: Partial<List>): Promise<List> {
-    // Verifica se o usuário tem acesso à lista usando o client autenticado
-    const { data: list, error: listError } = await supabase
-      .from('lists')
-      .select('id')
-      .eq('id', listId)
-      .single();
-      
-    if (listError || !list) throw new Error('Acesso negado à lista');
-
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabase
       .from('lists')
       // @ts-ignore
       .update(updates)
@@ -86,16 +59,7 @@ export const ListsService = {
   },
 
   async deleteList(supabase: any, listId: string): Promise<void> {
-    // Verifica se o usuário tem acesso à lista usando o client autenticado
-    const { data: list, error: listError } = await supabase
-      .from('lists')
-      .select('id')
-      .eq('id', listId)
-      .single();
-      
-    if (listError || !list) throw new Error('Acesso negado à lista');
-
-    const { error } = await supabaseServerClient
+    const { error } = await supabase
       .from('lists')
       .delete()
       .eq('id', listId);
@@ -104,16 +68,7 @@ export const ListsService = {
   },
 
   async getCollaborators(supabase: any, listId: string) {
-    // Verifica se o usuário tem acesso à lista usando o client autenticado
-    const { data: list, error: listError } = await supabase
-      .from('lists')
-      .select('id')
-      .eq('id', listId)
-      .single();
-      
-    if (listError || !list) throw new Error('Acesso negado à lista');
-
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabase
       .from('list_collaborators')
       .select(`
         role,
@@ -126,8 +81,11 @@ export const ListsService = {
       `)
       .eq('list_id', listId);
 
-    if (error) throw new Error(`Erro ao buscar colaboradores: ${error.message}`);
-    return data;
+    if (error) {
+      console.error('Erro ao buscar colaboradores:', error.message);
+      return [];
+    }
+    return data || [];
   },
 
   async addCollaborator(supabase: any, listId: string, email: string) {
@@ -148,7 +106,7 @@ export const ListsService = {
       .single();
 
     if (profileError || !profiles) {
-      throw new Error('Usuário não encontrado');
+      throw new Error('USUARIO_NAO_ENCONTRADO');
     }
 
     const { data, error } = await supabaseServerClient
@@ -163,12 +121,39 @@ export const ListsService = {
 
     if (error) {
       if (error.code === '23505') {
-        throw new Error('Usuário já é colaborador desta lista');
+        throw new Error('Este usuário já é colaborador desta lista');
       }
       throw new Error(`Erro ao adicionar colaborador: ${error.message}`);
     }
 
     return data;
+  },
+
+  /**
+   * Envia um convite oficial do Supabase Auth para um novo usuário e registra o convite pendente.
+   */
+  async inviteUser(email: string, listId: string) {
+    // 1. Enviar o convite oficial via Auth
+    const { data: inviteData, error: inviteError } = await supabaseServerClient.auth.admin.inviteUserByEmail(email);
+    
+    if (inviteError) {
+      throw new Error(`Erro ao enviar convite: ${inviteError.message}`);
+    }
+
+    // 2. Registrar o convite pendente para vinculação automática
+    const { error: pendingError } = await supabaseServerClient
+      .from('pending_invitations')
+      .insert({
+        list_id: listId,
+        email: email,
+        invited_by: (await supabaseServerClient.auth.getUser()).data.user?.id
+      } as any);
+
+    if (pendingError && pendingError.code !== '23505') {
+      console.error('Erro ao registrar convite pendente:', pendingError.message);
+    }
+    
+    return inviteData;
   },
 
   async removeCollaborator(supabase: any, listId: string, userId: string) {

@@ -45,6 +45,11 @@ export async function POST(
       return NextResponse.json({ error: 'E-mail do colaborador é obrigatório' }, { status: 400 });
     }
 
+    if (body.invite === true) {
+      const inviteData = await ListsService.inviteUser(body.email, listId);
+      return NextResponse.json({ data: inviteData, message: 'Convite enviado' }, { status: 200 });
+    }
+
     const newCollaborator = await ListsService.addCollaborator(supabase, listId, body.email);
 
     return NextResponse.json({ data: newCollaborator }, { status: 201 });

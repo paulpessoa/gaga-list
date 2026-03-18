@@ -52,6 +52,30 @@ CREATE TABLE public.items (
 );
 
 -- ==============================================================================
+-- FUNÇÕES DE AUXÍLIO PARA RLS (Para evitar recursão infinita)
+-- ==============================================================================
+
+-- Função para verificar se o usuário é dono da lista (bypassa RLS)
+CREATE OR REPLACE FUNCTION public.is_list_owner(l_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.lists WHERE id = l_id AND owner_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- Função para verificar se o usuário é colaborador da lista (bypassa RLS)
+CREATE OR REPLACE FUNCTION public.is_list_collaborator(l_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.list_collaborators WHERE list_id = l_id AND user_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- ==============================================================================
 -- ROW LEVEL SECURITY (RLS) - Regras de Segurança
 -- ==============================================================================
 
@@ -65,46 +89,56 @@ CREATE POLICY "Perfis são públicos para leitura" ON public.profiles FOR SELECT
 CREATE POLICY "Usuários podem atualizar próprio perfil" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Listas: Usuário pode ver/editar listas que é dono OU que é colaborador
-CREATE POLICY "Acesso de leitura a listas (Dono ou Colaborador)" ON public.lists FOR SELECT
+CREATE POLICY "Acesso de leitura a listas" ON public.lists FOR SELECT
   USING (
     auth.uid() = owner_id OR 
-    EXISTS (SELECT 1 FROM public.list_collaborators WHERE list_id = public.lists.id AND user_id = auth.uid())
+    public.is_list_collaborator(id)
   );
 
-CREATE POLICY "Acesso de inserção a listas (Apenas Autenticados)" ON public.lists FOR INSERT
+CREATE POLICY "Acesso de inserção a listas" ON public.lists FOR INSERT
   WITH CHECK (auth.uid() = owner_id);
 
-CREATE POLICY "Acesso de atualização a listas (Dono ou Editor)" ON public.lists FOR UPDATE
+CREATE POLICY "Acesso de atualização a listas" ON public.lists FOR UPDATE
   USING (
     auth.uid() = owner_id OR 
-    EXISTS (SELECT 1 FROM public.list_collaborators WHERE list_id = public.lists.id AND user_id = auth.uid() AND role = 'editor')
+    EXISTS (
+      SELECT 1 FROM public.list_collaborators 
+      WHERE list_id = public.lists.id 
+      AND user_id = auth.uid() 
+      AND role = 'editor'
+    )
   );
 
-CREATE POLICY "Acesso de deleção a listas (Apenas Dono)" ON public.lists FOR DELETE
+CREATE POLICY "Acesso de deleção a listas" ON public.lists FOR DELETE
   USING (auth.uid() = owner_id);
 
 -- Colaboradores: Donos podem gerenciar colaboradores, usuários podem ver colaboradores de suas listas
-CREATE POLICY "Leitura de colaboradores (Participantes da lista)" ON public.list_collaborators FOR SELECT
+CREATE POLICY "Leitura de colaboradores" ON public.list_collaborators FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM public.lists WHERE id = list_id AND owner_id = auth.uid()) OR
     user_id = auth.uid() OR
-    EXISTS (SELECT 1 FROM public.list_collaborators c2 WHERE c2.list_id = list_id AND c2.user_id = auth.uid())
+    public.is_list_owner(list_id) OR
+    public.is_list_collaborator(list_id)
   );
 
-CREATE POLICY "Gerenciamento de colaboradores (Apenas Dono)" ON public.list_collaborators FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.lists WHERE id = list_id AND owner_id = auth.uid()));
+CREATE POLICY "Gerenciamento de colaboradores" ON public.list_collaborators FOR ALL
+  USING (public.is_list_owner(list_id));
 
 -- Itens: Usuários podem ver/editar itens de listas que têm acesso
-CREATE POLICY "Leitura de itens (Participantes da lista)" ON public.items FOR SELECT
+CREATE POLICY "Leitura de itens" ON public.items FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM public.lists WHERE id = list_id AND owner_id = auth.uid()) OR
-    EXISTS (SELECT 1 FROM public.list_collaborators WHERE list_id = public.items.list_id AND user_id = auth.uid())
+    public.is_list_owner(list_id) OR
+    public.is_list_collaborator(list_id)
   );
 
-CREATE POLICY "Inserção/Atualização de itens (Dono ou Editor)" ON public.items FOR ALL
+CREATE POLICY "Gerenciamento de itens" ON public.items FOR ALL
   USING (
-    EXISTS (SELECT 1 FROM public.lists WHERE id = list_id AND owner_id = auth.uid()) OR
-    EXISTS (SELECT 1 FROM public.list_collaborators WHERE list_id = public.items.list_id AND user_id = auth.uid() AND role = 'editor')
+    public.is_list_owner(list_id) OR
+    EXISTS (
+      SELECT 1 FROM public.list_collaborators 
+      WHERE list_id = public.items.list_id 
+      AND user_id = auth.uid() 
+      AND role = 'editor'
+    )
   );
 
 -- Triggers para updated_at

@@ -53,21 +53,53 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
     deleteItem.mutate(itemId);
   };
 
+  const [showInviteButton, setShowInviteButton] = useState(false);
+
   const handleAddCollaborator = (e: React.FormEvent) => {
     e.preventDefault();
     if (!collaboratorEmail.trim()) return;
     trigger('medium');
+    setShowInviteButton(false);
+    
     addCollaborator.mutate(collaboratorEmail, {
       onSuccess: () => {
-        setShareMessage('Convite enviado com sucesso!');
+        setShareMessage('Colaborador adicionado com sucesso!');
         setCollaboratorEmail('');
         setTimeout(() => setShareMessage(''), 3000);
       },
       onError: (error: any) => {
-        setShareMessage(`Erro: ${error.message}`);
-        setTimeout(() => setShareMessage(''), 3000);
+        if (error.message.includes('USUARIO_NAO_ENCONTRADO')) {
+          setShareMessage('Este usuário ainda não possui conta na plataforma.');
+          setShowInviteButton(true);
+        } else {
+          setShareMessage(`Erro: ${error.message}`);
+          setTimeout(() => setShareMessage(''), 4000);
+        }
       }
     });
+  };
+
+  const handleInviteUser = async () => {
+    if (!collaboratorEmail.trim()) return;
+    trigger('medium');
+    setShareMessage('Enviando convite por e-mail...');
+    
+    try {
+      const response = await fetch(`/api/lists/${listId}/collaborators`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: collaboratorEmail, invite: true })
+      });
+      
+      if (!response.ok) throw new Error('Erro ao enviar convite');
+      
+      setShareMessage('Convite enviado! O usuário receberá um e-mail para participar.');
+      setCollaboratorEmail('');
+      setShowInviteButton(false);
+      setTimeout(() => setShareMessage(''), 5000);
+    } catch (error: any) {
+      setShareMessage(`Erro: ${error.message}`);
+    }
   };
 
   const filteredItems = items?.filter(item => {
@@ -218,8 +250,16 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
             </form>
 
             {shareMessage && (
-              <div className={`p-3 rounded-xl text-sm mb-6 ${shareMessage.includes('Erro') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-                {shareMessage}
+              <div className={`p-4 rounded-xl text-sm mb-6 flex flex-col gap-3 ${shareMessage.includes('Erro') || shareMessage.includes('não possui conta') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+                <p>{shareMessage}</p>
+                {showInviteButton && (
+                  <button
+                    onClick={handleInviteUser}
+                    className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors text-xs"
+                  >
+                    Enviar convite por e-mail
+                  </button>
+                )}
               </div>
             )}
 
