@@ -42,6 +42,13 @@ export async function POST(request: Request) {
       if (error) throw error;
       return NextResponse.json({ message: 'Cadastro realizado! Verifique seu e-mail para confirmar.' });
     }
+    else if (action === 'password_reset') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`,
+      });
+      if (error) throw error;
+      return NextResponse.json({ message: 'E-mail de recuperação enviado! Verifique sua caixa de entrada.' });
+    }
 
     return NextResponse.json({ error: 'Ação inválida' }, { status: 400 });
   } catch (error: any) {

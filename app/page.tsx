@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { ShoppingCart, Users, Zap, ShieldCheck, X, Mail, KeyRound } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { createClient } from '@/lib/supabase/client';
 
 // Carrega o Lottie dinamicamente para evitar erros de SSR (Server-Side Rendering)
 const LottieFooter = dynamic(() => import('@/components/ui/lottie-footer'), { ssr: false });
@@ -13,10 +15,17 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [authMode, setAuthMode] = useState<'magic_link' | 'password_login' | 'password_signup'>('magic_link');
+  const [authMode, setAuthMode] = useState<'magic_link' | 'password_login' | 'password_signup' | 'password_reset'>('magic_link');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      console.log('User in Landing Page:', user);
+    });
+  }, [supabase.auth]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,20 +33,34 @@ export default function LandingPage() {
     setMessage('');
 
     try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, action: authMode })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error);
-      
-      if (authMode === 'password_login') {
-        router.push('/dashboard');
-      } else {
-        setMessage(data.message);
+      const appUrl = window.location.origin;
+      const redirectUrl = `${appUrl}/api/auth/confirm`;
+
+      if (authMode === 'magic_link') {
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: redirectUrl },
+        });
+        if (error) throw error;
+        setMessage('Magic link enviado com sucesso! Verifique seu e-mail.');
+      } else if (authMode === 'password_login') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.href = '/dashboard';
+      } else if (authMode === 'password_signup') {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectUrl },
+        });
+        if (error) throw error;
+        setMessage('Cadastro realizado! Verifique seu e-mail para confirmar.');
+      } else if (authMode === 'password_reset') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`,
+        });
+        if (error) throw error;
+        setMessage('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
       }
     } catch (err: any) {
       setMessage(err.message || 'Ocorreu um erro.');
@@ -149,7 +172,7 @@ export default function LandingPage() {
               </button>
               <button 
                 onClick={() => setAuthMode('password_login')}
-                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${authMode === 'password_login' || authMode === 'password_signup' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
+                className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${authMode === 'password_login' || authMode === 'password_signup' || authMode === 'password_reset' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-200'}`}
               >
                 Senha
               </button>
@@ -182,23 +205,46 @@ export default function LandingPage() {
                 </div>
               )}
 
+              {authMode === 'password_login' && (
+                <div className="flex justify-end">
+                  <button 
+                    type="button"
+                    onClick={() => setAuthMode('password_reset')}
+                    className="text-xs text-zinc-400 hover:text-white transition-colors"
+                  >
+                    Esqueceu a senha?
+                  </button>
+                </div>
+              )}
+
               <button 
                 type="submit" 
                 disabled={isLoading}
                 className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
-                {isLoading ? 'Aguarde...' : authMode === 'magic_link' ? 'Enviar Magic Link' : authMode === 'password_login' ? 'Entrar' : 'Criar Conta'}
+                {isLoading ? 'Aguarde...' : authMode === 'magic_link' ? 'Enviar Magic Link' : authMode === 'password_login' ? 'Entrar' : authMode === 'password_reset' ? 'Recuperar Senha' : 'Criar Conta'}
               </button>
 
               {authMode !== 'magic_link' && (
-                <div className="text-center mt-2">
-                  <button 
-                    type="button"
-                    onClick={() => setAuthMode(authMode === 'password_login' ? 'password_signup' : 'password_login')}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-                  >
-                    {authMode === 'password_login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
-                  </button>
+                <div className="text-center mt-2 flex flex-col gap-2">
+                  {authMode !== 'password_reset' && (
+                    <button 
+                      type="button"
+                      onClick={() => setAuthMode(authMode === 'password_login' ? 'password_signup' : 'password_login')}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                    >
+                      {authMode === 'password_login' ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Faça login'}
+                    </button>
+                  )}
+                  {authMode === 'password_reset' && (
+                    <button 
+                      type="button"
+                      onClick={() => setAuthMode('password_login')}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                    >
+                      Voltar para o login
+                    </button>
+                  )}
                 </div>
               )}
 

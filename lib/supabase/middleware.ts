@@ -23,10 +23,14 @@ export async function updateSession(request: NextRequest) {
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, { ...options, sameSite: 'none', secure: true })
           );
         },
       },
+      cookieOptions: {
+        sameSite: 'none',
+        secure: true,
+      }
     }
   );
 
@@ -34,9 +38,17 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (err) {
+    console.error('Middleware getUser error:', err);
+  }
+
+  console.log('Middleware Path:', request.nextUrl.pathname);
+  console.log('Middleware User:', user?.id);
+  console.log('Middleware Cookies:', request.cookies.getAll().map(c => c.name));
 
   if (
     !user &&

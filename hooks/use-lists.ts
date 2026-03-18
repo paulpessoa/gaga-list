@@ -41,7 +41,8 @@ export function useCreateList() {
       });
       
       if (!response.ok) {
-        throw new Error('Falha ao criar lista');
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.details || 'Falha ao criar lista');
       }
       
       const { data } = await response.json();
@@ -129,6 +130,69 @@ export function useAddCollaborator(listId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COLLABORATORS_QUERY_KEY(listId) });
+    },
+  });
+}
+
+export function useRemoveCollaborator(listId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(`/api/lists/${listId}/collaborators/${userId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao remover colaborador');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: COLLABORATORS_QUERY_KEY(listId) });
+    },
+  });
+}
+
+export function useUpdateList() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ listId, updates }: { listId: string; updates: Partial<List> }) => {
+      const response = await fetch(`/api/lists/${listId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao atualizar lista');
+      }
+      const { data } = await response.json();
+      return data as List;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LISTS_QUERY_KEY });
+    },
+  });
+}
+
+export function useDeleteList() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (listId: string) => {
+      const response = await fetch(`/api/lists/${listId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao deletar lista');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LISTS_QUERY_KEY });
     },
   });
 }

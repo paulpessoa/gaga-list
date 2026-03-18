@@ -1,10 +1,10 @@
 // app/dashboard/page.tsx
 'use client';
 
-import { useLists, useCreateList } from '@/hooks/use-lists';
+import { useLists, useCreateList, useDeleteList } from '@/hooks/use-lists';
 import { useUser } from '@/hooks/use-user';
 import { useHaptic } from '@/hooks/use-haptic';
-import { Plus, ShoppingBag, WifiOff, LogOut, User } from 'lucide-react';
+import { Plus, ShoppingBag, WifiOff, LogOut, User, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -12,8 +12,13 @@ export default function Dashboard() {
   const { data: lists, isLoading, isError } = useLists();
   const { data: user } = useUser();
   const createList = useCreateList();
+  const deleteList = useDeleteList();
   const { trigger } = useHaptic();
   const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    console.log('User in Dashboard:', user);
+  }, [user]);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -107,20 +112,34 @@ export default function Dashboard() {
           </div>
         ) : (
           lists?.map((list) => (
-            <div key={list.id} className="glass-panel rounded-2xl p-6 flex flex-col justify-between h-40 hover:border-zinc-700 transition-colors cursor-pointer">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{list.icon}</span>
-                  <h3 className="font-medium text-lg">{list.title}</h3>
+            <div key={list.id} className="relative group">
+              <Link href={`/dashboard/lists/${list.id}`} className="glass-panel rounded-2xl p-6 flex flex-col justify-between h-40 hover:border-zinc-700 transition-colors cursor-pointer block">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{list.icon}</span>
+                    <h3 className="font-medium text-lg">{list.title}</h3>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between text-xs text-zinc-500">
-                <span>Atualizado hoje</span>
-                <div className="flex -space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-900"></div>
-                  <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
+                <div className="flex items-center justify-between text-xs text-zinc-500">
+                  <span>Atualizado hoje</span>
+                  <div className="flex -space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-900"></div>
+                    <div className="w-6 h-6 rounded-full bg-zinc-700 border border-zinc-900"></div>
+                  </div>
                 </div>
-              </div>
+              </Link>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (confirm('Tem certeza que deseja deletar esta lista?')) {
+                    deleteList.mutate(list.id);
+                  }
+                }}
+                className="absolute top-4 right-4 p-2 rounded-full bg-zinc-900/80 text-zinc-400 hover:text-red-400 hover:bg-zinc-800 opacity-0 group-hover:opacity-100 transition-all z-10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           ))
         )}

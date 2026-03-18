@@ -2,15 +2,17 @@
 
 import { use, useState } from 'react';
 import { useItems, useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/use-items';
-import { useLists, useCollaborators, useAddCollaborator } from '@/hooks/use-lists';
+import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/hooks/use-lists';
 import { Plus, CheckCircle2, Circle, Trash2, ArrowLeft, Share2, X, Users, ShoppingCart, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { useHaptic } from '@/hooks/use-haptic';
+import { useUser } from '@/hooks/use-user';
 
 export default function ListDetail({ params }: { params: Promise<{ listId: string }> }) {
   const { listId } = use(params);
   const { data: lists } = useLists();
   const list = lists?.find(l => l.id === listId);
+  const { data: user } = useUser();
   
   const { data: items, isLoading } = useItems(listId);
   const createItem = useCreateItem(listId);
@@ -28,6 +30,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
   
   const { data: collaborators } = useCollaborators(listId);
   const addCollaborator = useAddCollaborator(listId);
+  const removeCollaborator = useRemoveCollaborator(listId);
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,9 +244,23 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
                           <span className="text-xs text-zinc-500">{collab.profiles.email}</span>
                         </div>
                       </div>
-                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
-                        {collab.role === 'owner' ? 'Dono' : 'Editor'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
+                          {collab.role === 'owner' ? 'Dono' : 'Editor'}
+                        </span>
+                        {collab.role !== 'owner' && list?.owner_id === user?.id && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Remover colaborador?')) {
+                                removeCollaborator.mutate(collab.profiles.id);
+                              }
+                            }}
+                            className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))
                 )}

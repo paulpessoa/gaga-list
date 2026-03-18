@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { ItemsService } from '@/services/items.service';
+import { ListsService } from '@/services/lists.service';
 import { createClient } from '@/lib/supabase/server';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ listId: string; itemId: string }> }
+  { params }: { params: Promise<{ listId: string }> }
 ) {
   try {
-    const { listId, itemId } = await params;
+    const { listId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -17,16 +17,13 @@ export async function PATCH(
 
     const body = await request.json();
     
-    const updatedItem = await ItemsService.updateItem(supabase, listId, itemId, {
-      ...body,
-      purchased_by: body.is_purchased ? user.id : null,
-    });
+    const updatedList = await ListsService.updateList(supabase, listId, body);
 
-    return NextResponse.json({ data: updatedItem });
+    return NextResponse.json({ data: updatedList });
   } catch (error: any) {
-    console.error(`Erro na rota PATCH /api/lists/[listId]/items/[itemId]:`, error);
+    console.error(`Erro na rota PATCH /api/lists/[listId]:`, error);
     return NextResponse.json(
-      { error: 'Erro interno ao atualizar item', details: error.message },
+      { error: 'Erro interno ao atualizar lista', details: error.message },
       { status: 500 }
     );
   }
@@ -34,10 +31,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ listId: string; itemId: string }> }
+  { params }: { params: Promise<{ listId: string }> }
 ) {
   try {
-    const { listId, itemId } = await params;
+    const { listId } = await params;
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -45,13 +42,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    await ItemsService.deleteItem(supabase, listId, itemId);
+    await ListsService.deleteList(supabase, listId);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error(`Erro na rota DELETE /api/lists/[listId]/items/[itemId]:`, error);
+    console.error(`Erro na rota DELETE /api/lists/[listId]:`, error);
     return NextResponse.json(
-      { error: 'Erro interno ao deletar item', details: error.message },
+      { error: 'Erro interno ao deletar lista', details: error.message },
       { status: 500 }
     );
   }
