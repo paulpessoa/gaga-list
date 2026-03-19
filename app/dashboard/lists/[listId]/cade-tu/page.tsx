@@ -1,14 +1,15 @@
-"use client"
+'use client';
 
-import { useUser } from "@/hooks/use-user"
-import { usePresence } from "@/hooks/use-presence"
-import { useParams } from "next/navigation"
-import { ArrowLeft, Bell, MessageSquare, Navigation, User, Map as MapIcon, Zap, ChevronUp } from "lucide-react"
-import Link from "next/link"
-import { useState, useMemo, useEffect } from "react"
-import dynamic from "next/dynamic"
-import { useHaptic } from "@/hooks/use-haptic"
-import { ListChat } from "@/components/lists/list-chat"
+import { useUser } from '@/hooks/use-user';
+import { usePresence, PresenceUser } from '@/hooks/use-presence';
+import { useParams } from 'next/navigation';
+import { ArrowLeft, Bell, MessageSquare, Navigation, User, Map as MapIcon, Zap, ChevronUp, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import { useHaptic } from '@/hooks/use-haptic';
+import { ListChat } from '@/components/lists/list-chat';
+import { formatPhoneForWhatsApp } from '@/lib/utils';
 
 // Importação dinâmica do Leaflet
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -162,7 +163,7 @@ export default function CadeTuPage() {
       {/* Radar de Proximidade (Bottom Sheet) */}
       <div className="h-[38vh] bg-zinc-950 border-t border-white/10 z-[1001] flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
         <div className="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mt-3 mb-2" />
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-hide">
           <div className="flex flex-col gap-3">
             {colleagues.length === 0 ? (
               <div className="py-12 text-center flex flex-col items-center gap-3">
@@ -205,6 +206,19 @@ export default function CadeTuPage() {
                     >
                       <MapIcon className="w-4 h-4" />
                     </button>
+
+                    {(u as any).phone && (
+                      <a
+                        href={`https://wa.me/${formatPhoneForWhatsApp((u as any).phone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 shadow-lg hover:bg-emerald-500 hover:text-white transition-all"
+                        onClick={() => trigger('light')}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    )}
+
                     <button 
                       onClick={() => {
                         trigger("light")
@@ -232,8 +246,8 @@ export default function CadeTuPage() {
         currentUser={user}
         isOpen={isChatOpen}
         onClose={() => {
-          setIsChatOpen(false)
-          setChatTarget(undefined)
+          setIsChatOpen(false);
+          setChatTarget(undefined);
         }}
         targetUser={chatTarget}
       />

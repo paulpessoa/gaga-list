@@ -8,6 +8,7 @@ export interface PresenceUser {
   user_id: string;
   full_name: string;
   avatar_url: string | null;
+  phone?: string | null; // Adicionado para suportar WhatsApp
   lat: number | null;
   lng: number | null;
   last_seen: string;
@@ -27,10 +28,10 @@ export function usePresence(listId: string, currentUser: any) {
   useEffect(() => {
     if (!currentUser) return;
     
-    // Buscar perfil para respeitar permissão de vibração
+    // Buscar perfil completo para carregar telefone e permissões
     supabase
       .from('profiles')
-      .select('allow_notifications, full_name, avatar_url')
+      .select('allow_notifications, full_name, avatar_url, phone')
       .eq('id', currentUser.id)
       .maybeSingle()
       .then(({ data }) => setUserProfile(data));
@@ -55,16 +56,12 @@ export function usePresence(listId: string, currentUser: any) {
       const { targetId, senderName } = payload.payload;
       
       if (targetId === currentUser.id) {
-        // Alguém clicou no seu sino! 
-        // Verificamos a preferência do usuário local antes de vibrar
         if (userProfile?.allow_notifications !== false) {
           if ('vibrate' in navigator) {
             navigator.vibrate([200, 100, 200]);
           }
           trigger('heavy');
           setLastNudge({ senderName, time: Date.now() });
-          
-          // Auto-clear notification after 5s
           setTimeout(() => setLastNudge(null), 5000);
         }
       }
@@ -82,6 +79,7 @@ export function usePresence(listId: string, currentUser: any) {
             user_id: key,
             full_name: userState.full_name,
             avatar_url: userState.avatar_url,
+            phone: userState.phone, // Recebendo o telefone em tempo real
             lat: userState.lat,
             lng: userState.lng,
             last_seen: new Date().toISOString(),
@@ -89,22 +87,13 @@ export function usePresence(listId: string, currentUser: any) {
         });
         setOnlineUsers(formatted);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('User joined:', key, newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        setOnlineUsers((prev) => {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        });
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Track inicial usando dados do perfil (mais atualizados que o auth metadata)
+          // Track inicial com dados do perfil (incluindo telefone)
           await channel.track({
             full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Usuário',
             avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
+            phone: userProfile?.phone || null,
             lat: null,
             lng: null,
             online_at: new Date().toISOString(),
@@ -112,7 +101,7 @@ export function usePresence(listId: string, currentUser: any) {
         }
       });
 
-    // 4. Rastrear Localização GPS (se permitido)
+    // 4. Rastrear Localização GPS
     let watchId: number;
     if ('geolocation' in navigator) {
       watchId = navigator.geolocation.watchPosition(
@@ -120,10 +109,10 @@ export function usePresence(listId: string, currentUser: any) {
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setMyLocation(coords);
           
-          // Enviar posição para o Presence com dados atualizados do perfil
           channel.track({
             full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Usuário',
             avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
+            phone: userProfile?.phone || null,
             lat: coords.lat,
             lng: coords.lng,
             online_at: new Date().toISOString(),
@@ -138,9 +127,8 @@ export function usePresence(listId: string, currentUser: any) {
       supabase.removeChannel(channel);
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [listId, currentUser, supabase, trigger]);
+  }, [listId, currentUser, supabase, trigger, userProfile]);
 
-  // Função para dar o "Sino" (Vibrar o outro)
   const sendNudge = (targetId: string) => {
     if (channelRef.current) {
       const payload = {
@@ -148,14 +136,12 @@ export function usePresence(listId: string, currentUser: any) {
         senderName: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Alguém',
       };
 
-      // 1. Enviar para o canal atual (para quem está no mapa ver na hora)
       channelRef.current.send({
         type: 'broadcast',
         event: 'nudge',
         payload,
       });
 
-      // 2. Enviar para o Inbox Pessoal do Alvo (Para quem está em outras páginas)
       const targetInbox = supabase.channel(`user_inbox_${targetId}`);
       targetInbox.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
