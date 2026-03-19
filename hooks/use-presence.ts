@@ -17,9 +17,23 @@ export interface PresenceUser {
 export function usePresence(listId: string, currentUser: any) {
   const [onlineUsers, setOnlineUsers] = useState<Record<string, PresenceUser>>({});
   const [myLocation, setMyLocation] = useState<{ lat: number, lng: number } | null>(null);
+  const [lastNudge, setLastNudge] = useState<{ senderName: string, time: number } | null>(null);
   const supabase = createClient();
   const { trigger } = useHaptic();
   const channelRef = useRef<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    
+    // Buscar perfil para respeitar permissão de vibração
+    supabase
+      .from('profiles')
+      .select('allow_notifications, full_name, avatar_url')
+      .eq('id', currentUser.id)
+      .maybeSingle()
+      .then(({ data }) => setUserProfile(data));
+  }, [currentUser, supabase]);
 
   useEffect(() => {
     if (!listId || !currentUser) return;
@@ -37,13 +51,21 @@ export function usePresence(listId: string, currentUser: any) {
 
     // 2. Escutar Broadcast de Vibração (O Sino!)
     channel.on('broadcast', { event: 'nudge' }, (payload) => {
-      if (payload.payload.targetId === currentUser.id) {
-        // Alguém clicou no seu sino!
-        if ('vibrate' in navigator) {
-          navigator.vibrate([200, 100, 200]);
+      const { targetId, senderName } = payload.payload;
+      
+      if (targetId === currentUser.id) {
+        // Alguém clicou no seu sino! 
+        // Verificamos a preferência do usuário local antes de vibrar
+        if (userProfile?.allow_notifications !== false) {
+          if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]);
+          }
+          trigger('heavy');
+          setLastNudge({ senderName, time: Date.now() });
+          
+          // Auto-clear notification after 5s
+          setTimeout(() => setLastNudge(null), 5000);
         }
-        trigger('heavy');
-        alert(`🔔 ${payload.payload.senderName} está te chamando!`);
       }
     });
 
@@ -132,5 +154,5 @@ export function usePresence(listId: string, currentUser: any) {
     }
   };
 
-  return { onlineUsers, myLocation, sendNudge };
+  return { onlineUsers, myLocation, sendNudge, lastNudge };
 }

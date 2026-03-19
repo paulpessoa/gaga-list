@@ -184,7 +184,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
         listId={listId}
         collaborators={(collaborators || []) as Collaborator[]}
         isOwner={isOwner}
-        currentUserId={user?.id || ''}
+        currentUser={user}
         onAddCollaborator={(email, callbacks) => addCollaborator.mutate(email, callbacks)}
         onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
         onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}

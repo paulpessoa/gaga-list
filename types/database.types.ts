@@ -12,172 +12,172 @@ export interface Database {
     Tables: {
       lists: {
         Row: {
-          id: string
-          owner_id: string
-          title: string
-          description: string | null
-          icon: string | null
-          color_theme: string
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          owner_id: string;
+          title: string;
+          description: string | null;
+          icon: string | null;
+          color_theme: string;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          owner_id: string
-          title: string
-          description?: string | null
-          icon?: string | null
-          color_theme?: string
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          owner_id: string;
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          color_theme?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          owner_id?: string
-          title?: string
-          description?: string | null
-          icon?: string | null
-          color_theme?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
+          id?: string;
+          owner_id?: string;
+          title?: string;
+          description?: string | null;
+          icon?: string | null;
+          color_theme?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       items: {
         Row: {
-          id: string
-          list_id: string
-          added_by: string | null
-          name: string
-          quantity: number
-          unit: string | null
-          is_purchased: boolean
-          purchased_by: string | null
-          category: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          list_id: string;
+          added_by: string | null;
+          name: string;
+          quantity: number;
+          unit: string | null;
+          is_purchased: boolean;
+          purchased_by: string | null;
+          category: string | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id?: string
-          list_id: string
-          added_by?: string | null
-          name: string
-          quantity?: number
-          unit?: string | null
-          is_purchased?: boolean
-          purchased_by?: string | null
-          category?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id?: string;
+          list_id: string;
+          added_by?: string | null;
+          name: string;
+          quantity?: number;
+          unit?: string | null;
+          is_purchased?: boolean;
+          purchased_by?: string | null;
+          category?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          list_id?: string
-          added_by?: string | null
-          name?: string
-          quantity?: number
-          unit?: string | null
-          is_purchased?: boolean
-          purchased_by?: string | null
-          category?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
+          id?: string;
+          list_id?: string;
+          added_by?: string | null;
+          name?: string;
+          quantity?: number;
+          unit?: string | null;
+          is_purchased?: boolean;
+          purchased_by?: string | null;
+          category?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       list_collaborators: {
         Row: {
-          list_id: string
-          user_id: string
-          role: string
-          joined_at: string
-        }
+          list_id: string;
+          user_id: string;
+          role: string;
+          joined_at: string;
+        };
         Insert: {
-          list_id: string
-          user_id: string
-          role?: string
-          joined_at?: string
-        }
+          list_id: string;
+          user_id: string;
+          role?: string;
+          joined_at?: string;
+        };
         Update: {
-          list_id?: string
-          user_id?: string
-          role?: string
-          joined_at?: string
-        }
-      }
+          list_id?: string;
+          user_id?: string;
+          role?: string;
+          joined_at?: string;
+        };
+      };
       profiles: {
         Row: {
-          id: string
-          email: string
-          full_name: string | null
-          avatar_url: string | null
-          theme_preference: string | null
-          location_enabled: boolean
-          phone: string | null
-          allow_notifications: boolean
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          email: string;
+          full_name: string | null;
+          avatar_url: string | null;
+          theme_preference: string | null;
+          location_enabled: boolean;
+          phone: string | null;
+          allow_notifications: boolean;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id: string
-          email: string
-          full_name?: string | null
-          avatar_url?: string | null
-          theme_preference?: string | null
-          location_enabled?: boolean
-          phone?: string | null
-          allow_notifications?: boolean
-          created_at?: string
-          updated_at?: string
-        }
+          id: string;
+          email: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          theme_preference?: string | null;
+          location_enabled?: boolean;
+          phone?: string | null;
+          allow_notifications?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          email?: string
-          full_name?: string | null
-          avatar_url?: string | null
-          theme_preference?: string | null
-          location_enabled?: boolean
-          phone?: string | null
-          allow_notifications?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      },
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          theme_preference?: string | null;
+          location_enabled?: boolean;
+          phone?: string | null;
+          allow_notifications?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       list_messages: {
         Row: {
-          id: string
-          list_id: string
-          user_id: string
-          content: string
-          created_at: string
-        }
+          id: string;
+          list_id: string;
+          user_id: string;
+          content: string;
+          created_at: string;
+        };
         Insert: {
-          id?: string
-          list_id: string
-          user_id: string
-          content: string
-          created_at?: string
-        }
+          id?: string;
+          list_id: string;
+          user_id: string;
+          content: string;
+          created_at?: string;
+        };
         Update: {
-          id?: string
-          list_id?: string
-          user_id?: string
-          content?: string
-          created_at?: string
-        }
-      }
-    }
+          id?: string;
+          list_id?: string;
+          user_id?: string;
+          content?: string;
+          created_at?: string;
+        };
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Enums: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
+      [_ in never]: never;
+    };
+  };
 }
 
 export type List = Database['public']['Tables']['lists']['Row'];
@@ -199,5 +199,7 @@ export interface Collaborator {
     email: string;
     full_name: string | null;
     avatar_url: string | null;
+    phone?: string | null;
+    allow_notifications?: boolean;
   };
 }

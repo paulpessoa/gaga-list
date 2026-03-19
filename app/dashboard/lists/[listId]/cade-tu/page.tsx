@@ -35,7 +35,7 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 export default function CadeTuPage() {
   const { listId } = useParams() as { listId: string };
   const { data: user } = useUser();
-  const { onlineUsers, myLocation, sendNudge } = usePresence(listId, user);
+  const { onlineUsers, myLocation, sendNudge, lastNudge } = usePresence(listId, user);
   const { trigger } = useHaptic();
   
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
@@ -82,6 +82,16 @@ export default function CadeTuPage() {
 
   return (
     <main className="min-h-screen bg-black flex flex-col overflow-hidden">
+      {/* Banner de Notificação (Nudge) */}
+      {lastNudge && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-top-full duration-300">
+          <div className="bg-indigo-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-indigo-400">
+            <Bell className="w-5 h-5 animate-bounce" />
+            <span className="font-bold text-sm">{lastNudge.senderName} está te chamando!</span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="p-4 flex items-center gap-4 bg-zinc-950/80 backdrop-blur-md border-b border-white/5 z-20">
         <Link href={`/dashboard/lists/${listId}`} className="p-2 rounded-full hover:bg-zinc-800 text-zinc-400">
@@ -184,8 +194,8 @@ export default function CadeTuPage() {
                   <Bell className="w-5 h-5" />
                 </button>
                 <button 
-                  disabled
-                  className="p-3 rounded-2xl bg-zinc-800/20 text-zinc-600 cursor-not-allowed"
+                  className="p-3 rounded-2xl bg-zinc-800/50 text-zinc-400 hover:text-indigo-400 transition-colors"
+                  title="Chat"
                 >
                   <MessageSquare className="w-5 h-5" />
                 </button>
