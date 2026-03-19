@@ -63,31 +63,19 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-4xl mx-auto flex flex-col gap-8">
-      {/* Header */}
+      {/* Header Simplificado */}
       <header className="flex items-center justify-between">
-        <Link href="/dashboard/profile" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-            <User className="w-5 h-5 text-indigo-400" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Minhas Listas</h1>
-            {user?.email && (
-              <p className="text-sm text-zinc-500">{user.email}</p>
-            )}
-          </div>
-        </Link>
-        
-        <div className="flex items-center gap-4">
-          {isOffline && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
-              <WifiOff className="w-4 h-4" />
-              <span>Offline</span>
-            </div>
-          )}
-          <button onClick={handleLogout} className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100 cursor-pointer">
-            <LogOut className="w-5 h-5" />
-          </button>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Minhas Listas</h1>
+          <p className="text-sm text-zinc-500">Organize suas compras colaborativas</p>
         </div>
+        
+        {isOffline && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+            <WifiOff className="w-4 h-4" />
+            <span>Offline</span>
+          </div>
+        )}
       </header>
 
       {/* Content */}

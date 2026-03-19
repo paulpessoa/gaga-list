@@ -111,6 +111,8 @@ export interface Database {
           avatar_url: string | null
           theme_preference: string | null
           location_enabled: boolean
+          phone: string | null
+          allow_notifications: boolean
           created_at: string
           updated_at: string
         }
@@ -121,6 +123,8 @@ export interface Database {
           avatar_url?: string | null
           theme_preference?: string | null
           location_enabled?: boolean
+          phone?: string | null
+          allow_notifications?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -131,8 +135,33 @@ export interface Database {
           avatar_url?: string | null
           theme_preference?: string | null
           location_enabled?: boolean
+          phone?: string | null
+          allow_notifications?: boolean
           created_at?: string
           updated_at?: string
+        }
+      },
+      list_messages: {
+        Row: {
+          id: string
+          list_id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          list_id: string
+          user_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          list_id?: string
+          user_id?: string
+          content?: string
+          created_at?: string
         }
       }
     }

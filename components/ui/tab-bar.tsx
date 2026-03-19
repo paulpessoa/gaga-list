@@ -23,18 +23,9 @@ export function TabBar() {
         href="/dashboard/profile" 
         className={`flex flex-col items-center gap-1 transition-colors ${isActive('/dashboard/profile') ? 'text-indigo-400' : 'text-zinc-500 hover:text-zinc-300'}`}
       >
-        <User className="w-6 h-6" />
-        <span className="text-[10px] font-medium">Perfil</span>
-      </Link>
-
-      {/* Botão placeholder para futuras configurações */}
-      <button 
-        disabled
-        className="flex flex-col items-center gap-1 text-zinc-800 cursor-not-allowed"
-      >
         <Settings className="w-6 h-6" />
         <span className="text-[10px] font-medium">Config</span>
-      </button>
+      </Link>
     </nav>
   );
 }
