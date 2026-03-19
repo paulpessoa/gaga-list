@@ -282,7 +282,7 @@ export default function ProfilePage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
+        <h1 className="hidden md:block text-3xl font-bold tracking-tight text-white">
           Configurações
         </h1>
       </header>
@@ -491,19 +491,35 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Localização no Mapa</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    Localização no Mapa
+                  </span>
                 </div>
-                <button type="button" onClick={() => setLocationEnabled(!locationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
+                <button
+                  type="button"
+                  onClick={() => setLocationEnabled(!locationEnabled)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}
+                >
+                  <div
+                    className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`}
+                  />
                 </button>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Bell className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Buzinadas e Avisos</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    Buzinadas e Avisos
+                  </span>
                 </div>
-                <button type="button" onClick={() => setAllowNotifications(!allowNotifications)} className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${allowNotifications ? "left-6" : "left-1"}`} />
+                <button
+                  type="button"
+                  onClick={() => setAllowNotifications(!allowNotifications)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}
+                >
+                  <div
+                    className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${allowNotifications ? "left-6" : "left-1"}`}
+                  />
                 </button>
               </div>
             </div>
