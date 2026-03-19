@@ -61,23 +61,16 @@ function PushNotificationManager() {
     try {
       const registration = await navigator.serviceWorker.ready
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      
-      if (!vapidPublicKey) throw new Error('Chave VAPID pública não encontrada no .env')
+      if (!vapidPublicKey) throw new Error('Chave VAPID ausente')
       
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       })
-      
       setSubscription(sub)
       await subscribeUser(sub)
     } catch (err: any) {
       console.error('Erro ao assinar push:', err)
-      if (err.name === 'NotAllowedError') {
-        alert('Notificações bloqueadas pelo navegador. Ative nas configurações do site.')
-      } else {
-        alert('Erro ao ativar: ' + err.message)
-      }
     } finally {
       setIsProcessing(false)
     }
@@ -101,22 +94,12 @@ function PushNotificationManager() {
   return (
     <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500">
       {subscription ? (
-        <button 
-          onClick={unsubscribeFromPush}
-          disabled={isProcessing}
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl"
-        >
-          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellOff className="w-3.5 h-3.5" />}
-          Notificações Ativas
+        <button onClick={unsubscribeFromPush} className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl">
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellOff className="w-3.5 h-3.5" />} Notificações Ativas
         </button>
       ) : (
-        <button 
-          onClick={subscribeToPush}
-          disabled={isProcessing}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-        >
-          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
-          Ativar Notificações
+        <button onClick={subscribeToPush} className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3.5 h-3.5" />} Ativar Notificações
         </button>
       )}
     </div>
@@ -128,38 +111,37 @@ function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
-    // Verifica se já está rodando como standalone
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
-    }
+    // Usar timeout para evitar erro de cascading render no Next.js 15
+    const timer = setTimeout(() => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true)
+      }
+    }, 100)
 
     const handler = (e: any) => {
-      console.log('Evento beforeinstallprompt disparado')
       e.preventDefault()
       setDeferredPrompt(e)
     }
     window.addEventListener('beforeinstallprompt', handler)
     
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      clearTimeout(timer)
+    }
   }, [])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null)
-    }
+    if (outcome === 'accepted') setDeferredPrompt(null)
   }
 
   if (isInstalled || !deferredPrompt) return null
 
   return (
     <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <button 
-        onClick={handleInstall} 
-        className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce"
-      >
+      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all border-none animate-bounce">
         <Download className="w-4 h-4" /> Instalar App Nativo
       </button>
     </div>
@@ -167,6 +149,7 @@ function InstallPrompt() {
 }
 
 export default function LandingPage() {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -181,13 +164,20 @@ export default function LandingPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        router.replace("/dashboard")
+        const pendingToken = localStorage.getItem("pending_invite_token")
+        if (pendingToken) {
+          router.replace(`/join/${pendingToken}`)
+        } else {
+          router.replace("/dashboard")
+        }
       }
     }
     checkUser()
 
     const savedEmail = localStorage.getItem("remembered_email")
+    const savedPassword = localStorage.getItem("remembered_password")
     if (savedEmail) setEmail(savedEmail)
+    if (savedPassword) setPassword(savedPassword)
   }, [supabase.auth, router])
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -197,8 +187,10 @@ export default function LandingPage() {
 
     if (rememberMe) {
       localStorage.setItem("remembered_email", email)
+      localStorage.setItem("remembered_password", password)
     } else {
       localStorage.removeItem("remembered_email")
+      localStorage.removeItem("remembered_password")
     }
 
     try {
@@ -208,11 +200,17 @@ export default function LandingPage() {
       if (authMode === "magic_link") {
         const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } })
         if (error) throw error
-        setMessage("Link mágico enviado! Verifique seu e-mail.")
+        setMessage("Link enviado! Verifique seu e-mail.")
       } else if (authMode === "password_login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        window.location.href = "/dashboard"
+        
+        const pendingToken = localStorage.getItem("pending_invite_token")
+        if (pendingToken) {
+          router.push(`/join/${pendingToken}`)
+        } else {
+          window.location.href = "/dashboard"
+        }
       } else if (authMode === "password_signup") {
         const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectUrl } })
         if (error) throw error
@@ -227,6 +225,14 @@ export default function LandingPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleBiometricAuth = async () => {
+    if (!('credentials' in navigator)) {
+      alert('Seu dispositivo não suporta autenticação biométrica neste navegador.')
+      return
+    }
+    alert('Biometria em desenvolvimento: Para ativar o login 100% digital, acesse as Configurações após o primeiro login com senha.')
   }
 
   return (
@@ -252,7 +258,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-400 text-6xl md:text-8xl">perfeita sintonia.</span>
+          <span className="text-indigo-500 text-6xl md:text-8xl">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
@@ -270,7 +276,7 @@ export default function LandingPage() {
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-left">
             <div className="flex flex-col gap-4">
               <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-sm">
-                <Users className="w-7 h-7 text-indigo-500" />
+                <Users className="w-7 h-7 text-indigo-400" />
               </div>
               <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Colaboração Real</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Convide qualquer pessoa para editar a lista com você. Veja tudo em tempo real.</p>
@@ -296,7 +302,7 @@ export default function LandingPage() {
           <Link href="/privacy" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
             <Shield className="w-3.5 h-3.5" /> Privacidade
           </Link>
-          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-400 transition-colors flex items-center gap-2">
+          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" /> Termos
           </Link>
         </div>
@@ -311,8 +317,8 @@ export default function LandingPage() {
               <X className="w-6 h-6" />
             </button>
 
-            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">Bem-vindo</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">Acesse suas listas colaborativas.</p>
+            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">Acessar</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">Sincronize suas compras em segundos.</p>
 
             <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
               <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
@@ -352,13 +358,13 @@ export default function LandingPage() {
                 <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
                   {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
                 </button>
-                <button type="button" className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
+                <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
                   <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
                 </button>
               </div>
 
               {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
                   {message}
                 </div>
               )}
