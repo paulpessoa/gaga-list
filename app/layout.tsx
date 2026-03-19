@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Lista Pronta"
+  },
+  icons: {
+    apple: "/icons/icon-192x192.png"
   }
 }
 
@@ -48,7 +51,7 @@ export default function RootLayout({
                   }
                 } catch (e) {}
               })();
-            `,
+            `
           }}
         />
         {/* Microsoft Clarity Script */}
@@ -62,9 +65,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body
-        className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0 transition-colors duration-300"
-      >
+      <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0 transition-colors duration-300">
         <Providers>
           {children}
           <NavigationWrapper />

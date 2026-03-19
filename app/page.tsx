@@ -16,7 +16,8 @@ import {
   BellOff,
   Eye,
   EyeOff,
-  Fingerprint
+  Fingerprint,
+  Loader2
 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
@@ -44,9 +45,10 @@ function urlBase64ToUint8Array(base64String: string) {
 function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
       navigator.serviceWorker.ready.then(registration => {
         registration.pushManager.getSubscription().then(sub => setSubscription(sub))
@@ -55,43 +57,66 @@ function PushNotificationManager() {
   }, [])
 
   async function subscribeToPush() {
+    setIsProcessing(true)
     try {
       const registration = await navigator.serviceWorker.ready
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidPublicKey) throw new Error('Chave VAPID ausente')
+      
+      if (!vapidPublicKey) throw new Error('Chave VAPID pública não encontrada no .env')
       
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       })
+      
       setSubscription(sub)
       await subscribeUser(sub)
     } catch (err: any) {
       console.error('Erro ao assinar push:', err)
+      if (err.name === 'NotAllowedError') {
+        alert('Notificações bloqueadas pelo navegador. Ative nas configurações do site.')
+      } else {
+        alert('Erro ao ativar: ' + err.message)
+      }
+    } finally {
+      setIsProcessing(false)
     }
   }
 
   async function unsubscribeFromPush() {
+    setIsProcessing(true)
     try {
       await subscription?.unsubscribe()
       setSubscription(null)
       await unsubscribeUser()
     } catch (err) {
       console.error('Erro ao cancelar push:', err)
+    } finally {
+      setIsProcessing(false)
     }
   }
 
   if (!isSupported) return null
 
   return (
-    <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500 hidden sm:block">
+    <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500">
       {subscription ? (
-        <button onClick={unsubscribeFromPush} className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-white/10 rounded-full text-[10px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 backdrop-blur-md transition-all shadow-xl">
-          <BellOff className="w-3.5 h-3.5" /> Notificações Ativas
+        <button 
+          onClick={unsubscribeFromPush}
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl"
+        >
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellOff className="w-3.5 h-3.5" />}
+          Notificações Ativas
         </button>
       ) : (
-        <button onClick={subscribeToPush} className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
-          <Bell className="w-3.5 h-3.5" /> Ativar Notificações
+        <button 
+          onClick={subscribeToPush}
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+        >
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3.5 h-3.5" />}
+          Ativar Notificações
         </button>
       )}
     </div>
@@ -100,13 +125,21 @@ function PushNotificationManager() {
 
 function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
+    // Verifica se já está rodando como standalone
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true)
+    }
+
     const handler = (e: any) => {
+      console.log('Evento beforeinstallprompt disparado')
       e.preventDefault()
       setDeferredPrompt(e)
     }
     window.addEventListener('beforeinstallprompt', handler)
+    
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
@@ -114,14 +147,19 @@ function InstallPrompt() {
     if (!deferredPrompt) return
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') setDeferredPrompt(null)
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null)
+    }
   }
 
-  if (!deferredPrompt) return null
+  if (isInstalled || !deferredPrompt) return null
 
   return (
     <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all border-none animate-bounce">
+      <button 
+        onClick={handleInstall} 
+        className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce"
+      >
         <Download className="w-4 h-4" /> Instalar App Nativo
       </button>
     </div>
@@ -140,9 +178,17 @@ export default function LandingPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.replace("/dashboard")
+      }
+    }
+    checkUser()
+
     const savedEmail = localStorage.getItem("remembered_email")
     if (savedEmail) setEmail(savedEmail)
-  }, [])
+  }, [supabase.auth, router])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -206,7 +252,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-500">perfeita sintonia.</span>
+          <span className="text-indigo-400 text-6xl md:text-8xl">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
@@ -231,14 +277,14 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-col gap-4">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
-                <Zap className="w-7 h-7 text-emerald-500" />
+                <Zap className="w-7 h-7 text-emerald-400" />
               </div>
               <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Offline-First</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Sem internet? Sem problemas. O app funciona offline e sincroniza depois.</p>
             </div>
             <div className="flex flex-col gap-4">
               <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shadow-sm">
-                <ShieldCheck className="w-7 h-7 text-rose-500" />
+                <ShieldCheck className="w-7 h-7 text-rose-400" />
               </div>
               <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Segurança Staff</h3>
               <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Proteção de dados em nível bancário. Suas listas são privadas e seguras.</p>
@@ -250,7 +296,7 @@ export default function LandingPage() {
           <Link href="/privacy" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
             <Shield className="w-3.5 h-3.5" /> Privacidade
           </Link>
-          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
+          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-400 transition-colors flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" /> Termos
           </Link>
         </div>
@@ -298,7 +344,7 @@ export default function LandingPage() {
                   <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">Lembrar-me</span>
                 </label>
                 {authMode === "password_login" && (
-                  <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-500 transition-colors">Esqueceu a senha?</button>
+                  <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors">Esqueceu a senha?</button>
                 )}
               </div>
 
@@ -312,7 +358,7 @@ export default function LandingPage() {
               </div>
 
               {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
                   {message}
                 </div>
               )}
