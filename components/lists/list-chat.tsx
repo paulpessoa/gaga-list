@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Send, Loader2, MessageSquare, X, User, ShieldAlert, History } from "lucide-react"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -42,11 +42,18 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
 
   const isIndividual = !!targetUser
 
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      }
+    }, 100)
+  }, [])
+
   useEffect(() => {
     if (!isOpen || !listId) return
 
-    setMessages([])
-    
+    // Em vez de limpar síncronamente, deixamos o fetchHistory gerenciar o estado inicial
     const channel = supabase.channel(
       isIndividual 
         ? `dm_${[currentUser?.id, targetUser.id].sort().join('_')}` 
@@ -57,6 +64,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
 
     const fetchHistory = async () => {
       if (isIndividual) {
+        setMessages([]) // Limpa mensagens anteriores apenas quando necessário
         setIsLoading(false)
         return
       }
@@ -78,6 +86,8 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
 
       if (!error && data) {
         setMessages(data as any)
+      } else {
+        setMessages([])
       }
       setIsLoading(false)
       scrollToBottom()
@@ -125,15 +135,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [listId, isOpen, isIndividual, targetUser?.id, currentUser?.id])
-
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight
-      }
-    }, 100)
-  }
+  }, [listId, isOpen, isIndividual, targetUser?.id, currentUser?.id, supabase, trigger, scrollToBottom])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -160,17 +162,15 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
     if (isIndividual && targetUser) {
       const dmPayload = {
         ...ephemeralMsg,
-        listId, // Adicionando o contexto da lista
+        listId,
       }
 
-      // 1. Enviar para o canal da conversa
       await channelRef.current.send({
         type: "broadcast",
         event: "dm",
         payload: dmPayload
       })
 
-      // 2. Enviar para o Inbox Pessoal do Alvo
       const targetInbox = supabase.channel(`user_inbox_${targetUser.id}`)
       targetInbox.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {

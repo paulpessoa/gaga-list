@@ -45,27 +45,16 @@ function PushNotificationManager() {
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
-      registerServiceWorker()
+      // O Service Worker já é registrado automaticamente pela biblioteca @ducanh2912/next-pwa
+      navigator.serviceWorker.ready.then(registration => {
+        registration.pushManager.getSubscription().then(sub => setSubscription(sub))
+      })
     }
   }, [])
-
-  async function registerServiceWorker() {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/',
-      })
-      const sub = await registration.pushManager.getSubscription()
-      setSubscription(sub)
-    } catch (err) {
-      console.error('Falha ao registrar Service Worker:', err)
-    }
-  }
 
   async function subscribeToPush() {
     try {
       const registration = await navigator.serviceWorker.ready
-      
-      // Busca a chave pública das variáveis de ambiente
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       
       if (!vapidPublicKey) {
@@ -84,7 +73,7 @@ function PushNotificationManager() {
       if (err.name === 'NotAllowedError') {
         alert('Você bloqueou as notificações. Por favor, redefina a permissão no seu navegador.')
       } else {
-        alert('Erro: ' + err.message)
+        alert('Erro: Para ativar notificações, o site precisa estar em HTTPS (SSL). Erro: ' + err.message)
       }
     }
   }
@@ -234,9 +223,9 @@ export default function LandingPage() {
           <span>Sincronização em tempo real nativa</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-zinc-100 to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-zinc-100 to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-400">perfeita sintonia.</span>
+          <span className="text-indigo-400 text-6xl md:text-8xl">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">

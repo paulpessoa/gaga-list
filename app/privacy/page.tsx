@@ -19,7 +19,7 @@ export default function PrivacyPage() {
       <div className="space-y-8 leading-relaxed">
         <section>
           <h2 className="text-xl font-bold text-white mb-4">1. Coleta de Dados</h2>
-          <p>O <strong>Lista Pronta</strong> coleta apenas as informações necessárias para o funcionamento da plataforma colaborativa: seu nome, e-mail, foto de perfil e localização (apenas se ativada explicitamente por você para uso no recurso "Cadê tu?").</p>
+          <p>O <strong>Lista Pronta</strong> coleta apenas as informações necessárias para o funcionamento da plataforma colaborativa: seu nome, e-mail, foto de perfil e localização (apenas se ativada explicitamente por você para uso no recurso &quot;Cadê tu?&quot;).</p>
         </section>
 
         <section>

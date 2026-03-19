@@ -236,7 +236,7 @@ export default function ProfilePage() {
               >
                 <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-zinc-900 shadow-2xl bg-zinc-900 flex items-center justify-center">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <img src={avatarUrl} alt="Sua foto de perfil" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-12 h-12 text-zinc-700" />
                   )}

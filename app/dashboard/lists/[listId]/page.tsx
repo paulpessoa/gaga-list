@@ -50,20 +50,24 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
     const openChat = searchParams.get('openChat');
     const targetId = searchParams.get('targetId');
 
-    if (openChat === 'true') {
-      if (targetId && collaborators) {
-        const collab = (collaborators as Collaborator[]).find(c => c.user_id === targetId || c.profiles?.id === targetId);
-        if (collab) {
-          setChatTarget({
-            id: targetId,
-            full_name: collab.profiles?.full_name || null,
-            avatar_url: collab.profiles?.avatar_url || null
-          });
+    if (openChat === 'true' && !isChatOpen) {
+      // Usamos um timeout pequeno para tirar o setState do ciclo síncrono de renderização
+      const timer = setTimeout(() => {
+        if (targetId && collaborators) {
+          const collab = (collaborators as Collaborator[]).find(c => c.user_id === targetId || c.profiles?.id === targetId);
+          if (collab && chatTarget?.id !== targetId) {
+            setChatTarget({
+              id: targetId,
+              full_name: collab.profiles?.full_name || null,
+              avatar_url: collab.profiles?.avatar_url || null
+            });
+          }
         }
-      }
-      setIsChatOpen(true);
+        setIsChatOpen(true);
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [searchParams, collaborators]);
+  }, [searchParams, collaborators, isChatOpen, chatTarget?.id]);
 
   const pendingCount = useMemo(() => items?.filter(i => !i.is_purchased).length || 0, [items]);
 
@@ -99,11 +103,9 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
 
   return (
     <main className="min-h-screen bg-black flex flex-col pb-32">
-      {/* HEADER PREMIUM UX/UI */}
       <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            {/* Esquerda: Back + Título */}
             <div className="flex items-center gap-3">
               <Link 
                 href="/dashboard" 
@@ -121,7 +123,6 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
               </div>
             </div>
 
-            {/* Direita: Facepile (Collaborators) */}
             <div 
               className="flex items-center -space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setIsShareModalOpen(true)}
@@ -153,7 +154,6 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
             </div>
           </div>
 
-          {/* Action Bar Secundária */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <button 
@@ -180,7 +180,6 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
       </header>
 
       <div className="max-w-4xl mx-auto w-full p-6 flex flex-col gap-8">
-        {/* Add Item Form */}
         <form onSubmit={handleAddItem} className="flex gap-2">
           <input 
             type="text" 
@@ -198,7 +197,6 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           </button>
         </form>
 
-        {/* Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {(['all', 'pending', 'purchased'] as const).map((f) => (
             <button 
@@ -211,7 +209,6 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           ))}
         </div>
 
-        {/* Items List */}
         <div className="flex flex-col gap-3">
           {isLoading ? (
             <div className="glass-panel rounded-3xl p-6 h-24 animate-pulse flex items-center justify-center border border-white/5">
