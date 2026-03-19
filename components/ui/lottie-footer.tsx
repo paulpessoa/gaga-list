@@ -3,42 +3,50 @@
 import Lottie from 'lottie-react';
 import { useEffect, useState } from 'react';
 
-// Um placeholder simples de animação Lottie (JSON mínimo válido)
-const placeholderAnimation = {
-  "v": "5.5.2",
-  "fr": 60,
-  "ip": 0,
-  "op": 60,
-  "w": 800,
-  "h": 800,
-  "nm": "Placeholder",
-  "ddd": 0,
-  "assets": [],
-  "layers": []
-};
+// URL verificada de um carrinho de compras animado (CDN estável)
+const ANIMATION_URL = 'https://assets3.lottiefiles.com/packages/lf20_uw8n6at8.json';
 
 export default function LottieFooter() {
-  const [animationData, setAnimationData] = useState<any>(placeholderAnimation);
+  const [animationData, setAnimationData] = useState<any>(null);
 
   useEffect(() => {
-    // Em um cenário real, você importaria um JSON de animação 3D ou de personagens
-    // import animationJson from '@/assets/animations/footer-characters.json';
-    // setAnimationData(animationJson);
+    const loadLottie = async () => {
+      try {
+        const response = await fetch(ANIMATION_URL);
+        
+        // Verifica se a resposta é realmente um JSON
+        const contentType = response.headers.get("content-type");
+        if (response.ok && contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setAnimationData(data);
+        } else {
+          console.warn('Lottie: URL não retornou um JSON válido.');
+        }
+      } catch (err) {
+        console.error('Erro ao buscar animação Lottie:', err);
+      }
+    };
+
+    loadLottie();
   }, []);
 
+  if (!animationData) return <div className="h-48" />;
+
   return (
-    <footer className="w-full h-48 mt-20 relative flex items-end justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/20 to-transparent pointer-events-none" />
-      <div className="relative z-10 w-64 h-64 opacity-80 hover:opacity-100 transition-opacity cursor-pointer flex items-center justify-center">
+    <footer className="w-full h-64 mt-20 relative flex items-end justify-center overflow-hidden pointer-events-none">
+      {/* Glow effect */}
+      <div className="absolute bottom-[-50px] w-full h-32 bg-indigo-500/10 blur-[100px] rounded-full" />
+      
+      <div className="relative z-10 w-full max-w-[280px] h-full opacity-40 hover:opacity-100 transition-all duration-700">
         <Lottie 
           animationData={animationData} 
           loop={true} 
-          className="w-full h-full absolute inset-0"
+          className="w-full h-full"
         />
-        <div className="absolute bottom-10 left-0 w-full text-center text-xs text-indigo-300/50 font-mono">
-          [Animação Lottie 3D Aqui]
-        </div>
       </div>
+      
+      {/* Overlay para misturar com o fundo */}
+      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent h-24 bottom-0" />
     </footer>
   );
 }
