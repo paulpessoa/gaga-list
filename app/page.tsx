@@ -13,7 +13,10 @@ import {
   FileText,
   Download,
   Bell,
-  BellOff
+  BellOff,
+  Eye,
+  EyeOff,
+  Fingerprint
 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
@@ -45,7 +48,6 @@ function PushNotificationManager() {
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
-      // O Service Worker já é registrado automaticamente pela biblioteca @ducanh2912/next-pwa
       navigator.serviceWorker.ready.then(registration => {
         registration.pushManager.getSubscription().then(sub => setSubscription(sub))
       })
@@ -56,10 +58,7 @@ function PushNotificationManager() {
     try {
       const registration = await navigator.serviceWorker.ready
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      
-      if (!vapidPublicKey) {
-        throw new Error('A chave pública VAPID não foi encontrada no .env')
-      }
+      if (!vapidPublicKey) throw new Error('Chave VAPID ausente')
       
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -67,14 +66,8 @@ function PushNotificationManager() {
       })
       setSubscription(sub)
       await subscribeUser(sub)
-      alert('Notificações ativadas com sucesso!')
     } catch (err: any) {
       console.error('Erro ao assinar push:', err)
-      if (err.name === 'NotAllowedError') {
-        alert('Você bloqueou as notificações. Por favor, redefina a permissão no seu navegador.')
-      } else {
-        alert('Erro: Para ativar notificações, o site precisa estar em HTTPS (SSL). Erro: ' + err.message)
-      }
     }
   }
 
@@ -91,19 +84,13 @@ function PushNotificationManager() {
   if (!isSupported) return null
 
   return (
-    <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500">
+    <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500 hidden sm:block">
       {subscription ? (
-        <button
-          onClick={unsubscribeFromPush}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 border border-white/10 rounded-full text-[10px] font-bold text-zinc-400 hover:text-white backdrop-blur-md transition-all shadow-xl"
-        >
+        <button onClick={unsubscribeFromPush} className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-white/10 rounded-full text-[10px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 backdrop-blur-md transition-all shadow-xl">
           <BellOff className="w-3.5 h-3.5" /> Notificações Ativas
         </button>
       ) : (
-        <button
-          onClick={subscribeToPush}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-        >
+        <button onClick={subscribeToPush} className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
           <Bell className="w-3.5 h-3.5" /> Ativar Notificações
         </button>
       )}
@@ -127,19 +114,14 @@ function InstallPrompt() {
     if (!deferredPrompt) return
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null)
-    }
+    if (outcome === 'accepted') setDeferredPrompt(null)
   }
 
   if (!deferredPrompt) return null
 
   return (
     <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <button
-        onClick={handleInstall}
-        className="flex items-center gap-3 px-6 py-4 bg-white text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-95 transition-all border-none animate-bounce"
-      >
+      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all border-none animate-bounce">
         <Download className="w-4 h-4" /> Instalar App Nativo
       </button>
     </div>
@@ -150,48 +132,47 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [authMode, setAuthMode] = useState<
-    "magic_link" | "password_login" | "password_signup" | "password_reset"
-  >("magic_link")
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
+  const [authMode, setAuthMode] = useState<"magic_link" | "password_login" | "password_signup" | "password_reset">("magic_link")
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
   const supabase = createClient()
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("remembered_email")
+    if (savedEmail) setEmail(savedEmail)
+  }, [])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setMessage("")
 
+    if (rememberMe) {
+      localStorage.setItem("remembered_email", email)
+    } else {
+      localStorage.removeItem("remembered_email")
+    }
+
     try {
       const appUrl = window.location.origin
       const redirectUrl = `${appUrl}/api/auth/confirm`
 
       if (authMode === "magic_link") {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: redirectUrl }
-        })
+        const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } })
         if (error) throw error
         setMessage("Link mágico enviado! Verifique seu e-mail.")
       } else if (authMode === "password_login") {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         window.location.href = "/dashboard"
       } else if (authMode === "password_signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: redirectUrl }
-        })
+        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectUrl } })
         if (error) throw error
         setMessage("Cadastro realizado! Verifique seu e-mail.")
       } else if (authMode === "password_reset") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`
-        })
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile` })
         if (error) throw error
         setMessage("E-mail de recuperação enviado!")
       }
@@ -203,83 +184,73 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-zinc-950">
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
       <PushNotificationManager />
       <InstallPrompt />
 
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/10 dark:bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-emerald-600/5 dark:bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
 
       <nav className="w-full p-6 flex justify-between items-center z-10 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 text-zinc-50">
-          <ShoppingCart className="w-6 h-6 text-indigo-400" />
+        <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-50">
+          <ShoppingCart className="w-6 h-6 text-indigo-500" />
           <span className="font-bold text-xl tracking-tight">Lista Pronta</span>
         </div>
       </nav>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 z-10 mt-16 md:mt-24">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel text-xs font-medium text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Zap className="w-4 h-4 text-amber-400" />
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           <span>Sincronização em tempo real nativa</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-zinc-100 to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-400 text-6xl md:text-8xl">perfeita sintonia.</span>
+          <span className="text-indigo-500">perfeita sintonia.</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+        <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
           Crie, compartilhe e sincronize listas de compras com sua família e
-          amigos. Funciona offline, atualiza na velocidade da luz e protege seus
-          dados.
+          amigos. Funciona offline, atualiza na velocidade da luz.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-          <button
-            onClick={() => {
-              setAuthMode("magic_link")
-              setIsModalOpen(true)
-            }}
-            className="px-8 py-4 text-base font-semibold bg-zinc-100 text-zinc-900 hover:bg-white rounded-full transition-transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95"
-          >
+          <button onClick={() => { setAuthMode("magic_link"); setIsModalOpen(true); }} className="px-8 py-4 text-base font-semibold bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white rounded-full transition-transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95">
             Acessar minhas listas
           </button>
         </div>
 
-        <div className="mt-24 w-full max-w-5xl glass-panel rounded-3xl p-8 md:p-12 border border-white/10 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="mt-24 w-full max-w-5xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-left">
             <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                <Users className="w-7 h-7 text-indigo-400" />
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-sm">
+                <Users className="w-7 h-7 text-indigo-500" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-100">Colaboração Real</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">Convide qualquer pessoa para editar a lista com você. Veja os itens sendo marcados em tempo real na sua tela.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Colaboração Real</h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Convide qualquer pessoa para editar a lista com você. Veja tudo em tempo real.</p>
             </div>
-
             <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                <Zap className="w-7 h-7 text-emerald-400" />
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
+                <Zap className="w-7 h-7 text-emerald-500" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-100">Offline-First</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">Sem internet no supermercado? Sem problemas. O app funciona offline e sincroniza tudo automaticamente.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Offline-First</h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Sem internet? Sem problemas. O app funciona offline e sincroniza depois.</p>
             </div>
-
             <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-rose-500/20 flex items-center justify-center border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                <ShieldCheck className="w-7 h-7 text-rose-400" />
+              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shadow-sm">
+                <ShieldCheck className="w-7 h-7 text-rose-500" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-100">Segurança Staff</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">Arquitetura blindada. O frontend nunca acessa o banco diretamente. Seus dados protegidos por rotas de API seguras.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Segurança Staff</h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Proteção de dados em nível bancário. Suas listas são privadas e seguras.</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-20 mb-8 flex gap-8 z-10 opacity-40 hover:opacity-100 transition-opacity">
-          <Link href="/privacy" className="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors flex items-center gap-2">
+        <div className="mt-20 mb-8 flex gap-8 z-10 opacity-60">
+          <Link href="/privacy" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
             <Shield className="w-3.5 h-3.5" /> Privacidade
           </Link>
-          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors flex items-center gap-2">
+          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" /> Termos
           </Link>
         </div>
@@ -288,56 +259,60 @@ export default function LandingPage() {
       <LottieFooter />
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-white/10 animate-in zoom-in-95 duration-200">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+              <X className="w-6 h-6" />
             </button>
 
-            <h2 className="text-2xl font-bold text-white mb-2">Bem-vindo</h2>
-            <p className="text-zinc-400 text-sm mb-6">Acesse suas listas de compras colaborativas.</p>
+            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">Bem-vindo</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">Acesse suas listas colaborativas.</p>
 
-            <div className="flex bg-zinc-900/50 p-1 rounded-xl mb-6 border border-white/5">
-              <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${authMode === "magic_link" ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"}`}>Magic Link</button>
-              <button onClick={() => setAuthMode("password_login")} className={`flex-1 py-2 text-sm font-medium rounded-lg transition-colors ${authMode !== "magic_link" ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"}`}>Senha</button>
+            <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
+              <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
+              <button onClick={() => setAuthMode("password_login")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode !== "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Senha</button>
             </div>
 
             <form onSubmit={handleAuth} className="flex flex-col gap-4">
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                <input type="email" placeholder="Seu e-mail" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                <input type="email" placeholder="Seu e-mail" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
               </div>
 
               {(authMode === "password_login" || authMode === "password_signup") && (
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                  <input type="password" placeholder="Sua senha" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-zinc-900/50 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
-                </div>
-              )}
-
-              {authMode === "password_login" && (
-                <div className="flex justify-end">
-                  <button type="button" onClick={() => setAuthMode("password_reset")} className="text-xs text-zinc-400 hover:text-white transition-colors">Esqueceu a senha?</button>
-                </div>
-              )}
-
-              <button type="submit" disabled={isLoading} className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-xl shadow-indigo-500/20 active:scale-95">
-                {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Magic Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar Senha" : "Criar Conta"}
-              </button>
-
-              <div className="text-center mt-2 flex flex-col gap-2">
-                {authMode !== "magic_link" && authMode !== "password_reset" && (
-                  <button type="button" onClick={() => setAuthMode(authMode === "password_login" ? "password_signup" : "password_login")} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
-                    {authMode === "password_login" ? "Não tem conta? Cadastre-se" : "Já tem conta? Faça login"}
+                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                  <input type={showPassword ? "text" : "password"} placeholder="Sua senha" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-indigo-500 transition-colors">
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
-                )}
-                {authMode === "password_reset" && (
-                  <button type="button" onClick={() => setAuthMode("password_login")} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Voltar para o login</button>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between px-2 mb-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? "bg-indigo-500 border-indigo-500" : "border-zinc-300 dark:border-zinc-700"}`}>
+                    {rememberMe && <X className="w-3 h-3 text-white" />}
+                  </div>
+                  <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">Lembrar-me</span>
+                </label>
+                {authMode === "password_login" && (
+                  <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-500 transition-colors">Esqueceu a senha?</button>
                 )}
               </div>
 
+              <div className="flex flex-col gap-3">
+                <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
+                  {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
+                </button>
+                <button type="button" className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
+                  <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
+                </button>
+              </div>
+
               {message && (
-                <div className={`p-3 rounded-xl text-sm text-center ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
                   {message}
                 </div>
               )}
