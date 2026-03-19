@@ -3,7 +3,7 @@
 import { useUser } from '@/hooks/use-user';
 import { usePresence, PresenceUser } from '@/hooks/use-presence';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Bell, MessageSquare, Navigation, User, Map as MapIcon, Zap, ChevronUp, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Bell, MessageSquare, Navigation, User, Map as MapIcon, Zap, ChevronUp, MessageCircleMore } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
@@ -130,7 +130,7 @@ export default function CadeTuPage() {
             {myLocation && (
               <Marker position={[myLocation.lat, myLocation.lng]} icon={L.divIcon({
                 className: 'custom-icon',
-                html: `<div class="relative"><div class="w-12 h-12 rounded-full border-4 border-indigo-500 bg-zinc-900 shadow-2xl flex items-center justify-center overflow-hidden z-10 relative"><img src="${user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=EU&background=6366f1&color=fff`}" class="w-full h-full object-cover" /></div><div class="absolute -inset-2 bg-indigo-500/20 rounded-full animate-ping" /></div>`,
+                html: `<div class="relative"><div class="w-12 h-12 rounded-full border-4 border-white bg-indigo-500 shadow-2xl flex items-center justify-center overflow-hidden z-10 relative"><img src="${user?.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=EU&background=6366f1&color=fff`}" class="w-full h-full object-cover" /></div><div class="absolute -inset-2 bg-indigo-500/20 rounded-full animate-ping" /></div>`,
                 iconSize: [48, 48],
                 iconAnchor: [24, 24]
               })}>
@@ -207,16 +207,23 @@ export default function CadeTuPage() {
                       <MapIcon className="w-4 h-4" />
                     </button>
 
-                    {(u as any).phone && (
+                    {u.phone ? (
                       <a
-                        href={`https://wa.me/${formatPhoneForWhatsApp((u as any).phone)}`}
+                        href={`https://wa.me/${formatPhoneForWhatsApp(u.phone)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 shadow-lg hover:bg-emerald-500 hover:text-white transition-all"
                         onClick={() => trigger('light')}
                       >
-                        <MessageCircle className="w-4 h-4" />
+                        <MessageCircleMore className="w-4 h-4" />
                       </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="p-3 rounded-xl bg-zinc-900/50 text-zinc-800 cursor-not-allowed"
+                      >
+                        <MessageCircleMore className="w-4 h-4 opacity-20" />
+                      </button>
                     )}
 
                     <button 
