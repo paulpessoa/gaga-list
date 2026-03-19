@@ -14,11 +14,13 @@ import {
   Bell,
   Phone
 } from "lucide-react"
-import type { Profile } from "@/types/database.types"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { useHaptic } from "@/hooks/use-haptic"
 import { createClient } from "@/lib/supabase/client"
+import type { Database } from "@/types/database.types"
+
+type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"]
 
 export default function ProfilePage() {
   const { data: user, isLoading: userLoading } = useUser()
@@ -37,25 +39,37 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      setFullName(user.user_metadata?.full_name || "")
-      const fetchProfile = async () => {
-        const { data, error } = (await supabase
-          .from<Profile>("profiles")
-          .select("avatar_url, location_enabled, phone, allow_notifications")
-          .eq("id", user.id)
-          .maybeSingle()) as { data: Profile | null; error: any }
+      const metadata = user.user_metadata as { full_name?: string }
+      setFullName(metadata?.full_name || "")
 
-        if (data) {
-          setAvatarUrl(data.avatar_url)
-          setLocationEnabled(data.location_enabled)
-          setPhone(data.phone || "")
-          setAllowNotifications(data.allow_notifications ?? true)
-        } else if (!error) {
-          await supabase.from<any>("profiles").upsert({
-            id: user.id,
-            email: user.email!,
-            full_name: user.user_metadata?.full_name || ""
-          } as any)
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await (supabase
+            .from("profiles") as any)
+            .select("*")
+            .eq("id", user.id)
+            .maybeSingle()
+
+          if (error) throw error
+
+          const profile = data as Database["public"]["Tables"]["profiles"]["Row"] | null
+
+          if (profile) {
+            setAvatarUrl(profile.avatar_url)
+            setLocationEnabled(!!profile.location_enabled)
+            setPhone(profile.phone || "")
+            setAllowNotifications(!!profile.allow_notifications)
+          } else {
+            await (supabase.from("profiles") as any).upsert({
+              id: user.id,
+              email: user.email || "",
+              full_name: metadata?.full_name || "",
+              location_enabled: false,
+              allow_notifications: true
+            })
+          }
+        } catch (err) {
+          console.error("Erro ao carregar perfil:", err)
         }
       }
       fetchProfile()
@@ -85,17 +99,22 @@ export default function ProfilePage() {
 
       const publicUrlWithTimestamp = `${publicUrl}?t=${Date.now()}`
 
-      const { error: updateError } = await supabase
-        .from<any>("profiles")
-        .update({ avatar_url: publicUrlWithTimestamp } as any)
+      const updateData: ProfileUpdate = { 
+        avatar_url: publicUrlWithTimestamp 
+      }
+
+      const { error: updateError } = await (supabase
+        .from("profiles") as any)
+        .update(updateData)
         .eq("id", user.id)
 
       if (updateError) throw updateError
 
       setAvatarUrl(publicUrlWithTimestamp)
       setMessage("Foto de perfil atualizada!")
-    } catch (error: any) {
-      setMessage(`Erro no upload: ${error.message}`)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro desconhecido"
+      setMessage(`Erro no upload: ${msg}`)
     } finally {
       setIsUploading(false)
     }
@@ -110,14 +129,16 @@ export default function ProfilePage() {
     trigger("medium")
 
     try {
-      const { error } = await supabase
-        .from<any>("profiles")
-        .update({
-          full_name: fullName,
-          location_enabled: locationEnabled,
-          phone: phone,
-          allow_notifications: allowNotifications
-        } as any)
+      const updateData: ProfileUpdate = {
+        full_name: fullName,
+        location_enabled: locationEnabled,
+        phone: phone,
+        allow_notifications: allowNotifications
+      }
+
+      const { error } = await (supabase
+        .from("profiles") as any)
+        .update(updateData)
         .eq("id", user.id)
 
       if (error) throw error
@@ -128,8 +149,9 @@ export default function ProfilePage() {
 
       setMessage("Configurações salvas!")
       setTimeout(() => setMessage(""), 3000)
-    } catch (error: any) {
-      setMessage(`Erro ao salvar: ${error.message}`)
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : "Erro desconhecido"
+      setMessage(`Erro ao salvar: ${msg}`)
     } finally {
       setIsSaving(false)
     }
@@ -166,6 +188,8 @@ export default function ProfilePage() {
         </div>
       ) : (
         <div className="glass-panel rounded-3xl p-8 md:p-10 border border-white/5 shadow-2xl relative overflow-hidden bg-zinc-950/40 backdrop-blur-xl">
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
+          
           <div className="relative z-10 flex flex-col items-center mb-10">
             <div
               className="relative group cursor-pointer"
@@ -213,8 +237,8 @@ export default function ProfilePage() {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
                   Nome Completo
                 </label>
-                <input
-                  type="text"
+                <input 
+                  type="text" 
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Seu nome"
@@ -225,8 +249,8 @@ export default function ProfilePage() {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 ml-1">
                   WhatsApp / Telefone
                 </label>
-                <input
-                  type="tel"
+                <input 
+                  type="tel" 
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="(00) 00000-0000"
