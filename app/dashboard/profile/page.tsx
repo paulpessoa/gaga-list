@@ -12,6 +12,7 @@ import {
   Loader2,
   LogOut,
   Bell,
+  BellOff,
   Phone,
   Lock,
   Sun,
@@ -22,9 +23,23 @@ import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { useHaptic } from "@/hooks/use-haptic"
 import { createClient } from "@/lib/supabase/client"
+import { subscribeUser, unsubscribeUser } from "@/app/actions"
 import type { Database } from "@/types/database.types"
+import Image from "next/image"
 
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"]
+
+// Função auxiliar para VAPID
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i)
+  }
+  return outputArray
+}
 
 export default function ProfilePage() {
   const { data: user, isLoading: userLoading } = useUser()
@@ -38,22 +53,45 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [locationEnabled, setLocationEnabled] = useState(false)
   const [allowNotifications, setAllowNotifications] = useState(true)
-  
+
+  // Push Subscription State
+  const [subscription, setSubscription] = useState<PushSubscription | null>(
+    null
+  )
+  const [isPushSupported, setIsPushSupported] = useState(false)
+  const [isPushProcessing, setIsPushProcessing] = useState(false)
+
   // Tema
   const [theme, setTheme] = useState<"light" | "dark" | "system">("dark")
-  
+
   // Senha
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  
+
   // UI
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    // Carregar preferência de tema do localStorage
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system"
+    // Check Push Support
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window
+    ) {
+      setIsPushSupported(true)
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.pushManager
+          .getSubscription()
+          .then((sub) => setSubscription(sub))
+      })
+    }
+
+    const savedTheme = localStorage.getItem("theme") as
+      | "light"
+      | "dark"
+      | "system"
     if (savedTheme) setTheme(savedTheme)
 
     if (user) {
@@ -62,15 +100,16 @@ export default function ProfilePage() {
 
       const fetchProfile = async () => {
         try {
-          const { data, error } = await (supabase
-            .from("profiles") as any)
+          const { data, error } = await (supabase.from("profiles") as any)
             .select("*")
             .eq("id", user.id)
             .maybeSingle()
 
           if (error) throw error
 
-          const profile = data as Database["public"]["Tables"]["profiles"]["Row"] | null
+          const profile = data as
+            | Database["public"]["Tables"]["profiles"]["Row"]
+            | null
 
           if (profile) {
             setAvatarUrl(profile.avatar_url)
@@ -86,18 +125,51 @@ export default function ProfilePage() {
     }
   }, [user, supabase])
 
+  const handleTogglePush = async () => {
+    setIsPushProcessing(true)
+    try {
+      if (subscription) {
+        // Unsubscribe
+        await subscription.unsubscribe()
+        setSubscription(null)
+        await unsubscribeUser()
+        trigger("medium")
+      } else {
+        // Subscribe
+        const registration = await navigator.serviceWorker.ready
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        if (!vapidPublicKey)
+          throw new Error("Chave VAPID pública não encontrada")
+
+        const sub = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        })
+        setSubscription(sub)
+        await subscribeUser(sub)
+        trigger("success" as any)
+      }
+    } catch (err: any) {
+      console.error("Erro no Push:", err)
+      alert("Erro ao configurar notificações: " + err.message)
+    } finally {
+      setIsPushProcessing(false)
+    }
+  }
+
   const applyTheme = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme)
     localStorage.setItem("theme", newTheme)
-    
+
     const root = window.document.documentElement
     if (newTheme === "dark") {
       root.classList.add("dark")
     } else if (newTheme === "light") {
       root.classList.remove("dark")
     } else {
-      // Modo Sistema
-      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+      const systemDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches
       if (systemDark) {
         root.classList.add("dark")
       } else {
@@ -130,8 +202,7 @@ export default function ProfilePage() {
 
       const publicUrlWithTimestamp = `${publicUrl}?t=${Date.now()}`
 
-      const { error: updateError } = await (supabase
-        .from("profiles") as any)
+      const { error: updateError } = await (supabase.from("profiles") as any)
         .update({ avatar_url: publicUrlWithTimestamp })
         .eq("id", user.id)
 
@@ -155,7 +226,6 @@ export default function ProfilePage() {
     trigger("medium")
 
     try {
-      // 1. Atualizar Perfil
       const updateData: ProfileUpdate = {
         full_name: fullName,
         location_enabled: locationEnabled,
@@ -163,21 +233,17 @@ export default function ProfilePage() {
         allow_notifications: allowNotifications
       }
 
-      const { error: profileError } = await (supabase
-        .from("profiles") as any)
+      const { error: profileError } = await (supabase.from("profiles") as any)
         .update(updateData)
         .eq("id", user.id)
 
       if (profileError) throw profileError
 
-      // 2. Atualizar Senha (se preenchida)
       if (newPassword) {
-        if (newPassword !== confirmPassword) {
+        if (newPassword !== confirmPassword)
           throw new Error("As senhas não coincidem")
-        }
-        if (newPassword.length < 6) {
+        if (newPassword.length < 6)
           throw new Error("A senha deve ter no mínimo 6 caracteres")
-        }
         const { error: passwordError } = await supabase.auth.updateUser({
           password: newPassword
         })
@@ -186,9 +252,7 @@ export default function ProfilePage() {
         setConfirmPassword("")
       }
 
-      await supabase.auth.updateUser({
-        data: { full_name: fullName }
-      })
+      await supabase.auth.updateUser({ data: { full_name: fullName } })
 
       setMessage("Configurações salvas!")
       setTimeout(() => setMessage(""), 3000)
@@ -230,10 +294,8 @@ export default function ProfilePage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Avatar & Info */}
           <div className="bg-zinc-50 dark:bg-zinc-950/40 rounded-3xl p-8 border border-zinc-200 dark:border-white/5 backdrop-blur-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
-            
             <div className="relative z-10 flex flex-col items-center">
               <div
                 className="relative group cursor-pointer"
@@ -241,7 +303,15 @@ export default function ProfilePage() {
               >
                 <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-zinc-900 shadow-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Sua foto de perfil" className="w-full h-full object-cover" />
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={avatarUrl}
+                        fill
+                        className="object-cover"
+                        alt="Sua foto de perfil"
+                        sizes="80px"
+                      />
+                    </div>
                   ) : (
                     <User className="w-12 h-12 text-zinc-400 dark:text-zinc-700" />
                   )}
@@ -254,9 +324,17 @@ export default function ProfilePage() {
                 <div className="absolute bottom-0 right-0 p-2 bg-indigo-500 rounded-full border-2 border-white dark:border-zinc-950 text-white shadow-lg">
                   <Camera className="w-4 h-4" />
                 </div>
-                <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                  accept="image/*"
+                />
               </div>
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white mt-4">{fullName || "Usuário"}</h2>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white mt-4">
+                {fullName || "Usuário"}
+              </h2>
               <p className="text-zinc-500 text-sm flex items-center gap-2 mt-1">
                 <Mail className="w-4 h-4" /> {user?.email}
               </p>
@@ -264,30 +342,46 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSave} className="space-y-6">
-            {/* Seção Perfil */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados Pessoais</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Dados Pessoais
+                </span>
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nome</label>
-                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">
+                    Nome
+                  </label>
+                  <input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    type="text"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Telefone</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="(00) 00000-0000" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">
+                    Telefone
+                  </label>
+                  <input
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Seção Tema */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
               <div className="flex items-center gap-2 text-amber-500 mb-4">
                 <Palette className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Aparência</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Aparência
+                </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -302,63 +396,144 @@ export default function ProfilePage() {
                     className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${theme === t.id ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-white border-zinc-300 dark:border-white/20 shadow-lg" : "bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
                   >
                     <t.icon className="w-5 h-5" />
-                    <span className="text-[10px] font-bold uppercase tracking-tighter">{t.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tighter">
+                      {t.label}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Seção Segurança */}
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
+              <div className="flex items-center gap-2 text-indigo-500 mb-2">
+                <Bell className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Notificações do Sistema
+                </span>
+              </div>
+
+              {isPushSupported ? (
+                <button
+                  type="button"
+                  onClick={handleTogglePush}
+                  disabled={isPushProcessing}
+                  className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${subscription ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600" : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    {subscription ? (
+                      <Bell className="w-5 h-5" />
+                    ) : (
+                      <BellOff className="w-5 h-5" />
+                    )}
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-bold">
+                        {subscription
+                          ? "Notificações Ativas"
+                          : "Ativar Notificações"}
+                      </span>
+                      <span className="text-[9px] uppercase tracking-wider opacity-60">
+                        Alertas de radar e chat no celular
+                      </span>
+                    </div>
+                  </div>
+                  {isPushProcessing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : subscription ? (
+                    <CheckCircle2 className="w-5 h-5" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5" />
+                  )}
+                </button>
+              ) : (
+                <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-white/5 text-zinc-500 text-xs italic">
+                  Notificações Push não são suportadas neste navegador ou
+                  conexão não segura (HTTPS).
+                </div>
+              )}
+            </div>
+
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-emerald-500 mb-2">
                 <Lock className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Segurança</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
+                  Segurança
+                </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nova Senha</label>
-                  <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">
+                    Nova Senha
+                  </label>
+                  <input
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    type="password"
+                    placeholder="••••••"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Confirmar</label>
-                  <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">
+                    Confirmar
+                  </label>
+                  <input
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    type="password"
+                    placeholder="••••••"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Seção Permissões */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <MapPin className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Localização no Mapa</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                    Localização no Mapa
+                  </span>
                 </div>
-                <button type="button" onClick={() => setLocationEnabled(!locationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Buzinadas e Avisos</span>
-                </div>
-                <button type="button" onClick={() => setAllowNotifications(!allowNotifications)} className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${allowNotifications ? "left-6" : "left-1"}`} />
+                <button
+                  type="button"
+                  onClick={() => setLocationEnabled(!locationEnabled)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}
+                >
+                  <div
+                    className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`}
+                  />
                 </button>
               </div>
             </div>
 
             {message && (
-              <div className={`p-4 rounded-2xl text-xs font-bold text-center animate-in fade-in zoom-in-95 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"}`}>
+              <div
+                className={`p-4 rounded-2xl text-xs font-bold text-center animate-in fade-in zoom-in-95 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
+              >
                 {message}
               </div>
             )}
 
             <div className="flex flex-col gap-3">
-              <button disabled={isSaving} type="submit" className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95">
-                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Configurações</>}
+              <button
+                disabled={isSaving}
+                type="submit"
+                className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" /> Salvar Configurações
+                  </>
+                )}
               </button>
-              <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-red-500/10 hover:text-red-500 text-zinc-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-red-500/10 hover:text-red-400 text-zinc-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95"
+              >
                 <LogOut className="w-5 h-5" /> Sair da Conta
               </button>
             </div>
@@ -366,13 +541,59 @@ export default function ProfilePage() {
 
           <footer className="pt-8 flex flex-col items-center gap-2 opacity-40">
             <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              <Link href="/privacy" className="hover:text-indigo-500">Privacidade</Link>
-              <Link href="/terms" className="hover:text-indigo-500">Termos</Link>
+              <Link href="/privacy" className="hover:text-indigo-500">
+                Privacidade
+              </Link>
+              <Link href="/terms" className="hover:text-indigo-500">
+                Termos
+              </Link>
             </div>
-            <p className="text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-bold tracking-widest">Lista Pronta v1.0.0</p>
+            <p className="text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-bold tracking-widest">
+              Lista Pronta v1.0.0
+            </p>
           </footer>
         </div>
       )}
     </main>
+  )
+}
+
+// Icons extras para o build
+function CheckCircle2(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22c5.523 0 9-4.477 9-10S17.523 2 12 2 3 6.477 3 12s3.477 10 9 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+
+function ChevronRight(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
   )
 }
