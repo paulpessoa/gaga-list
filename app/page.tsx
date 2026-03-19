@@ -13,11 +13,15 @@ import {
   FileText,
   Download,
   Eye,
-  EyeOff
+  EyeOff,
+  Fingerprint,
+  Loader2,
+  PartyPopper
 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { subscribeUser, unsubscribeUser } from './actions'
 
 import { createClient } from "@/lib/supabase/client"
 
@@ -69,6 +73,7 @@ function InstallPrompt() {
 
 export default function LandingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -77,13 +82,17 @@ export default function LandingPage() {
   const [authMode, setAuthMode] = useState<"magic_link" | "password_login" | "password_signup" | "password_reset">("magic_link")
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
+  const [inviteContext, setInviteContext] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
-    const checkUser = async () => {
+    const checkUserAndInvite = async () => {
+      // Verificar se há convite no localStorage
+      const pendingToken = localStorage.getItem("pending_invite_token")
+      if (pendingToken) setInviteContext(true)
+
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const pendingToken = localStorage.getItem("pending_invite_token")
         if (pendingToken) {
           router.replace(`/join/${pendingToken}`)
         } else {
@@ -91,7 +100,7 @@ export default function LandingPage() {
         }
       }
     }
-    checkUser()
+    checkUserAndInvite()
 
     const savedEmail = localStorage.getItem("remembered_email")
     const savedPassword = localStorage.getItem("remembered_password")
@@ -161,10 +170,17 @@ export default function LandingPage() {
       </nav>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 z-10 mt-16 md:mt-24">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-          <span>Sincronização em tempo real nativa</span>
-        </div>
+        {inviteContext ? (
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-sm font-bold text-amber-600 dark:text-amber-400 mb-8 animate-bounce">
+            <PartyPopper className="w-5 h-5" />
+            <span>Você recebeu um convite para colaborar!</span>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+            <span>Sincronização em tempo real nativa</span>
+          </div>
+        )}
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
@@ -177,8 +193,8 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-          <button onClick={() => { setAuthMode("magic_link"); setIsModalOpen(true); }} className="px-8 py-4 text-base font-semibold bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white rounded-full transition-transform hover:scale-105 flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-95">
-            Acessar minhas listas
+          <button onClick={() => { setAuthMode(inviteContext ? "password_signup" : "magic_link"); setIsModalOpen(true); }} className="px-10 py-5 text-lg font-bold bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2 cursor-pointer shadow-xl active:scale-95">
+            {inviteContext ? "Criar conta e entrar na lista" : "Acessar minhas listas"}
           </button>
         </div>
 
@@ -227,8 +243,12 @@ export default function LandingPage() {
               <X className="w-6 h-6" />
             </button>
 
-            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">Acessar</h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">Sincronize suas compras em segundos.</p>
+            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+              {inviteContext ? "Quase lá!" : "Bem-vindo"}
+            </h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">
+              {inviteContext ? "Crie sua conta para aceitar o convite." : "Acesse suas listas colaborativas."}
+            </p>
 
             <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
               <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
@@ -271,7 +291,7 @@ export default function LandingPage() {
               </div>
 
               {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
                   {message}
                 </div>
               )}
