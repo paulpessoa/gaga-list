@@ -155,3 +155,17 @@ export type UpdateList = Database['public']['Tables']['lists']['Update'];
 export type Item = Database['public']['Tables']['items']['Row'];
 export type InsertItem = Database['public']['Tables']['items']['Insert'];
 export type UpdateItem = Database['public']['Tables']['items']['Update'];
+
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+
+export interface Collaborator {
+  user_id?: string;
+  role: 'owner' | 'editor' | 'viewer';
+  status: 'active' | 'pending';
+  profiles: {
+    id: string;
+    email: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
+}

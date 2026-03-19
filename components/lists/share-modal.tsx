@@ -1,0 +1,235 @@
+"use client"
+
+import { useState } from "react"
+import { X, Users, Clock, Loader2 } from "lucide-react"
+import { Collaborator } from "@/types/database.types"
+
+interface ShareModalProps {
+  isOpen: boolean
+  onClose: () => void
+  listId: string
+  collaborators: Collaborator[]
+  isOwner: boolean
+  currentUserId: string
+  onAddCollaborator: (
+    email: string,
+    callbacks: { onSuccess: () => void; onError: (err: any) => void }
+  ) => void
+  onInviteUser: (
+    email: string,
+    callbacks: { onSuccess: () => void; onError: (err: any) => void }
+  ) => void
+  onRemoveCollaborator: (userId: string) => void
+}
+
+export function ShareModal({
+  isOpen,
+  onClose,
+  collaborators,
+  isOwner,
+  currentUserId,
+  onAddCollaborator,
+  onInviteUser,
+  onRemoveCollaborator
+}: ShareModalProps) {
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [showInviteButton, setShowInviteButton] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  if (!isOpen) return null
+
+  console.log(collaborators)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+
+    setIsLoading(true)
+    setShowInviteButton(false)
+
+    onAddCollaborator(email, {
+      onSuccess: () => {
+        setMessage("Colaborador adicionado com sucesso!")
+        setEmail("")
+        setIsLoading(false)
+        setTimeout(() => setMessage(""), 3000)
+      },
+      onError: (error: any) => {
+        setIsLoading(false)
+        if (error.message?.includes("USUARIO_NAO_ENCONTRADO")) {
+          setMessage("Este usuário ainda não possui conta.")
+          setShowInviteButton(true)
+        } else {
+          setMessage(`Erro: ${error.message}`)
+        }
+      }
+    })
+  }
+
+  const handleInvite = () => {
+    setIsLoading(true)
+    onInviteUser(email, {
+      onSuccess: () => {
+        setMessage("Convite enviado!")
+        setEmail("")
+        setShowInviteButton(false)
+        setIsLoading(false)
+        setTimeout(() => setMessage(""), 5000)
+      },
+      onError: (error: any) => {
+        setIsLoading(false)
+        setMessage(`Erro: ${error.message}`)
+      }
+    })
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <h2 className="text-2xl font-bold text-white mb-2">
+          Compartilhar Lista
+        </h2>
+        <p className="text-zinc-400 text-sm mb-6">
+          Convide amigos para editar esta lista com você.
+        </p>
+
+        <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+          <input
+            type="email"
+            placeholder="E-mail do colaborador"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 bg-zinc-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !email.trim()}
+            className="px-4 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px] flex items-center justify-center"
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "Convidar"
+            )}
+          </button>
+        </form>
+
+        {message && (
+          <div
+            className={`p-4 rounded-xl text-sm mb-6 flex flex-col gap-3 ${message.includes("Erro") || message.includes("não possui") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
+          >
+            <p>{message}</p>
+            {showInviteButton && (
+              <button
+                onClick={handleInvite}
+                className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors text-xs"
+              >
+                Enviar convite por e-mail
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-zinc-400 flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Colaboradores ({collaborators?.length || 0})
+          </h3>
+
+          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2">
+            {collaborators?.length === 0 ? (
+              <p className="text-sm text-zinc-500 italic">
+                Nenhum colaborador ainda.
+              </p>
+            ) : (
+              collaborators?.map((collab, index) => (
+                <div
+                  key={
+                    collab.user_id || collab.profiles?.id || `collab-${index}`
+                  }
+                  className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5"
+                >
+                  <div className="flex items-center gap-3">
+                    {collab.profiles?.avatar_url ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+                        <img
+                          src={collab.profiles.avatar_url}
+                          alt={collab.profiles.full_name || "Avatar"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === "pending" ? "bg-zinc-800 text-zinc-500 border border-zinc-700" : "bg-indigo-500/20 text-indigo-400"}`}
+                      >
+                        {(collab.profiles?.email || "U")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex flex-col">
+                      <span
+                        className={`text-sm font-medium ${collab.status === "pending" ? "text-zinc-500" : "text-zinc-200"}`}
+                      >
+                        {collab.profiles?.full_name ||
+                          collab.profiles?.email?.split("@")[0] ||
+                          "Usuário"}
+                      </span>
+                      {collab.profiles?.email && (
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          {collab.profiles.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {collab.status === "pending" ? (
+                      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md bg-zinc-800 text-amber-500/80 border border-amber-500/20">
+                        <Clock className="w-3 h-3" />
+                        Pendente
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
+                        {collab.role === "owner" ? "Dono" : "Editor"}
+                      </span>
+                    )}
+                    {collab.role !== "owner" && isOwner && (
+                      <button
+                        onClick={() => {
+                          const idToRemove =
+                            collab.status === "pending"
+                              ? `pending-${collab.profiles?.email}`
+                              : collab.user_id || collab.profiles?.id
+
+                          if (
+                            idToRemove &&
+                            confirm(
+                              `Remover ${collab.status === "pending" ? "convite" : "colaborador"}?`
+                            )
+                          ) {
+                            onRemoveCollaborator(idToRemove)
+                          }
+                        }}
+                        className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

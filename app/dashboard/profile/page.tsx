@@ -29,11 +29,19 @@ export default function ProfilePage() {
           .from('profiles')
           .select('avatar_url, location_enabled')
           .eq('id', user.id)
-          .single();
+          .maybeSingle(); // Usar maybeSingle para evitar erro PGRST116
         
         if (data) {
           setAvatarUrl(data.avatar_url);
           setLocationEnabled(data.location_enabled);
+        } else if (!error) {
+          // Se não houver erro mas o dado for nulo, o perfil não existe.
+          // Vamos criar um perfil básico para este usuário (Auto-Healing)
+          await supabase.from('profiles').insert({
+            id: user.id,
+            email: user.email!,
+            full_name: user.user_metadata?.full_name || '',
+          });
         }
       };
       fetchProfile();
@@ -63,15 +71,18 @@ export default function ProfilePage() {
         .from('avatars')
         .getPublicUrl(filePath);
 
+      // Adicionar timestamp para evitar cache do navegador na exibição imediata
+      const publicUrlWithTimestamp = `${publicUrl}?t=${Date.now()}`;
+
       // Atualizar perfil
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: publicUrlWithTimestamp })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
-      setAvatarUrl(publicUrl);
+      setAvatarUrl(publicUrlWithTimestamp);
       setMessage('Foto de perfil atualizada!');
     } catch (error: any) {
       setMessage(`Erro no upload: ${error.message}`);

@@ -3,6 +3,7 @@ import "./globals.css" // Global styles
 import "leaflet/dist/leaflet.css" // Leaflet styles
 import Providers from "./providers"
 import Script from "next/script"
+import { NavigationWrapper } from "@/components/navigation-wrapper"
 
 export const metadata: Metadata = {
   title: "Lista Pronta - Compras Colaborativas",
@@ -31,15 +32,18 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body
-        className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30"
+        className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0"
         suppressHydrationWarning
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <NavigationWrapper />
+        </Providers>
         <Script id="service-worker-registration" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/sw.js').then(
+                navigator.worker.register('/sw.js').then(
                   function(registration) {
                     console.log('Service Worker registration successful with scope: ', registration.scope);
                   },

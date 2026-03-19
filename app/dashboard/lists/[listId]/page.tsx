@@ -10,16 +10,14 @@ import {
   Trash2, 
   ArrowLeft, 
   Share2, 
-  X, 
-  Users, 
   ShoppingCart, 
-  Filter, 
-  Clock, 
   Navigation 
 } from 'lucide-react';
 import Link from 'next/link';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useUser } from '@/hooks/use-user';
+import { ShareModal } from '@/components/lists/share-modal';
+import { Collaborator } from '@/types/database.types';
 
 export default function ListDetail({ params }: { params: Promise<{ listId: string }> }) {
   const { listId } = use(params);
@@ -35,11 +33,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
 
   const [newItemName, setNewItemName] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
-
-  // Share Modal State
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [collaboratorEmail, setCollaboratorEmail] = useState('');
-  const [shareMessage, setShareMessage] = useState('');
   
   const { data: collaborators } = useCollaborators(listId);
   const addCollaborator = useAddCollaborator(listId);
@@ -67,56 +61,14 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
     deleteItem.mutate(itemId);
   };
 
-  const [showInviteButton, setShowInviteButton] = useState(false);
-
-  const handleAddCollaborator = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!collaboratorEmail.trim()) return;
-    trigger('medium');
-    setShowInviteButton(false);
-    
-    addCollaborator.mutate(collaboratorEmail, {
-      onSuccess: () => {
-        setShareMessage('Colaborador adicionado com sucesso!');
-        setCollaboratorEmail('');
-        setTimeout(() => setShareMessage(''), 3000);
-      },
-      onError: (error: any) => {
-        if (error.message.includes('USUARIO_NAO_ENCONTRADO')) {
-          setShareMessage('Este usuário ainda não possui conta na plataforma.');
-          setShowInviteButton(true);
-        } else {
-          setShareMessage(`Erro: ${error.message}`);
-          setTimeout(() => setShareMessage(''), 4000);
-        }
-      }
-    });
-  };
-
-  const handleInviteUser = async () => {
-    if (!collaboratorEmail.trim()) return;
-    trigger('medium');
-    setShareMessage('Enviando convite por e-mail...');
-    
-    inviteUser.mutate(collaboratorEmail, {
-      onSuccess: () => {
-        setShareMessage('Convite enviado! O usuário já aparece como pendente abaixo.');
-        setCollaboratorEmail('');
-        setShowInviteButton(false);
-        setTimeout(() => setShareMessage(''), 5000);
-      },
-      onError: (error: any) => {
-        setShareMessage(`Erro: ${error.message}`);
-      }
-    });
-  };
-
   const filteredItems = items?.filter(item => {
     if (filter === 'all') return true;
     if (filter === 'pending') return !item.is_purchased;
     if (filter === 'purchased') return item.is_purchased;
     return true;
   });
+
+  const isOwner = list?.owner_id === user?.id;
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-4xl mx-auto flex flex-col gap-8">
@@ -138,7 +90,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           </Link>
           <button 
             onClick={() => setIsShareModalOpen(true)}
-            className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
+            className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
           >
             <Share2 className="w-5 h-5" />
           </button>
@@ -165,24 +117,15 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
 
       {/* Filters */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <button 
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === 'all' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white'}`}
-        >
-          Todos
-        </button>
-        <button 
-          onClick={() => setFilter('pending')}
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === 'pending' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white'}`}
-        >
-          Pendentes
-        </button>
-        <button 
-          onClick={() => setFilter('purchased')}
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === 'purchased' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white'}`}
-        >
-          Comprados
-        </button>
+        {(['all', 'pending', 'purchased'] as const).map((f) => (
+          <button 
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === f ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white'}`}
+          >
+            {f === 'all' ? 'Todos' : f === 'pending' ? 'Pendentes' : 'Comprados'}
+          </button>
+        ))}
       </div>
 
       {/* Items List */}
@@ -235,113 +178,17 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
         )}
       </div>
 
-      {/* Share Modal */}
-      {isShareModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setIsShareModalOpen(false)}
-              className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            
-            <h2 className="text-2xl font-bold text-white mb-2">Compartilhar Lista</h2>
-            <p className="text-zinc-400 text-sm mb-6">Convide amigos para editar esta lista com você.</p>
-
-            <form onSubmit={handleAddCollaborator} className="flex gap-2 mb-6">
-              <input 
-                type="email" 
-                placeholder="E-mail do colaborador" 
-                required
-                value={collaboratorEmail}
-                onChange={(e) => setCollaboratorEmail(e.target.value)}
-                className="flex-1 bg-zinc-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-              />
-              <button 
-                type="submit" 
-                disabled={addCollaborator.isPending || !collaboratorEmail.trim()}
-                className="px-4 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {addCollaborator.isPending ? 'Enviando...' : 'Convidar'}
-              </button>
-            </form>
-
-            {shareMessage && (
-              <div className={`p-4 rounded-xl text-sm mb-6 flex flex-col gap-3 ${shareMessage.includes('Erro') || shareMessage.includes('não possui conta') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-                <p>{shareMessage}</p>
-                {showInviteButton && (
-                  <button
-                    onClick={handleInviteUser}
-                    className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors text-xs"
-                  >
-                    Enviar convite por e-mail
-                  </button>
-                )}
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <h3 className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Colaboradores ({collaborators?.length || 0})
-              </h3>
-              
-              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2">
-                {collaborators?.length === 0 ? (
-                  <p className="text-sm text-zinc-500 italic">Nenhum colaborador ainda.</p>
-                ) : (
-                  collaborators?.map((collab: any) => (
-                    <div key={collab.profiles.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5">
-                      <div className="flex items-center gap-3">
-                        {collab.profiles.avatar_url ? (
-                          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
-                            <img src={collab.profiles.avatar_url} alt={collab.profiles.full_name} className="w-full h-full object-cover" />
-                          </div>
-                        ) : (
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                            {collab.profiles.email.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="flex flex-col">
-                          <span className={`text-sm font-medium ${collab.status === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>
-                            {collab.profiles.full_name || collab.profiles.email.split('@')[0]}
-                          </span>
-                          <span className="text-xs text-zinc-500">{collab.profiles.email}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {collab.status === 'pending' ? (
-                          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md bg-zinc-800 text-amber-500/80 border border-amber-500/20">
-                            <Clock className="w-3 h-3" />
-                            Pendente
-                          </span>
-                        ) : (
-                          <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
-                            {collab.role === 'owner' ? 'Dono' : 'Editor'}
-                          </span>
-                        )}
-                        {collab.role !== 'owner' && list?.owner_id === user?.id && (
-                          <button
-                            onClick={() => {
-                              if (confirm(`Remover ${collab.status === 'pending' ? 'convite' : 'colaborador'}?`)) {
-                                removeCollaborator.mutate(collab.profiles.id);
-                              }
-                            }}
-                            className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ShareModal 
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        listId={listId}
+        collaborators={(collaborators || []) as Collaborator[]}
+        isOwner={isOwner}
+        currentUserId={user?.id || ''}
+        onAddCollaborator={(email, callbacks) => addCollaborator.mutate(email, callbacks)}
+        onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
+        onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}
+      />
     </main>
   );
 }

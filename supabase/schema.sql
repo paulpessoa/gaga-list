@@ -86,6 +86,7 @@ ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 
 -- Perfis: Usuários podem ler qualquer perfil (para buscar amigos), mas só podem atualizar o próprio
 CREATE POLICY "Perfis são públicos para leitura" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Usuários podem inserir próprio perfil" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Usuários podem atualizar próprio perfil" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Listas: Usuário pode ver/editar listas que é dono OU que é colaborador

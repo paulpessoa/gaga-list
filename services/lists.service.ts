@@ -72,6 +72,7 @@ export const ListsService = {
     const { data: realCollaborators, error: realError } = await supabase
       .from('list_collaborators')
       .select(`
+        user_id,
         role,
         profiles (
           id,
