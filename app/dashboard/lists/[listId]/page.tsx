@@ -1,151 +1,195 @@
-'use client';
+"use client"
 
-import { use, useState, useMemo, useEffect } from 'react';
-import { useItems, useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/use-items';
-import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator, useInviteUser } from '@/hooks/use-lists';
-import { 
-  Plus, 
-  CheckCircle2, 
-  Circle, 
-  Trash2, 
-  ArrowLeft, 
-  ShoppingCart, 
+import { use, useState, useMemo, useEffect } from "react"
+import {
+  useItems,
+  useCreateItem,
+  useUpdateItem,
+  useDeleteItem
+} from "@/hooks/use-items"
+import {
+  useLists,
+  useCollaborators,
+  useAddCollaborator,
+  useRemoveCollaborator,
+  useInviteUser
+} from "@/hooks/use-lists"
+import {
+  Plus,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  ArrowLeft,
+  ShoppingCart,
   Navigation,
   MessageSquare
-} from 'lucide-react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useHaptic } from '@/hooks/use-haptic';
-import { useUser } from '@/hooks/use-user';
-import { ShareModal } from '@/components/lists/share-modal';
-import { ListChat } from '@/components/lists/list-chat';
-import { Collaborator } from '@/types/database.types';
+} from "lucide-react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { useHaptic } from "@/hooks/use-haptic"
+import { useUser } from "@/hooks/use-user"
+import { ShareModal } from "@/components/lists/share-modal"
+import { ListChat } from "@/components/lists/list-chat"
+import { Collaborator } from "@/types/database.types"
+import Image from "next/image"
 
-export default function ListDetail({ params }: { params: Promise<{ listId: string }> }) {
-  const { listId } = use(params);
-  const searchParams = useSearchParams();
-  const { data: lists } = useLists();
-  const list = lists?.find(l => l.id === listId);
-  const { data: user } = useUser();
-  
-  const { data: items, isLoading } = useItems(listId);
-  const createItem = useCreateItem(listId);
-  const updateItem = useUpdateItem(listId);
-  const deleteItem = useDeleteItem(listId);
-  const { trigger } = useHaptic();
+export default function ListDetail({
+  params
+}: {
+  params: Promise<{ listId: string }>
+}) {
+  const { listId } = use(params)
+  const searchParams = useSearchParams()
+  const { data: lists } = useLists()
+  const list = lists?.find((l) => l.id === listId)
+  const { data: user } = useUser()
 
-  const [newItemName, setNewItemName] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatTarget, setChatTarget] = useState<{ id: string, full_name: string | null, avatar_url: string | null } | undefined>(undefined);
-  
-  const { data: collaborators } = useCollaborators(listId);
-  const addCollaborator = useAddCollaborator(listId);
-  const removeCollaborator = useRemoveCollaborator(listId);
-  const inviteUser = useInviteUser(listId);
+  const { data: items, isLoading } = useItems(listId)
+  const createItem = useCreateItem(listId)
+  const updateItem = useUpdateItem(listId)
+  const deleteItem = useDeleteItem(listId)
+  const { trigger } = useHaptic()
+
+  const [newItemName, setNewItemName] = useState("")
+  const [filter, setFilter] = useState<"all" | "pending" | "purchased">("all")
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [chatTarget, setChatTarget] = useState<
+    | { id: string; full_name: string | null; avatar_url: string | null }
+    | undefined
+  >(undefined)
+
+  const { data: collaborators } = useCollaborators(listId)
+  const addCollaborator = useAddCollaborator(listId)
+  const removeCollaborator = useRemoveCollaborator(listId)
+  const inviteUser = useInviteUser(listId)
+
+  // Filtrar apenas os OUTROS colaboradores para exibição no Header e Modal
+  const otherCollaborators = useMemo(() => {
+    return (
+      (collaborators as Collaborator[] | undefined)?.filter(
+        (c) => c.user_id !== user?.id && c.profiles?.id !== user?.id
+      ) || []
+    )
+  }, [collaborators, user?.id])
 
   // LOGICA DE AUTO-OPEN CHAT (Deep Linking)
   useEffect(() => {
-    const openChat = searchParams.get('openChat');
-    const targetId = searchParams.get('targetId');
+    const openChat = searchParams.get("openChat")
+    const targetId = searchParams.get("targetId")
 
-    if (openChat === 'true' && !isChatOpen) {
-      // Usamos um timeout pequeno para tirar o setState do ciclo síncrono de renderização
+    if (openChat === "true" && !isChatOpen) {
       const timer = setTimeout(() => {
         if (targetId && collaborators) {
-          const collab = (collaborators as Collaborator[]).find(c => c.user_id === targetId || c.profiles?.id === targetId);
+          const collab = (collaborators as Collaborator[]).find(
+            (c) => c.user_id === targetId || c.profiles?.id === targetId
+          )
           if (collab && chatTarget?.id !== targetId) {
             setChatTarget({
               id: targetId,
               full_name: collab.profiles?.full_name || null,
               avatar_url: collab.profiles?.avatar_url || null
-            });
+            })
           }
         }
-        setIsChatOpen(true);
-      }, 100);
-      return () => clearTimeout(timer);
+        setIsChatOpen(true)
+      }, 100)
+      return () => clearTimeout(timer)
     }
-  }, [searchParams, collaborators, isChatOpen, chatTarget?.id]);
+  }, [searchParams, collaborators, isChatOpen, chatTarget?.id])
 
-  const pendingCount = useMemo(() => items?.filter(i => !i.is_purchased).length || 0, [items]);
+  const pendingCount = useMemo(
+    () => items?.filter((i) => !i.is_purchased).length || 0,
+    [items]
+  )
 
   const handleAddItem = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItemName.trim()) return;
-    trigger('medium');
-    createItem.mutate({ name: newItemName });
-    setNewItemName('');
-  };
+    e.preventDefault()
+    if (!newItemName.trim()) return
+    trigger("medium")
+    createItem.mutate({ name: newItemName })
+    setNewItemName("")
+  }
 
   const handleToggleItem = (item: any) => {
-    trigger('light');
+    trigger("light")
     updateItem.mutate({
       itemId: item.id,
       updates: { is_purchased: !item.is_purchased }
-    });
-  };
+    })
+  }
 
   const handleDeleteItem = (itemId: string) => {
-    trigger('heavy');
-    deleteItem.mutate(itemId);
-  };
+    trigger("heavy")
+    deleteItem.mutate(itemId)
+  }
 
-  const filteredItems = items?.filter(item => {
-    if (filter === 'all') return true;
-    if (filter === 'pending') return !item.is_purchased;
-    if (filter === 'purchased') return item.is_purchased;
-    return true;
-  });
+  const filteredItems = items?.filter((item) => {
+    if (filter === "all") return true
+    if (filter === "pending") return !item.is_purchased
+    if (filter === "purchased") return item.is_purchased
+    return true
+  })
 
-  const isOwner = list?.owner_id === user?.id;
+  const isOwner = list?.owner_id === user?.id
 
   return (
     <main className="min-h-screen bg-black flex flex-col pb-32">
+      {/* HEADER PREMIUM UX/UI */}
       <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-xl border-b border-white/5 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-4">
           <div className="flex items-center justify-between">
+            {/* Esquerda: Back + Título */}
             <div className="flex items-center gap-3">
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className="p-2 -ml-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div>
                 <h1 className="text-lg font-bold text-white tracking-tight leading-tight">
-                  {list?.title || 'Lista'}
+                  {list?.title || "Lista"}
                 </h1>
                 <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">
-                  {pendingCount} {pendingCount === 1 ? 'item pendente' : 'itens pendentes'}
+                  {pendingCount}{" "}
+                  {pendingCount === 1 ? "item pendente" : "itens pendentes"}
                 </p>
               </div>
             </div>
 
-            <div 
+            {/* Direita: Facepile (Apenas os OUTROS) */}
+            <div
               className="flex items-center -space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => setIsShareModalOpen(true)}
             >
-              {(collaborators as Collaborator[] | undefined)?.slice(0, 3).map((collab: Collaborator, i: number) => {
-                const id = collab.user_id || collab.profiles?.id || `collab-${i}`;
+              {otherCollaborators.slice(0, 3).map((collab, i) => {
+                const id =
+                  collab.user_id || collab.profiles?.id || `collab-${i}`
                 return (
-                  <div 
-                    key={id} 
+                  <div
+                    key={id}
                     className="w-8 h-8 rounded-full border-2 border-zinc-950 bg-zinc-800 overflow-hidden shadow-lg"
                     style={{ zIndex: 10 - i }}
                   >
-                    <img 
-                      src={collab.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${collab.profiles?.full_name || 'U'}&background=27272a&color=fff`} 
-                      className="w-full h-full object-cover"
-                      alt="Avatar"
-                    />
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={
+                          collab.profiles?.avatar_url ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=27272a&color=fff`
+                        }
+                        fill
+                        className="object-cover"
+                        alt="Avatar"
+                        sizes="40px"
+                      />
+                    </div>
                   </div>
-                );
+                )
               })}
-              {(collaborators?.length || 0) > 3 && (
+              {otherCollaborators.length > 3 && (
                 <div className="w-8 h-8 rounded-full border-2 border-zinc-950 bg-zinc-900 flex items-center justify-center text-[10px] font-bold text-zinc-400 z-0">
-                  +{(collaborators?.length || 0) - 3}
+                  +{otherCollaborators.length - 3}
                 </div>
               )}
               <div className="w-8 h-8 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center text-zinc-500 hover:text-white transition-colors ml-4">
@@ -154,12 +198,13 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
             </div>
           </div>
 
+          {/* Action Bar Secundária */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <button 
+              <button
                 onClick={() => {
-                  trigger('light');
-                  setIsChatOpen(true);
+                  trigger("light")
+                  setIsChatOpen(true)
                 }}
                 className="flex items-center gap-2 py-2 px-4 rounded-xl bg-zinc-900 border border-white/5 text-zinc-300 hover:text-white transition-all text-xs font-bold uppercase tracking-wider"
               >
@@ -168,7 +213,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
               </button>
             </div>
 
-            <Link 
+            <Link
               href={`/dashboard/lists/${listId}/cade-tu`}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white transition-all font-bold text-xs uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
             >
@@ -180,16 +225,17 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
       </header>
 
       <div className="max-w-4xl mx-auto w-full p-6 flex flex-col gap-8">
+        {/* Add Item Form */}
         <form onSubmit={handleAddItem} className="flex gap-2">
-          <input 
-            type="text" 
-            placeholder="Adicionar novo item..." 
+          <input
+            type="text"
+            placeholder="Adicionar novo item..."
             value={newItemName}
             onChange={(e) => setNewItemName(e.target.value)}
             className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={createItem.isPending || !newItemName.trim()}
             className="w-14 h-14 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-500/20 active:scale-95"
           >
@@ -197,22 +243,26 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           </button>
         </form>
 
+        {/* Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {(['all', 'pending', 'purchased'] as const).map((f) => (
-            <button 
+          {(["all", "pending", "purchased"] as const).map((f) => (
+            <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-all ${filter === f ? 'bg-white text-black shadow-lg' : 'bg-zinc-900 border border-white/5 text-zinc-500 hover:text-zinc-300'}`}
+              className={`px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest whitespace-nowrap transition-all ${filter === f ? "bg-white text-black shadow-lg" : "bg-zinc-900 border border-white/5 text-zinc-500 hover:text-zinc-300"}`}
             >
-              {f === 'all' ? 'Tudo' : f === 'pending' ? 'Faltando' : 'Comprado'}
+              {f === "all" ? "Tudo" : f === "pending" ? "Faltando" : "Comprado"}
             </button>
           ))}
         </div>
 
+        {/* Items List */}
         <div className="flex flex-col gap-3">
           {isLoading ? (
             <div className="glass-panel rounded-3xl p-6 h-24 animate-pulse flex items-center justify-center border border-white/5">
-              <span className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em]">Carregando...</span>
+              <span className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em]">
+                Carregando...
+              </span>
             </div>
           ) : filteredItems?.length === 0 ? (
             <div className="glass-panel rounded-[2rem] p-12 flex flex-col items-center justify-center gap-4 text-center border border-white/5 bg-zinc-950/40">
@@ -221,16 +271,21 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
               </div>
               <div>
                 <p className="text-zinc-400 font-bold">Lista vazia</p>
-                <p className="text-zinc-600 text-sm">Adicione itens para começar.</p>
+                <p className="text-zinc-600 text-sm">
+                  Adicione itens para começar.
+                </p>
               </div>
             </div>
           ) : (
             filteredItems?.map((item) => (
-              <div 
-                key={item.id} 
-                className={`glass-panel rounded-2xl p-4 flex items-center justify-between group transition-all border border-white/5 ${item.is_purchased ? 'opacity-40 bg-black/40' : 'bg-zinc-900/40'}`}
+              <div
+                key={item.id}
+                className={`glass-panel rounded-2xl p-4 flex items-center justify-between group transition-all border border-white/5 ${item.is_purchased ? "opacity-40 bg-black/40" : "bg-zinc-900/40"}`}
               >
-                <div className="flex items-center gap-4 flex-1 cursor-pointer" onClick={() => handleToggleItem(item)}>
+                <div
+                  className="flex items-center gap-4 flex-1 cursor-pointer"
+                  onClick={() => handleToggleItem(item)}
+                >
                   <button className="transition-colors">
                     {item.is_purchased ? (
                       <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
@@ -241,17 +296,19 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
                     )}
                   </button>
                   <div className="flex flex-col">
-                    <span className={`font-medium ${item.is_purchased ? 'line-through text-zinc-500' : 'text-zinc-100'}`}>
+                    <span
+                      className={`font-medium ${item.is_purchased ? "line-through text-zinc-500" : "text-zinc-100"}`}
+                    >
                       {item.name}
                     </span>
                     {(item.quantity > 1 || item.unit) && (
                       <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">
-                        {item.quantity} {item.unit || 'un'}
+                        {item.quantity} {item.unit || "un"}
                       </span>
                     )}
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => handleDeleteItem(item.id)}
                   disabled={deleteItem.isPending}
                   className="p-2 text-zinc-700 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50"
@@ -264,32 +321,34 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
         </div>
       </div>
 
-      <ShareModal 
+      <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         listId={listId}
         collaborators={(collaborators || []) as Collaborator[]}
         isOwner={isOwner}
         currentUser={user}
-        onAddCollaborator={(email, callbacks) => addCollaborator.mutate(email, callbacks)}
+        onAddCollaborator={(email, callbacks) =>
+          addCollaborator.mutate(email, callbacks)
+        }
         onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
         onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}
         onOpenChat={(target) => {
-          setChatTarget(target);
-          setIsChatOpen(true);
+          setChatTarget(target)
+          setIsChatOpen(true)
         }}
       />
 
-      <ListChat 
+      <ListChat
         listId={listId}
         currentUser={user}
         isOpen={isChatOpen}
         onClose={() => {
-          setIsChatOpen(false);
-          setChatTarget(undefined);
+          setIsChatOpen(false)
+          setChatTarget(undefined)
         }}
         targetUser={chatTarget}
       />
     </main>
-  );
+  )
 }

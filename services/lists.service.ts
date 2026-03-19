@@ -68,7 +68,18 @@ export const ListsService = {
   },
 
   async getCollaborators(supabase: any, listId: string) {
-    // 1. Buscar colaboradores reais
+    // 1. Buscar a lista para identificar o dono
+    const { data: listInfo, error: listError } = await supabase
+      .from('lists')
+      .select('owner_id, profiles!owner_id (id, email, full_name, avatar_url, phone)')
+      .eq('id', listId)
+      .single();
+
+    if (listError) {
+      console.error('Erro ao buscar info da lista:', listError.message);
+    }
+
+    // 2. Buscar colaboradores reais
     const { data: realCollaborators, error: realError } = await supabase
       .from('list_collaborators')
       .select(`
@@ -88,15 +99,19 @@ export const ListsService = {
       console.error('Erro ao buscar colaboradores reais:', realError.message);
     }
 
-    // 2. Buscar convites pendentes
+    // 3. Buscar convites pendentes
     const { data: pendingInvites, error: pendingError } = await supabaseServerClient
       .from('pending_invitations')
       .select('email, invited_by')
       .eq('list_id', listId);
 
-    if (pendingError) {
-      console.error('Erro ao buscar convites pendentes:', pendingError.message);
-    }
+    // Formatar o dono como um colaborador ativo
+    const ownerAsCollab = listInfo ? [{
+      user_id: listInfo.owner_id,
+      role: 'owner',
+      status: 'active',
+      profiles: listInfo.profiles
+    }] : [];
 
     const formattedReal = (realCollaborators || []).map((collab: any) => ({
       ...collab,
@@ -114,7 +129,8 @@ export const ListsService = {
       }
     }));
 
-    return [...formattedReal, ...formattedPending];
+    // Retorna Dono + Colaboradores Reais + Convites
+    return [...ownerAsCollab, ...formattedReal, ...formattedPending];
   },
 
   async addCollaborator(supabase: any, listId: string, email: string) {
