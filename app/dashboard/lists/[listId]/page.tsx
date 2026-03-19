@@ -3,7 +3,20 @@
 import { use, useState } from 'react';
 import { useItems, useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/use-items';
 import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator, useInviteUser } from '@/hooks/use-lists';
-import { Plus, CheckCircle2, Circle, Trash2, ArrowLeft, Share2, X, Users, ShoppingCart, Filter, Clock } from 'lucide-react';
+import { 
+  Plus, 
+  CheckCircle2, 
+  Circle, 
+  Trash2, 
+  ArrowLeft, 
+  Share2, 
+  X, 
+  Users, 
+  ShoppingCart, 
+  Filter, 
+  Clock, 
+  Navigation 
+} from 'lucide-react';
 import Link from 'next/link';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useUser } from '@/hooks/use-user';
@@ -115,12 +128,21 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{list?.title || 'Lista'}</h1>
         </div>
-        <button 
-          onClick={() => setIsShareModalOpen(true)}
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
-        >
-          <Share2 className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link 
+            href={`/dashboard/lists/${listId}/cade-tu`}
+            className="flex items-center gap-2 py-2 px-4 rounded-full bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all font-medium text-sm group"
+          >
+            <Navigation className="w-4 h-4 group-hover:animate-pulse" />
+            Cadê tu?
+          </Link>
+          <button 
+            onClick={() => setIsShareModalOpen(true)}
+            className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* Add Item Form */}
@@ -272,9 +294,15 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
                   collaborators?.map((collab: any) => (
                     <div key={collab.profiles.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5">
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                          {collab.profiles.email.charAt(0).toUpperCase()}
-                        </div>
+                        {collab.profiles.avatar_url ? (
+                          <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
+                            <img src={collab.profiles.avatar_url} alt={collab.profiles.full_name} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                            {collab.profiles.email.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div className="flex flex-col">
                           <span className={`text-sm font-medium ${collab.status === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>
                             {collab.profiles.full_name || collab.profiles.email.split('@')[0]}

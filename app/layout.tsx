@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import "./globals.css" // Global styles
+import "leaflet/dist/leaflet.css" // Leaflet styles
 import Providers from "./providers"
 import Script from "next/script"
 
