@@ -13,8 +13,7 @@ import {
   FileText,
   Download,
   Eye,
-  EyeOff,
-  Fingerprint
+  EyeOff
 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
@@ -147,14 +146,6 @@ export default function LandingPage() {
     }
   }
 
-  const handleBiometricAuth = async () => {
-    if (!('credentials' in navigator)) {
-      alert('Seu dispositivo não suporta autenticação biométrica neste navegador.')
-      return
-    }
-    alert('Biometria em desenvolvimento: Para ativar o login 100% digital, acesse as Configurações após o primeiro login com senha.')
-  }
-
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
       <InstallPrompt />
@@ -177,7 +168,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-500 text-6xl md:text-8xl">perfeita sintonia.</span>
+          <span className="text-indigo-500">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
@@ -276,9 +267,6 @@ export default function LandingPage() {
               <div className="flex flex-col gap-3">
                 <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
                   {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
-                </button>
-                <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
-                  <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
                 </button>
               </div>
 
