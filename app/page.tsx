@@ -18,7 +18,7 @@ import {
 import dynamic from "next/dynamic"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { subscribeUser, unsubscribeUser, sendNotification } from './actions'
+import { subscribeUser, unsubscribeUser } from './actions'
 
 import { createClient } from "@/lib/supabase/client"
 
@@ -27,7 +27,6 @@ const LottieFooter = dynamic(() => import("@/components/ui/lottie-footer"), {
   ssr: false
 })
 
-// Função auxiliar conforme documentação Next.js
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
@@ -42,7 +41,6 @@ function urlBase64ToUint8Array(base64String: string) {
 function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
-  const [message, setMessage] = useState('')
 
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -52,30 +50,53 @@ function PushNotificationManager() {
   }, [])
 
   async function registerServiceWorker() {
-    const registration = await navigator.serviceWorker.register('/sw.js', {
-      scope: '/',
-      updateViaCache: 'none',
-    })
-    const sub = await registration.pushManager.getSubscription()
-    setSubscription(sub)
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+      })
+      const sub = await registration.pushManager.getSubscription()
+      setSubscription(sub)
+    } catch (err) {
+      console.error('Falha ao registrar Service Worker:', err)
+    }
   }
 
   async function subscribeToPush() {
-    const registration = await navigator.serviceWorker.ready
-    const sub = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BCZ...sua_chave_publica_aqui'
-      ),
-    })
-    setSubscription(sub)
-    await subscribeUser(sub)
+    try {
+      const registration = await navigator.serviceWorker.ready
+      
+      // Busca a chave pública das variáveis de ambiente
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      
+      if (!vapidPublicKey) {
+        throw new Error('A chave pública VAPID não foi encontrada no .env')
+      }
+      
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      })
+      setSubscription(sub)
+      await subscribeUser(sub)
+      alert('Notificações ativadas com sucesso!')
+    } catch (err: any) {
+      console.error('Erro ao assinar push:', err)
+      if (err.name === 'NotAllowedError') {
+        alert('Você bloqueou as notificações. Por favor, redefina a permissão no seu navegador.')
+      } else {
+        alert('Erro: ' + err.message)
+      }
+    }
   }
 
   async function unsubscribeFromPush() {
-    await subscription?.unsubscribe()
-    setSubscription(null)
-    await unsubscribeUser()
+    try {
+      await subscription?.unsubscribe()
+      setSubscription(null)
+      await unsubscribeUser()
+    } catch (err) {
+      console.error('Erro ao cancelar push:', err)
+    }
   }
 
   if (!isSupported) return null
@@ -85,7 +106,7 @@ function PushNotificationManager() {
       {subscription ? (
         <button
           onClick={unsubscribeFromPush}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 border border-white/10 rounded-full text-[10px] font-bold text-zinc-400 hover:text-white backdrop-blur-md transition-all"
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-900/80 border border-white/10 rounded-full text-[10px] font-bold text-zinc-400 hover:text-white backdrop-blur-md transition-all shadow-xl"
         >
           <BellOff className="w-3.5 h-3.5" /> Notificações Ativas
         </button>
@@ -102,21 +123,15 @@ function PushNotificationManager() {
 }
 
 function InstallPrompt() {
-  const [isStandalone, setIsSupported] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
 
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia('(display-mode: standalone)').matches
-    ) {
-      setIsSupported(true)
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
+    const handler = (e: any) => {
       e.preventDefault()
       setDeferredPrompt(e)
-    })
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
   const handleInstall = async () => {
@@ -128,13 +143,13 @@ function InstallPrompt() {
     }
   }
 
-  if (isStandalone || !deferredPrompt) return null
+  if (!deferredPrompt) return null
 
   return (
     <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
       <button
         onClick={handleInstall}
-        className="flex items-center gap-3 px-6 py-4 bg-white text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-95 transition-all border-none"
+        className="flex items-center gap-3 px-6 py-4 bg-white text-black rounded-[1.5rem] font-bold text-xs uppercase tracking-widest shadow-2xl shadow-white/5 active:scale-95 transition-all border-none animate-bounce"
       >
         <Download className="w-4 h-4" /> Instalar App Nativo
       </button>
@@ -219,9 +234,9 @@ export default function LandingPage() {
           <span>Sincronização em tempo real nativa</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-zinc-100 to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-zinc-100 to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-400 text-6xl md:text-8xl">perfeita sintonia.</span>
+          <span className="text-indigo-400">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
