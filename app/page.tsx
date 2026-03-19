@@ -12,6 +12,8 @@ import {
   Shield,
   FileText,
   Download,
+  Bell,
+  BellOff,
   Eye,
   EyeOff,
   Fingerprint,
@@ -19,7 +21,7 @@ import {
   PartyPopper
 } from "lucide-react"
 import dynamic from "next/dynamic"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { subscribeUser, unsubscribeUser } from './actions'
 
@@ -29,6 +31,81 @@ import { createClient } from "@/lib/supabase/client"
 const LottieFooter = dynamic(() => import("@/components/ui/lottie-footer"), {
   ssr: false
 })
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i)
+  }
+  return outputArray
+}
+
+function PushNotificationManager() {
+  const [isSupported, setIsSupported] = useState(false)
+  const [subscription, setSubscription] = useState<PushSubscription | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+      setIsSupported(true)
+      navigator.serviceWorker.ready.then(registration => {
+        registration.pushManager.getSubscription().then(sub => setSubscription(sub))
+      })
+    }
+  }, [])
+
+  async function subscribeToPush() {
+    setIsProcessing(true)
+    try {
+      const registration = await navigator.serviceWorker.ready
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidPublicKey) throw new Error('Chave VAPID ausente')
+      
+      const sub = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+      })
+      setSubscription(sub)
+      await subscribeUser(sub)
+    } catch (err: any) {
+      console.error('Erro ao assinar push:', err)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  async function unsubscribeFromPush() {
+    setIsProcessing(true)
+    try {
+      await subscription?.unsubscribe()
+      setSubscription(null)
+      await unsubscribeUser()
+    } catch (err) {
+      console.error('Erro ao cancelar push:', err)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  if (!isSupported) return null
+
+  return (
+    <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500">
+      {subscription ? (
+        <button onClick={unsubscribeFromPush} className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl">
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellOff className="w-3.5 h-3.5" />} Notificações Ativas
+        </button>
+      ) : (
+        <button onClick={subscribeToPush} className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
+          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3.5 h-3.5" />} Ativar Notificações
+        </button>
+      )}
+    </div>
+  )
+}
 
 function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
@@ -64,14 +141,14 @@ function InstallPrompt() {
 
   return (
     <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce">
+      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all border-none animate-bounce">
         <Download className="w-4 h-4" /> Instalar App Nativo
       </button>
     </div>
   )
 }
 
-export default function LandingPage() {
+function LandingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -87,7 +164,6 @@ export default function LandingPage() {
 
   useEffect(() => {
     const checkUserAndInvite = async () => {
-      // Verificar se há convite no localStorage
       const pendingToken = localStorage.getItem("pending_invite_token")
       if (pendingToken) setInviteContext(true)
 
@@ -155,8 +231,17 @@ export default function LandingPage() {
     }
   }
 
+  const handleBiometricAuth = async () => {
+    if (!('credentials' in navigator)) {
+      alert('Seu dispositivo não suporta autenticação biométrica neste navegador.')
+      return
+    }
+    alert('Biometria em desenvolvimento: Para ativar o login 100% digital, acesse as Configurações após o primeiro login com senha.')
+  }
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
+      <PushNotificationManager />
       <InstallPrompt />
 
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/10 dark:bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
@@ -184,7 +269,7 @@ export default function LandingPage() {
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-500">perfeita sintonia.</span>
+          <span className="text-indigo-500 text-6xl md:text-8xl">perfeita sintonia.</span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
@@ -288,10 +373,13 @@ export default function LandingPage() {
                 <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
                   {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
                 </button>
+                <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
+                  <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
+                </button>
               </div>
 
               {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
                   {message}
                 </div>
               )}
@@ -300,5 +388,13 @@ export default function LandingPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>}>
+      <LandingContent />
+    </Suspense>
   )
 }
