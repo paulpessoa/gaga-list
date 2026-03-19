@@ -1,6 +1,6 @@
 {
-  "name": "CollabList",
-  "short_name": "CollabList",
+  "name": "Lista Pronta",
+  "short_name": "Lista Pronta",
   "description": "Listas de compras colaborativas em tempo real.",
   "start_url": "/dashboard",
   "display": "standalone",

@@ -1,42 +1,40 @@
-const CACHE_NAME = 'collablist-v1';
-const OFFLINE_URL = '/';
+const CACHE_NAME = "lista-pronta-v1"
+const OFFLINE_URL = "/"
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll([
-        OFFLINE_URL,
-        '/dashboard',
-        '/manifest.json'
-      ]);
+      return cache.addAll([OFFLINE_URL, "/dashboard", "/manifest.json"])
     })
-  );
-  self.skipWaiting();
-});
+  )
+  self.skipWaiting()
+})
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
-      );
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
     })
-  );
-  self.clients.claim();
-});
+  )
+  self.clients.claim()
+})
 
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match(OFFLINE_URL);
+        return caches.match(OFFLINE_URL)
       })
-    );
+    )
   } else {
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
+        return response || fetch(event.request)
       })
-    );
+    )
   }
-});
+})

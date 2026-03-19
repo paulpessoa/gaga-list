@@ -1,34 +1,39 @@
-import type {Metadata, Viewport} from 'next';
-import './globals.css'; // Global styles
-import Providers from './providers';
-import Script from 'next/script';
+import type { Metadata, Viewport } from "next"
+import "./globals.css" // Global styles
+import Providers from "./providers"
+import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: 'CollabList - Compras Colaborativas',
-  description: 'Listas de compras colaborativas em tempo real.',
-  manifest: '/manifest.json',
+  title: "Lista Pronta - Compras Colaborativas",
+  description: "Listas de compras colaborativas em tempo real.",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'CollabList',
-  },
-};
+    statusBarStyle: "default",
+    title: "Lista Pronta"
+  }
+}
 
 export const viewport: Viewport = {
-  themeColor: '#6366f1',
-  width: 'device-width',
+  themeColor: "#6366f1",
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false,
-};
+  userScalable: false
+}
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30" suppressHydrationWarning>
-        <Providers>
-          {children}
-        </Providers>
+      <body
+        className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30"
+        suppressHydrationWarning
+      >
+        <Providers>{children}</Providers>
         <Script id="service-worker-registration" strategy="afterInteractive">
           {`
             if ('serviceWorker' in navigator) {
@@ -47,5 +52,5 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         </Script>
       </body>
     </html>
-  );
+  )
 }
