@@ -1,5 +1,24 @@
 -- supabase/migrations/20260319023736_add_settings_and_chat_table.sql
 
+-- 0. Garantir funções auxiliares (Necessário para as políticas de chat)
+CREATE OR REPLACE FUNCTION public.is_list_owner(l_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.lists WHERE id = l_id AND owner_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+CREATE OR REPLACE FUNCTION public.is_list_collaborator(l_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.list_collaborators WHERE list_id = l_id AND user_id = auth.uid()
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- 1. Evoluir a tabela de perfis com novos campos de configuração
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS phone TEXT,

@@ -39,8 +39,8 @@ export function ListChat({ listId, currentUser, isOpen, onClose }: ListChatProps
     // 1. Carregar mensagens iniciais
     const fetchMessages = async () => {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from("list_messages")
+      const { data, error } = await (supabase
+        .from("list_messages") as any)
         .select(`
           *,
           profiles:user_id (
@@ -75,9 +75,9 @@ export function ListChat({ listId, currentUser, isOpen, onClose }: ListChatProps
         },
         async (payload) => {
           // Quando uma nova mensagem chega, buscamos o perfil do autor
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("full_name, avatar_url, email")
+          const { data: profileData } = await (supabase
+            .from("profiles") as any)
+            .select("*")
             .eq("id", payload.new.user_id)
             .single()
 
@@ -118,7 +118,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose }: ListChatProps
     setNewMessage("")
     trigger("medium")
 
-    const { error } = await supabase.from("list_messages").insert({
+    const { error } = await (supabase.from("list_messages") as any).insert({
       list_id: listId,
       user_id: currentUser.id,
       content: content,
