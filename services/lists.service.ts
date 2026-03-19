@@ -78,7 +78,8 @@ export const ListsService = {
           id,
           email,
           full_name,
-          avatar_url
+          avatar_url,
+          phone
         )
       `)
       .eq('list_id', listId);
