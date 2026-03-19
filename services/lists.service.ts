@@ -68,7 +68,8 @@ export const ListsService = {
   },
 
   async getCollaborators(supabase: any, listId: string) {
-    const { data, error } = await supabase
+    // 1. Buscar colaboradores reais
+    const { data: realCollaborators, error: realError } = await supabase
       .from('list_collaborators')
       .select(`
         role,
@@ -81,11 +82,37 @@ export const ListsService = {
       `)
       .eq('list_id', listId);
 
-    if (error) {
-      console.error('Erro ao buscar colaboradores:', error.message);
-      return [];
+    if (realError) {
+      console.error('Erro ao buscar colaboradores reais:', realError.message);
     }
-    return data || [];
+
+    // 2. Buscar convites pendentes
+    const { data: pendingInvites, error: pendingError } = await supabaseServerClient
+      .from('pending_invitations')
+      .select('email, invited_by')
+      .eq('list_id', listId);
+
+    if (pendingError) {
+      console.error('Erro ao buscar convites pendentes:', pendingError.message);
+    }
+
+    const formattedReal = (realCollaborators || []).map((collab: any) => ({
+      ...collab,
+      status: 'active'
+    }));
+
+    const formattedPending = (pendingInvites || []).map((invite: any) => ({
+      role: 'editor',
+      status: 'pending',
+      profiles: {
+        id: `pending-${invite.email}`,
+        email: invite.email,
+        full_name: 'Pendente',
+        avatar_url: null
+      }
+    }));
+
+    return [...formattedReal, ...formattedPending];
   },
 
   async addCollaborator(supabase: any, listId: string, email: string) {
@@ -165,6 +192,18 @@ export const ListsService = {
       .single();
       
     if (listError || !list) throw new Error('Acesso negado à lista');
+
+    if (userId.startsWith('pending-')) {
+      const email = userId.replace('pending-', '');
+      const { error } = await supabaseServerClient
+        .from('pending_invitations')
+        .delete()
+        .eq('list_id', listId)
+        .eq('email', email);
+
+      if (error) throw new Error(`Erro ao remover convite pendente: ${error.message}`);
+      return true;
+    }
 
     const { error } = await supabaseServerClient
       .from('list_collaborators')

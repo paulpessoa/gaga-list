@@ -134,6 +134,28 @@ export function useAddCollaborator(listId: string) {
   });
 }
 
+export function useInviteUser(listId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const response = await fetch(`/api/lists/${listId}/collaborators`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, invite: true }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao enviar convite');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: COLLABORATORS_QUERY_KEY(listId) });
+    },
+  });
+}
+
 export function useRemoveCollaborator(listId: string) {
   const queryClient = useQueryClient();
 

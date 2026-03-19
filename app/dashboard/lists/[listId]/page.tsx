@@ -2,8 +2,8 @@
 
 import { use, useState } from 'react';
 import { useItems, useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/use-items';
-import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/hooks/use-lists';
-import { Plus, CheckCircle2, Circle, Trash2, ArrowLeft, Share2, X, Users, ShoppingCart, Filter } from 'lucide-react';
+import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator, useInviteUser } from '@/hooks/use-lists';
+import { Plus, CheckCircle2, Circle, Trash2, ArrowLeft, Share2, X, Users, ShoppingCart, Filter, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useUser } from '@/hooks/use-user';
@@ -31,6 +31,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
   const { data: collaborators } = useCollaborators(listId);
   const addCollaborator = useAddCollaborator(listId);
   const removeCollaborator = useRemoveCollaborator(listId);
+  const inviteUser = useInviteUser(listId);
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,22 +85,17 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
     trigger('medium');
     setShareMessage('Enviando convite por e-mail...');
     
-    try {
-      const response = await fetch(`/api/lists/${listId}/collaborators`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: collaboratorEmail, invite: true })
-      });
-      
-      if (!response.ok) throw new Error('Erro ao enviar convite');
-      
-      setShareMessage('Convite enviado! O usuário receberá um e-mail para participar.');
-      setCollaboratorEmail('');
-      setShowInviteButton(false);
-      setTimeout(() => setShareMessage(''), 5000);
-    } catch (error: any) {
-      setShareMessage(`Erro: ${error.message}`);
-    }
+    inviteUser.mutate(collaboratorEmail, {
+      onSuccess: () => {
+        setShareMessage('Convite enviado! O usuário já aparece como pendente abaixo.');
+        setCollaboratorEmail('');
+        setShowInviteButton(false);
+        setTimeout(() => setShareMessage(''), 5000);
+      },
+      onError: (error: any) => {
+        setShareMessage(`Erro: ${error.message}`);
+      }
+    });
   };
 
   const filteredItems = items?.filter(item => {
@@ -276,22 +272,31 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
                   collaborators?.map((collab: any) => (
                     <div key={collab.profiles.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-medium text-sm">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' : 'bg-indigo-500/20 text-indigo-400'}`}>
                           {collab.profiles.email.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-zinc-200">{collab.profiles.full_name || collab.profiles.email.split('@')[0]}</span>
+                          <span className={`text-sm font-medium ${collab.status === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>
+                            {collab.profiles.full_name || collab.profiles.email.split('@')[0]}
+                          </span>
                           <span className="text-xs text-zinc-500">{collab.profiles.email}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
-                          {collab.role === 'owner' ? 'Dono' : 'Editor'}
-                        </span>
+                        {collab.status === 'pending' ? (
+                          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md bg-zinc-800 text-amber-500/80 border border-amber-500/20">
+                            <Clock className="w-3 h-3" />
+                            Pendente
+                          </span>
+                        ) : (
+                          <span className="text-xs font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-400">
+                            {collab.role === 'owner' ? 'Dono' : 'Editor'}
+                          </span>
+                        )}
                         {collab.role !== 'owner' && list?.owner_id === user?.id && (
                           <button
                             onClick={() => {
-                              if (confirm('Remover colaborador?')) {
+                              if (confirm(`Remover ${collab.status === 'pending' ? 'convite' : 'colaborador'}?`)) {
                                 removeCollaborator.mutate(collab.profiles.id);
                               }
                             }}
