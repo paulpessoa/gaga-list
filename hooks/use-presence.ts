@@ -8,7 +8,7 @@ export interface PresenceUser {
   user_id: string;
   full_name: string;
   avatar_url: string | null;
-  phone?: string | null; // Adicionado para suportar WhatsApp
+  phone?: string | null;
   lat: number | null;
   lng: number | null;
   last_seen: string;
@@ -27,8 +27,6 @@ export function usePresence(listId: string, currentUser: any) {
 
   useEffect(() => {
     if (!currentUser) return;
-    
-    // Buscar perfil completo para carregar telefone e permissões
     supabase
       .from('profiles')
       .select('allow_notifications, full_name, avatar_url, phone')
@@ -40,7 +38,6 @@ export function usePresence(listId: string, currentUser: any) {
   useEffect(() => {
     if (!listId || !currentUser) return;
 
-    // 1. Configurar Canal de Realtime
     const channel = supabase.channel(`list_presence_${listId}`, {
       config: {
         presence: {
@@ -51,7 +48,6 @@ export function usePresence(listId: string, currentUser: any) {
 
     channelRef.current = channel;
 
-    // 2. Escutar Broadcast de Vibração (O Sino!)
     channel.on('broadcast', { event: 'nudge' }, (payload) => {
       const { targetId, senderName } = payload.payload;
       
@@ -67,7 +63,6 @@ export function usePresence(listId: string, currentUser: any) {
       }
     });
 
-    // 3. Gerenciar Presença
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
@@ -79,7 +74,7 @@ export function usePresence(listId: string, currentUser: any) {
             user_id: key,
             full_name: userState.full_name,
             avatar_url: userState.avatar_url,
-            phone: userState.phone, // Recebendo o telefone em tempo real
+            phone: userState.phone,
             lat: userState.lat,
             lng: userState.lng,
             last_seen: new Date().toISOString(),
@@ -89,7 +84,6 @@ export function usePresence(listId: string, currentUser: any) {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Track inicial com dados do perfil (incluindo telefone)
           await channel.track({
             full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Usuário',
             avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
@@ -101,7 +95,6 @@ export function usePresence(listId: string, currentUser: any) {
         }
       });
 
-    // 4. Rastrear Localização GPS
     let watchId: number;
     if ('geolocation' in navigator) {
       watchId = navigator.geolocation.watchPosition(
@@ -129,26 +122,36 @@ export function usePresence(listId: string, currentUser: any) {
     };
   }, [listId, currentUser, supabase, trigger, userProfile]);
 
-  const sendNudge = (targetId: string) => {
+  const sendNudge = async (targetId: string) => {
     if (channelRef.current) {
-      const payload = {
-        targetId,
-        senderName: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Alguém',
-      };
+      const senderName = userProfile?.full_name || currentUser.user_metadata?.full_name || 'Alguém';
 
+      // 1. Sinal Imediato (Realtime - App Aberto)
       channelRef.current.send({
         type: 'broadcast',
         event: 'nudge',
-        payload,
+        payload: { targetId, senderName },
       });
 
+      // 2. Sinal em Background (Push Notification - App Fechado)
+      try {
+        fetch('/api/push/nudge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUserId: targetId, senderName })
+        });
+      } catch (err) {
+        console.error('Erro ao disparar push nudge:', err);
+      }
+
+      // 3. Inbox Pessoal
       const targetInbox = supabase.channel(`user_inbox_${targetId}`);
       targetInbox.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await targetInbox.send({
             type: 'broadcast',
             event: 'nudge',
-            payload,
+            payload: { targetId, senderName },
           });
           supabase.removeChannel(targetInbox);
         }
