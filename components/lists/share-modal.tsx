@@ -124,7 +124,7 @@ export function ShareModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="glass-panel w-full max-w-md rounded-3xl p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+        <div className="glass-panel w-full max-w-md rounded-3xl p-6 sm:p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
           <button 
             onClick={onClose}
             className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
@@ -132,8 +132,8 @@ export function ShareModal({
             <X className="w-5 h-5" />
           </button>
           
-          <h2 className="text-2xl font-bold text-white mb-2">Compartilhar Lista</h2>
-          <p className="text-zinc-400 text-sm mb-6">Convide amigos para editar esta lista com você.</p>
+          <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Compartilhar</h2>
+          <p className="text-zinc-400 text-sm mb-6">Traga sua equipe para as compras.</p>
 
           <div className="flex flex-col gap-4 mb-8">
             <button 
@@ -141,41 +141,41 @@ export function ShareModal({
               disabled={isLoading}
               className="w-full py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center gap-3 text-indigo-400 font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98]"
             >
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><QrCode className="w-5 h-5" /> Gerar Convite via QR Code</>}
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><QrCode className="w-5 h-5" /> Convite via QR Code</>}
             </button>
             
-            <div className="flex items-center gap-4 text-zinc-700">
+            <div className="flex items-center gap-4 text-zinc-800">
               <div className="flex-1 h-px bg-current opacity-20" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">ou convide por e-mail</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em]">ou por e-mail</span>
               <div className="flex-1 h-px bg-current opacity-20" />
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-6">
             <input 
               type="email" 
               placeholder="E-mail do colaborador" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-zinc-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="flex-1 bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
             />
             <button 
               type="submit" 
               disabled={isLoading || !email.trim()}
-              className="px-4 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px] flex items-center justify-center"
+              className="px-6 py-4 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 min-w-[120px] flex items-center justify-center"
             >
               {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Convidar'}
             </button>
           </form>
 
           {message && (
-            <div className={`p-4 rounded-xl text-sm mb-6 flex flex-col gap-3 ${message.includes('Erro') || message.includes('não possui') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+            <div className={`p-4 rounded-2xl text-xs font-bold mb-6 flex flex-col gap-3 ${message.includes('Erro') || message.includes('não possui') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
               <p>{message}</p>
               {showInviteButton && (
                 <button
                   onClick={handleInvite}
-                  className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-medium transition-colors text-xs"
+                  className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-colors text-[10px] uppercase tracking-widest"
                 >
                   Enviar convite por e-mail
                 </button>
@@ -184,117 +184,41 @@ export function ShareModal({
           )}
 
           <div className="space-y-4">
-            <h3 className="text-sm font-medium text-zinc-400 flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Colaboradores ({collaborators?.length || 0})
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+              <Users className="w-3 h-3" />
+              Colaboradores Ativos ({collaborators?.length || 0})
             </h3>
             
-            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-2 scrollbar-hide">
+            <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1 scrollbar-hide">
               {collaborators?.length === 0 ? (
-                <p className="text-sm text-zinc-500 italic">Nenhum colaborador ainda.</p>
+                <p className="text-sm text-zinc-600 italic py-4">Nenhum colaborador ainda.</p>
               ) : (
                 collaborators?.map((collab, index) => (
-                  <div key={collab.user_id || collab.profiles?.id || `collab-${index}`} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-white/5">
-                    <div className="flex items-center gap-3">
-                      {collab.profiles?.avatar_url ? (
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10">
-                          <img src={collab.profiles.avatar_url} alt={collab.profiles.full_name || 'Avatar'} className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-500 border border-zinc-700' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                          {(collab.profiles?.email || 'U').charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-medium ${collab.status === 'pending' ? 'text-zinc-500' : 'text-zinc-200'}`}>
-                            {collab.profiles?.full_name || collab.profiles?.email?.split('@')[0] || 'Usuário'}
-                          </span>
-                          {isOnline(collab.profiles?.id) && (
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Online agora" />
-                          )}
-                        </div>
-                        {collab.profiles?.email && (
-                          <span className="text-[10px] text-zinc-500 font-mono">{collab.profiles.email}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      {/* Action Bar */}
-                      {collab.status === 'active' && collab.profiles?.id !== currentUser?.id && (
-                        <div className="flex items-center gap-1 mr-2 bg-zinc-800/50 p-1 rounded-lg border border-white/5">
-                          <button
-                            onClick={() => handleNudge(collab.profiles.id)}
-                            disabled={!isOnline(collab.profiles.id)}
-                            className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-amber-400 transition-colors disabled:opacity-20"
-                            title="Tocar Sino"
-                          >
-                            <Bell className="w-3.5 h-3.5" />
-                          </button>
-                          
-                          {collab.profiles?.phone ? (
-                            <a
-                              href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded-md hover:bg-emerald-500/20 text-emerald-500 transition-all hover:bg-emerald-500 hover:text-white"
-                              title="Chamar no WhatsApp"
-                              onClick={() => trigger('light')}
-                            >
-                              <MessageCircleMore className="w-3.5 h-3.5" />
-                            </a>
-                          ) : (
-                            <button
-                              disabled
-                              className="p-1.5 rounded-md text-zinc-700 cursor-not-allowed"
-                              title="Sem WhatsApp cadastrado"
-                            >
-                              <MessageCircleMore className="w-3.5 h-3.5 opacity-30" />
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => {
-                              onClose();
-                              trigger('light');
-                              onOpenChat?.({
-                                id: (collab.profiles?.id || collab.user_id) as string,
-                                full_name: collab.profiles?.full_name || collab.profiles?.email || 'Usuário',
-                                avatar_url: collab.profiles?.avatar_url || null
-                              });
-                            }}
-                            className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-indigo-400 transition-colors"
-                            title="Abrir Chat"
-                          >
-                            <MessageSquare className="w-3.5 h-3.5" />
-                          </button>
-
-                          <Link
-                            href={`/dashboard/lists/${listId}/cade-tu`}
-                            className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-indigo-400 transition-colors"
-                            title="Ver no Mapa"
-                          >
-                            <MapIcon className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      )}
-
-                      {collab.status === 'pending' ? (
-                        <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md bg-zinc-800 text-amber-500/80 border border-amber-500/20">
-                          <Clock className="w-3 h-3" />
-                          Pendente
-                        </span>
-                      ) : (
-                        collab.profiles?.id === currentUser?.id ? (
-                          <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">VOCÊ</span>
+                  <div key={collab.user_id || collab.profiles?.id || `collab-${index}`} className="flex flex-col gap-3 p-4 rounded-3xl bg-zinc-900/40 border border-white/5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {collab.profiles?.avatar_url ? (
+                          <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg">
+                            <img src={collab.profiles.avatar_url} alt={collab.profiles.full_name || 'Avatar'} className="w-full h-full object-cover" />
+                          </div>
                         ) : (
-                          <span className="text-[10px] font-medium px-2 py-1 rounded-md bg-zinc-800 text-zinc-500">
-                            {collab.role === 'owner' ? 'Dono' : 'Editor'}
-                          </span>
-                        )
-                      )}
-                      
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${collab.status === 'pending' ? 'bg-zinc-800 text-zinc-600' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                            {(collab.profiles?.email || 'U').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${collab.status === 'pending' ? 'text-zinc-600' : 'text-zinc-100'}`}>
+                              {collab.profiles?.full_name || collab.profiles?.email?.split('@')[0] || 'Usuário'}
+                            </span>
+                            {isOnline(collab.profiles?.id) && (
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            )}
+                          </div>
+                          <span className="text-[10px] text-zinc-600 font-medium">{collab.profiles?.email}</span>
+                        </div>
+                      </div>
+
                       {collab.role !== 'owner' && isOwner && (
                         <button
                           onClick={() => {
@@ -302,16 +226,72 @@ export function ShareModal({
                               ? `pending-${collab.profiles?.email}` 
                               : (collab.user_id || collab.profiles?.id);
                             
-                            if (idToRemove && confirm(`Remover ${collab.status === 'pending' ? 'convite' : 'colaborador'}?`)) {
+                            if (idToRemove && confirm(`Remover colaborador?`)) {
                               onRemoveCollaborator(idToRemove);
                             }
                           }}
-                          className="p-1 text-zinc-500 hover:text-red-400 transition-colors ml-1"
+                          className="p-2 text-zinc-700 hover:text-red-400 transition-colors"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
+
+                    {/* Action Bar - Reestilizada para Mobile */}
+                    {collab.status === 'active' && collab.profiles?.id !== currentUser?.id && (
+                      <div className="grid grid-cols-4 gap-2">
+                        <button
+                          onClick={() => handleNudge(collab.profiles.id)}
+                          disabled={!isOnline(collab.profiles.id)}
+                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-amber-400 disabled:opacity-20 transition-all"
+                        >
+                          <Bell className="w-4 h-4" />
+                          <span className="text-[8px] font-bold uppercase">Sino</span>
+                        </button>
+                        
+                        {collab.profiles?.phone ? (
+                          <a
+                            href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                            onClick={() => trigger('light')}
+                          >
+                            <MessageCircleMore className="w-4 h-4" />
+                            <span className="text-[8px] font-bold uppercase">Zap</span>
+                          </a>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-800 opacity-30 cursor-not-allowed">
+                            <MessageCircleMore className="w-4 h-4" />
+                            <span className="text-[8px] font-bold uppercase">Zap</span>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            onClose();
+                            trigger('light');
+                            onOpenChat?.({
+                              id: (collab.profiles?.id || collab.user_id) as string,
+                              full_name: collab.profiles?.full_name || collab.profiles?.email || 'Usuário',
+                              avatar_url: collab.profiles?.avatar_url || null
+                            });
+                          }}
+                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          <span className="text-[8px] font-bold uppercase">Chat</span>
+                        </button>
+
+                        <Link
+                          href={`/dashboard/lists/${listId}/cade-tu`}
+                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
+                        >
+                          <MapIcon className="w-4 h-4" />
+                          <span className="text-[8px] font-bold uppercase">Mapa</span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ) )
               )}
@@ -336,7 +316,7 @@ export function ShareModal({
             </div>
 
             <h2 className="text-xl font-bold text-white mb-2">Escaneie para entrar</h2>
-            <p className="text-zinc-500 text-xs mb-8">Aponte a câmera do celular para este código para se tornar colaborador desta lista.</p>
+            <p className="text-zinc-500 text-xs mb-8">Aponte a câmera para entrar na lista.</p>
 
             <div className="p-6 bg-white rounded-3xl shadow-2xl mb-8">
               <QRCodeSVG 
