@@ -11,10 +11,11 @@ export async function subscribeUser(sub: PushSubscription) {
 
   if (!user) return { success: false, error: 'Não autenticado' }
 
-  // Salva o JSON da assinatura no campo push_subscription da tabela profiles
-  const { error } = await supabase
-    .from('profiles')
-    .update({ push_subscription: sub as any })
+  // Usamos casting para 'any' porque os tipos locais do banco podem estar desatualizados
+  // em relação à nova coluna push_subscription criada via migração.
+  const { error } = await (supabase
+    .from('profiles') as any)
+    .update({ push_subscription: sub })
     .eq('id', user.id)
 
   if (error) {
@@ -34,8 +35,8 @@ export async function unsubscribeUser() {
 
   if (!user) return { success: false }
 
-  await supabase
-    .from('profiles')
+  await (supabase
+    .from('profiles') as any)
     .update({ push_subscription: null })
     .eq('id', user.id)
 

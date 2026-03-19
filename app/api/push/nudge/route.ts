@@ -14,9 +14,9 @@ export async function POST(request: Request) {
     const { targetUserId, senderName } = await request.json()
     const supabase = await createClient()
 
-    // 1. Buscar a assinatura push do usuário alvo
-    const { data: profile, error } = await supabase
-      .from('profiles')
+    // 1. Buscar a assinatura push do usuário alvo (casting para any para evitar erro de tipagem local)
+    const { data: profile, error } = await (supabase
+      .from('profiles') as any)
       .select('push_subscription, allow_notifications')
       .eq('id', targetUserId)
       .single()
