@@ -33,6 +33,24 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <head>
+        {/* Script Crítico para Evitar Flash de Tema */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+                  if (theme === 'dark' || (theme === 'system' && supportDarkMode) || !theme) {
+                    document.documentElement.classList.add('dark');
+                  } else if (theme === 'light') {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         {/* Microsoft Clarity Script */}
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
@@ -45,7 +63,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0"
+        className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0 transition-colors duration-300"
       >
         <Providers>
           {children}

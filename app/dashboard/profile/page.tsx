@@ -52,8 +52,8 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    // Carregar preferência de tema
-    const savedTheme = localStorage.getItem("theme") as any
+    // Carregar preferência de tema do localStorage
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system"
     if (savedTheme) setTheme(savedTheme)
 
     if (user) {
@@ -96,8 +96,13 @@ export default function ProfilePage() {
     } else if (newTheme === "light") {
       root.classList.remove("dark")
     } else {
+      // Modo Sistema
       const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      root.classList.toggle("dark", systemDark)
+      if (systemDark) {
+        root.classList.add("dark")
+      } else {
+        root.classList.remove("dark")
+      }
     }
     trigger("light")
   }
@@ -205,28 +210,28 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32">
+    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-100"
+          className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight text-white dark:text-white">
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">
           Configurações
         </h1>
       </header>
 
       {userLoading ? (
-        <div className="glass-panel rounded-2xl p-8 animate-pulse flex flex-col items-center gap-4">
-          <div className="w-24 h-24 rounded-full bg-zinc-800/50"></div>
-          <div className="w-48 h-6 bg-zinc-800/50 rounded-md"></div>
+        <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl p-8 animate-pulse flex flex-col items-center gap-4 border border-zinc-200 dark:border-white/5">
+          <div className="w-24 h-24 rounded-full bg-zinc-200 dark:bg-zinc-800/50"></div>
+          <div className="w-48 h-6 bg-zinc-200 dark:bg-zinc-800/50 rounded-md"></div>
         </div>
       ) : (
         <div className="space-y-6">
           {/* Avatar & Info */}
-          <div className="glass-panel rounded-3xl p-8 border border-white/5 bg-zinc-950/40 backdrop-blur-xl relative overflow-hidden">
+          <div className="bg-zinc-50 dark:bg-zinc-950/40 rounded-3xl p-8 border border-zinc-200 dark:border-white/5 backdrop-blur-xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
             
             <div className="relative z-10 flex flex-col items-center">
@@ -234,11 +239,11 @@ export default function ProfilePage() {
                 className="relative group cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-zinc-900 shadow-2xl bg-zinc-900 flex items-center justify-center">
+                <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white dark:border-zinc-900 shadow-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt="Sua foto de perfil" className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-12 h-12 text-zinc-700" />
+                    <User className="w-12 h-12 text-zinc-400 dark:text-zinc-700" />
                   )}
                   {isUploading && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -246,12 +251,12 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
-                <div className="absolute bottom-0 right-0 p-2 bg-indigo-500 rounded-full border-2 border-zinc-950 text-white shadow-lg">
+                <div className="absolute bottom-0 right-0 p-2 bg-indigo-500 rounded-full border-2 border-white dark:border-zinc-950 text-white shadow-lg">
                   <Camera className="w-4 h-4" />
                 </div>
                 <input type="file" ref={fileInputRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
               </div>
-              <h2 className="text-xl font-bold text-white mt-4">{fullName || "Usuário"}</h2>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white mt-4">{fullName || "Usuário"}</h2>
               <p className="text-zinc-500 text-sm flex items-center gap-2 mt-1">
                 <Mail className="w-4 h-4" /> {user?.email}
               </p>
@@ -260,27 +265,27 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSave} className="space-y-6">
             {/* Seção Perfil */}
-            <div className="glass-panel rounded-3xl p-6 border border-white/5 bg-zinc-900/20 space-y-4">
-              <div className="flex items-center gap-2 text-indigo-400 mb-2">
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
+              <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados Pessoais</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase">Nome</label>
-                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-3.5 px-5 text-white focus:ring-2 focus:ring-indigo-500/50" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nome</label>
+                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase">Telefone</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="(00) 00000-0000" className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-3.5 px-5 text-white focus:ring-2 focus:ring-indigo-500/50" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Telefone</label>
+                  <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="(00) 00000-0000" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
                 </div>
               </div>
             </div>
 
             {/* Seção Tema */}
-            <div className="glass-panel rounded-3xl p-6 border border-white/5 bg-zinc-900/20">
-              <div className="flex items-center gap-2 text-amber-400 mb-4">
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
+              <div className="flex items-center gap-2 text-amber-500 mb-4">
                 <Palette className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Aparência</span>
               </div>
@@ -294,7 +299,7 @@ export default function ProfilePage() {
                     key={t.id}
                     type="button"
                     onClick={() => applyTheme(t.id as any)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${theme === t.id ? "bg-white text-black border-white" : "bg-zinc-900/50 border-white/5 text-zinc-500 hover:text-zinc-300"}`}
+                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${theme === t.id ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-white border-zinc-300 dark:border-white/20 shadow-lg" : "bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
                   >
                     <t.icon className="w-5 h-5" />
                     <span className="text-[10px] font-bold uppercase tracking-tighter">{t.label}</span>
@@ -304,56 +309,56 @@ export default function ProfilePage() {
             </div>
 
             {/* Seção Segurança */}
-            <div className="glass-panel rounded-3xl p-6 border border-white/5 bg-zinc-900/20 space-y-4">
-              <div className="flex items-center gap-2 text-emerald-400 mb-2">
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
+              <div className="flex items-center gap-2 text-emerald-500 mb-2">
                 <Lock className="w-4 h-4" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Segurança</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase">Nova Senha</label>
-                  <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-3.5 px-5 text-white focus:ring-2 focus:ring-indigo-500/50" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nova Senha</label>
+                  <input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase">Confirmar</label>
-                  <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-3.5 px-5 text-white focus:ring-2 focus:ring-indigo-500/50" />
+                  <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Confirmar</label>
+                  <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
                 </div>
               </div>
             </div>
 
             {/* Seção Permissões */}
-            <div className="glass-panel rounded-3xl p-6 border border-white/5 bg-zinc-900/20 space-y-3">
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-200">Localização no Mapa</span>
+                  <MapPin className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Localização no Mapa</span>
                 </div>
-                <button type="button" onClick={() => setLocationEnabled(!locationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-800"}`}>
+                <button type="button" onClick={() => setLocationEnabled(!locationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
                 </button>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-200">Buzinadas e Avisos</span>
+                  <Bell className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Buzinadas e Avisos</span>
                 </div>
-                <button type="button" onClick={() => setAllowNotifications(!allowNotifications)} className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-800"}`}>
+                <button type="button" onClick={() => setAllowNotifications(!allowNotifications)} className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
                   <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${allowNotifications ? "left-6" : "left-1"}`} />
                 </button>
               </div>
             </div>
 
             {message && (
-              <div className={`p-4 rounded-2xl text-sm text-center font-bold animate-in fade-in zoom-in-95 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+              <div className={`p-4 rounded-2xl text-xs font-bold text-center animate-in fade-in zoom-in-95 ${message.includes("Erro") ? "bg-red-500/10 text-red-500 border border-red-500/20" : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"}`}>
                 {message}
               </div>
             )}
 
             <div className="flex flex-col gap-3">
-              <button disabled={isSaving} type="submit" className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2">
+              <button disabled={isSaving} type="submit" className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95">
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Configurações</>}
               </button>
-              <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-900/50 hover:bg-red-500/10 hover:text-red-400 text-zinc-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-white/5">
+              <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-red-500/10 hover:text-red-500 text-zinc-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
                 <LogOut className="w-5 h-5" /> Sair da Conta
               </button>
             </div>
@@ -361,10 +366,10 @@ export default function ProfilePage() {
 
           <footer className="pt-8 flex flex-col items-center gap-2 opacity-40">
             <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              <Link href="/privacy" className="hover:text-white">Privacidade</Link>
-              <Link href="/terms" className="hover:text-white">Termos</Link>
+              <Link href="/privacy" className="hover:text-indigo-500">Privacidade</Link>
+              <Link href="/terms" className="hover:text-indigo-500">Termos</Link>
             </div>
-            <p className="text-[9px] text-zinc-600 uppercase font-bold">Lista Pronta v1.0.0</p>
+            <p className="text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-bold tracking-widest">Lista Pronta v1.0.0</p>
           </footer>
         </div>
       )}
