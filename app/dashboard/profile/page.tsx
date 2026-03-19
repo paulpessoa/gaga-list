@@ -27,9 +27,9 @@ export default function ProfilePage() {
       const fetchProfile = async () => {
         const { data, error } = await supabase
           .from('profiles')
-          .select('avatar_url, location_enabled')
+          .select('avatar_url, theme_preference, location_enabled')
           .eq('id', user.id)
-          .maybeSingle(); // Usar maybeSingle para evitar erro PGRST116
+          .maybeSingle(); 
         
         if (data) {
           setAvatarUrl(data.avatar_url);
@@ -37,7 +37,7 @@ export default function ProfilePage() {
         } else if (!error) {
           // Se não houver erro mas o dado for nulo, o perfil não existe.
           // Vamos criar um perfil básico para este usuário (Auto-Healing)
-          await supabase.from('profiles').insert({
+          await supabase.from('profiles').upsert({
             id: user.id,
             email: user.email!,
             full_name: user.user_metadata?.full_name || '',

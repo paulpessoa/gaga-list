@@ -110,6 +110,7 @@ export interface Database {
           full_name: string | null
           avatar_url: string | null
           theme_preference: string | null
+          location_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -119,6 +120,7 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           theme_preference?: string | null
+          location_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -128,6 +130,7 @@ export interface Database {
           full_name?: string | null
           avatar_url?: string | null
           theme_preference?: string | null
+          location_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
