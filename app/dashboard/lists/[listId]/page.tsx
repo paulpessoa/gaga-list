@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState, useMemo } from 'react';
+import { use, useState, useMemo, useEffect } from 'react';
 import { useItems, useCreateItem, useUpdateItem, useDeleteItem } from '@/hooks/use-items';
 import { useLists, useCollaborators, useAddCollaborator, useRemoveCollaborator, useInviteUser } from '@/hooks/use-lists';
 import { 
@@ -9,14 +9,12 @@ import {
   Circle, 
   Trash2, 
   ArrowLeft, 
-  Share2, 
   ShoppingCart, 
   Navigation,
-  MessageSquare,
-  Users,
-  ChevronRight
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useUser } from '@/hooks/use-user';
 import { ShareModal } from '@/components/lists/share-modal';
@@ -25,6 +23,7 @@ import { Collaborator } from '@/types/database.types';
 
 export default function ListDetail({ params }: { params: Promise<{ listId: string }> }) {
   const { listId } = use(params);
+  const searchParams = useSearchParams();
   const { data: lists } = useLists();
   const list = lists?.find(l => l.id === listId);
   const { data: user } = useUser();
@@ -45,6 +44,26 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
   const addCollaborator = useAddCollaborator(listId);
   const removeCollaborator = useRemoveCollaborator(listId);
   const inviteUser = useInviteUser(listId);
+
+  // LOGICA DE AUTO-OPEN CHAT (Deep Linking)
+  useEffect(() => {
+    const openChat = searchParams.get('openChat');
+    const targetId = searchParams.get('targetId');
+
+    if (openChat === 'true') {
+      if (targetId && collaborators) {
+        const collab = (collaborators as Collaborator[]).find(c => c.user_id === targetId || c.profiles?.id === targetId);
+        if (collab) {
+          setChatTarget({
+            id: targetId,
+            full_name: collab.profiles?.full_name || null,
+            avatar_url: collab.profiles?.avatar_url || null
+          });
+        }
+      }
+      setIsChatOpen(true);
+    }
+  }, [searchParams, collaborators]);
 
   const pendingCount = useMemo(() => items?.filter(i => !i.is_purchased).length || 0, [items]);
 

@@ -158,21 +158,26 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
     }
 
     if (isIndividual && targetUser) {
-      // 1. Enviar para o canal da conversa (Realtime imediato)
+      const dmPayload = {
+        ...ephemeralMsg,
+        listId, // Adicionando o contexto da lista
+      }
+
+      // 1. Enviar para o canal da conversa
       await channelRef.current.send({
         type: "broadcast",
         event: "dm",
-        payload: ephemeralMsg
+        payload: dmPayload
       })
 
-      // 2. Enviar para o Inbox Pessoal do Alvo (Para acender o Badge)
+      // 2. Enviar para o Inbox Pessoal do Alvo
       const targetInbox = supabase.channel(`user_inbox_${targetUser.id}`)
       targetInbox.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await targetInbox.send({
             type: "broadcast",
             event: "dm",
-            payload: ephemeralMsg
+            payload: dmPayload
           })
           supabase.removeChannel(targetInbox)
         }

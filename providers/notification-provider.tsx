@@ -5,12 +5,15 @@ import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/use-user"
 import { useHaptic } from "@/hooks/use-haptic"
 
-interface Notification {
+export interface Notification {
   id: string
-  type: "dm" | "nudge"
+  type: "dm" | "nudge" | "group"
   senderName: string
   message?: string
   time: number
+  listId: string
+  listTitle?: string
+  senderId?: string
 }
 
 interface NotificationContextType {
@@ -31,14 +34,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!user) return
 
-    // Canal de Inbox Pessoal (Ouvinte Global)
     const channel = supabase.channel(`user_inbox_${user.id}`)
 
     channel
       .on("broadcast", { event: "dm" }, (payload) => {
-        const { content, profiles, user_id } = payload.payload
+        const { content, profiles, user_id, listId, listTitle } = payload.payload
         
-        // Só notifica se a mensagem não for minha
         if (user_id !== user.id) {
           trigger("heavy")
           setNotifications(prev => [{
@@ -46,15 +47,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             type: "dm",
             senderName: profiles?.full_name || "Alguém",
             message: content,
-            time: Date.now()
+            time: Date.now(),
+            listId,
+            listTitle,
+            senderId: user_id
           }, ...prev])
           setUnreadCount(prev => prev + 1)
         }
       })
       .on("broadcast", { event: "nudge" }, (payload) => {
-        const { senderName, targetId } = payload.payload
+        const { senderName, targetId, listId, listTitle } = payload.payload
         
-        // Só notifica se eu for o alvo
         if (targetId === user.id) {
           trigger("heavy")
           if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
@@ -63,7 +66,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             id: Math.random().toString(),
             type: "nudge",
             senderName: senderName || "Alguém",
-            time: Date.now()
+            time: Date.now(),
+            listId,
+            listTitle
           }, ...prev])
           setUnreadCount(prev => prev + 1)
         }
