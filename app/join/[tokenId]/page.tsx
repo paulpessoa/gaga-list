@@ -27,15 +27,15 @@ export default function JoinListPage({ params }: { params: Promise<{ tokenId: st
 
       // 2. Tentar entrar na lista usando a função RPC que criamos
       try {
-        const { data: listId, error } = await supabase.rpc("join_list_via_token", {
+        const { data: listId, error } = await (supabase.rpc as any)("join_list_via_token", {
           token_uuid: tokenId
         })
 
         if (error) throw error
 
         // 3. Buscar nome da lista para o feedback visual
-        const { data: listData } = await supabase
-          .from("lists")
+        const { data: listData } = await (supabase
+          .from("lists") as any)
           .select("title")
           .eq("id", listId)
           .single()

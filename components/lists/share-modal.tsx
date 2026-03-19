@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Users, Clock, Loader2, Bell, Phone, MessageSquare, Map as MapIcon, MessageCircle, QrCode } from 'lucide-react';
+import { X, Users, Clock, Loader2, Bell, Phone, MessageSquare, Map as MapIcon, MessageCircleMore, QrCode } from 'lucide-react';
 import { Collaborator } from '@/types/database.types';
 import { usePresence } from '@/hooks/use-presence';
 import { useHaptic } from '@/hooks/use-haptic';
@@ -58,8 +58,8 @@ export function ShareModal({
     setIsLoading(true);
     trigger('medium');
     try {
-      const { data, error } = await supabase
-        .from('list_invite_tokens')
+      const { data, error } = await (supabase
+        .from('list_invite_tokens') as any)
         .insert({
           list_id: listId,
           created_by: currentUser.id
@@ -221,6 +221,7 @@ export function ShareModal({
                     </div>
 
                     <div className="flex items-center gap-1">
+                      {/* Action Bar */}
                       {collab.status === 'active' && collab.profiles?.id !== currentUser?.id && (
                         <div className="flex items-center gap-1 mr-2 bg-zinc-800/50 p-1 rounded-lg border border-white/5">
                           <button
@@ -232,17 +233,25 @@ export function ShareModal({
                             <Bell className="w-3.5 h-3.5" />
                           </button>
                           
-                          {collab.profiles?.phone && (
+                          {collab.profiles?.phone ? (
                             <a
                               href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-emerald-400 transition-colors"
-                              title="WhatsApp"
+                              className="p-1.5 rounded-md hover:bg-emerald-500/20 text-emerald-500 transition-all hover:bg-emerald-500 hover:text-white"
+                              title="Chamar no WhatsApp"
                               onClick={() => trigger('light')}
                             >
-                              <MessageCircle className="w-3.5 h-3.5" />
+                              <MessageCircleMore className="w-3.5 h-3.5" />
                             </a>
+                          ) : (
+                            <button
+                              disabled
+                              className="p-1.5 rounded-md text-zinc-700 cursor-not-allowed"
+                              title="Sem WhatsApp cadastrado"
+                            >
+                              <MessageCircleMore className="w-3.5 h-3.5 opacity-30" />
+                            </button>
                           )}
 
                           <button
