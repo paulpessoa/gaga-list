@@ -45,9 +45,8 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
   useEffect(() => {
     if (!isOpen || !listId) return
 
-    setMessages([]) // Limpa ao abrir para evitar ghosting entre canais
+    setMessages([])
     
-    // 1. Canal de Realtime
     const channel = supabase.channel(
       isIndividual 
         ? `dm_${[currentUser?.id, targetUser.id].sort().join('_')}` 
@@ -56,7 +55,6 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
 
     channelRef.current = channel
 
-    // 2. Carregar histórico (Apenas se for chat de GRUPO)
     const fetchHistory = async () => {
       if (isIndividual) {
         setIsLoading(false)
@@ -87,9 +85,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
 
     fetchHistory()
 
-    // 3. Configurar escutas
     if (isIndividual) {
-      // MODO INDIVIDUAL: Escuta via Broadcast
       channel.on("broadcast", { event: "dm" }, (payload) => {
         const msg = payload.payload as Message
         setMessages((prev) => [...prev, msg])
@@ -97,7 +93,6 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
         trigger("light")
       })
     } else {
-      // MODO GRUPO: Escuta via Postgres Changes
       channel.on(
         "postgres_changes",
         {
@@ -149,32 +144,44 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
     setNewMessage("")
     trigger("medium")
 
-    if (isIndividual) {
-      // MODO INDIVIDUAL: Envia via Broadcast
-      const ephemeralMsg: Message = {
-        id: Math.random().toString(36).substr(2, 9),
-        content,
-        user_id: currentUser.id,
-        created_at: new Date().toISOString(),
-        is_ephemeral: true,
-        profiles: {
-          full_name: currentUser.user_metadata?.full_name || "Eu",
-          avatar_url: currentUser.user_metadata?.avatar_url || null,
-          email: currentUser.email || ""
-        }
+    const ephemeralMsg: Message = {
+      id: Math.random().toString(36).substr(2, 9),
+      content,
+      user_id: currentUser.id,
+      created_at: new Date().toISOString(),
+      is_ephemeral: isIndividual,
+      profiles: {
+        full_name: currentUser.user_metadata?.full_name || "Eu",
+        avatar_url: currentUser.user_metadata?.avatar_url || null,
+        email: currentUser.email || ""
       }
+    }
 
+    if (isIndividual && targetUser) {
+      // 1. Enviar para o canal da conversa (Realtime imediato)
       await channelRef.current.send({
         type: "broadcast",
         event: "dm",
         payload: ephemeralMsg
       })
 
+      // 2. Enviar para o Inbox Pessoal do Alvo (Para acender o Badge)
+      const targetInbox = supabase.channel(`user_inbox_${targetUser.id}`)
+      targetInbox.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await targetInbox.send({
+            type: "broadcast",
+            event: "dm",
+            payload: ephemeralMsg
+          })
+          supabase.removeChannel(targetInbox)
+        }
+      })
+
       setMessages((prev) => [...prev, ephemeralMsg])
       setIsSending(false)
       scrollToBottom()
     } else {
-      // MODO GRUPO: Salva no banco
       const { error } = await (supabase.from("list_messages") as any).insert({
         list_id: listId,
         user_id: currentUser.id,
@@ -193,10 +200,9 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="glass-panel w-full max-w-lg h-[85vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl flex flex-col relative shadow-2xl border border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
         
-        {/* Header */}
         <header className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 rounded-t-3xl">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isIndividual ? "bg-amber-500/10 text-amber-500" : "bg-indigo-500/10 text-indigo-400"}`}>
@@ -223,7 +229,6 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
           </button>
         </header>
 
-        {/* Individual Chat Warning */}
         {isIndividual && (
           <div className="bg-amber-500/10 border-b border-amber-500/10 px-6 py-2">
             <p className="text-[10px] text-amber-500/80 text-center font-medium italic">
@@ -232,11 +237,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
           </div>
         )}
 
-        {/* Messages List */}
-        <div 
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide"
-        >
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
           {isLoading ? (
             <div className="h-full flex flex-col items-center justify-center gap-2 text-zinc-500">
               <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
@@ -255,10 +256,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
             messages.map((msg) => {
               const isMine = msg.user_id === currentUser?.id
               return (
-                <div 
-                  key={msg.id} 
-                  className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}
-                >
+                <div key={msg.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
                   <div className={`flex gap-2 max-w-[85%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
                     {!isMine && !isIndividual && (
                       <div className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/5">
@@ -275,13 +273,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
                           {msg.profiles?.full_name || msg.profiles?.email.split("@")[0]}
                         </span>
                       )}
-                      <div 
-                        className={`py-3 px-4 rounded-2xl text-sm ${
-                          isMine 
-                            ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-500/10" 
-                            : "bg-zinc-800 text-zinc-200 rounded-tl-none border border-white/5"
-                        }`}
-                      >
+                      <div className={`py-3 px-4 rounded-2xl text-sm ${isMine ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-500/10" : "bg-zinc-800 text-zinc-200 rounded-tl-none border border-white/5"}`}>
                         {msg.content}
                       </div>
                       <span className={`text-[9px] text-zinc-600 ${isMine ? "text-right mr-1" : "ml-1"}`}>
@@ -295,7 +287,6 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
           )}
         </div>
 
-        {/* Input Area */}
         <footer className="p-4 bg-zinc-950/50 border-t border-white/5 sm:rounded-b-3xl">
           <form onSubmit={handleSendMessage} className="flex gap-2">
             <input 
@@ -310,11 +301,7 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
               disabled={!newMessage.trim() || isSending}
               className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg ${isIndividual ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20" : "bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20"}`}
             >
-              {isSending ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5 text-white" />
-              )}
+              {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 text-white" />}
             </button>
           </form>
         </footer>

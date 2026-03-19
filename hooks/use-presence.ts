@@ -101,10 +101,10 @@ export function usePresence(listId: string, currentUser: any) {
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Track inicial
+          // Track inicial usando dados do perfil (mais atualizados que o auth metadata)
           await channel.track({
-            full_name: currentUser.user_metadata?.full_name || 'Usuário',
-            avatar_url: currentUser.user_metadata?.avatar_url || null,
+            full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Usuário',
+            avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
             lat: null,
             lng: null,
             online_at: new Date().toISOString(),
@@ -120,10 +120,10 @@ export function usePresence(listId: string, currentUser: any) {
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setMyLocation(coords);
           
-          // Enviar posição para o Presence
+          // Enviar posição para o Presence com dados atualizados do perfil
           channel.track({
-            full_name: currentUser.user_metadata?.full_name || 'Usuário',
-            avatar_url: currentUser.user_metadata?.avatar_url || null,
+            full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Usuário',
+            avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
             lat: coords.lat,
             lng: coords.lng,
             online_at: new Date().toISOString(),
@@ -143,14 +143,31 @@ export function usePresence(listId: string, currentUser: any) {
   // Função para dar o "Sino" (Vibrar o outro)
   const sendNudge = (targetId: string) => {
     if (channelRef.current) {
+      const payload = {
+        targetId,
+        senderName: userProfile?.full_name || currentUser.user_metadata?.full_name || 'Alguém',
+      };
+
+      // 1. Enviar para o canal atual (para quem está no mapa ver na hora)
       channelRef.current.send({
         type: 'broadcast',
         event: 'nudge',
-        payload: {
-          targetId,
-          senderName: currentUser.user_metadata?.full_name || 'Alguém',
-        },
+        payload,
       });
+
+      // 2. Enviar para o Inbox Pessoal do Alvo (Para quem está em outras páginas)
+      const targetInbox = supabase.channel(`user_inbox_${targetId}`);
+      targetInbox.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await targetInbox.send({
+            type: 'broadcast',
+            event: 'nudge',
+            payload,
+          });
+          supabase.removeChannel(targetInbox);
+        }
+      });
+
       trigger('light');
     }
   };

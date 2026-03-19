@@ -31,37 +31,42 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (!user) return
 
-    // Escuta global de Broadcasts para o usuário logado
-    // Nota: Como não temos um list_id fixo aqui, o ideal é que cada lista 
-    // que o usuário participa crie um canal. Para simplificar e ser eficiente,
-    // usaremos um canal baseado no ID do próprio usuário.
+    // Canal de Inbox Pessoal (Ouvinte Global)
     const channel = supabase.channel(`user_inbox_${user.id}`)
 
     channel
       .on("broadcast", { event: "dm" }, (payload) => {
-        const { content, profiles } = payload.payload
-        trigger("heavy")
-        setNotifications(prev => [{
-          id: Math.random().toString(),
-          type: "dm",
-          senderName: profiles?.full_name || "Alguém",
-          message: content,
-          time: Date.now()
-        }, ...prev])
-        setUnreadCount(prev => prev + 1)
+        const { content, profiles, user_id } = payload.payload
+        
+        // Só notifica se a mensagem não for minha
+        if (user_id !== user.id) {
+          trigger("heavy")
+          setNotifications(prev => [{
+            id: Math.random().toString(),
+            type: "dm",
+            senderName: profiles?.full_name || "Alguém",
+            message: content,
+            time: Date.now()
+          }, ...prev])
+          setUnreadCount(prev => prev + 1)
+        }
       })
       .on("broadcast", { event: "nudge" }, (payload) => {
-        const { senderName } = payload.payload
-        trigger("heavy")
-        if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
+        const { senderName, targetId } = payload.payload
         
-        setNotifications(prev => [{
-          id: Math.random().toString(),
-          type: "nudge",
-          senderName: senderName || "Alguém",
-          time: Date.now()
-        }, ...prev])
-        setUnreadCount(prev => prev + 1)
+        // Só notifica se eu for o alvo
+        if (targetId === user.id) {
+          trigger("heavy")
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
+          
+          setNotifications(prev => [{
+            id: Math.random().toString(),
+            type: "nudge",
+            senderName: senderName || "Alguém",
+            time: Date.now()
+          }, ...prev])
+          setUnreadCount(prev => prev + 1)
+        }
       })
       .subscribe()
 
