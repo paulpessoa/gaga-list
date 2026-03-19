@@ -16,6 +16,16 @@ const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLaye
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 const Circle = dynamic(() => import('react-leaflet').then(mod => mod.Circle), { ssr: false });
+const useMap = dynamic(() => import('react-leaflet').then(mod => mod.useMap), { ssr: false });
+
+// Componente para mudar a visão do mapa programaticamente
+function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = (useMap as any)();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+}
 
 // Função Haversine no Frontend para cálculo rápido de distância
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -42,6 +52,7 @@ export default function CadeTuPage() {
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [L, setL] = useState<any>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatTarget, setChatTarget] = useState<{ id: string, full_name: string | null, avatar_url: string | null } | undefined>(undefined);
 
   // Inicializar ícones do Leaflet no lado do cliente
   useEffect(() => {
@@ -124,6 +135,7 @@ export default function CadeTuPage() {
                 style={{ height: '100%', width: '100%' }}
                 zoomControl={false}
               >
+                <ChangeView center={mapCenter} zoom={18} />
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   className="map-tiles-dark" // CSS personalizado para deixar o mapa escuro
@@ -198,10 +210,15 @@ export default function CadeTuPage() {
                 <button 
                   onClick={() => {
                     trigger('light');
+                    setChatTarget({
+                      id: u.user_id,
+                      full_name: u.full_name,
+                      avatar_url: u.avatar_url
+                    });
                     setIsChatOpen(true);
                   }}
                   className="p-3 rounded-2xl bg-zinc-800/50 text-zinc-400 hover:text-indigo-400 transition-colors"
-                  title="Chat"
+                  title="Chat Individual"
                 >
                   <MessageSquare className="w-5 h-5" />
                 </button>
@@ -221,7 +238,11 @@ export default function CadeTuPage() {
         listId={listId}
         currentUser={user}
         isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
+        onClose={() => {
+          setIsChatOpen(false);
+          setChatTarget(undefined);
+        }}
+        targetUser={chatTarget}
       />
 
       <style jsx global>{`

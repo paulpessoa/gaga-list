@@ -17,7 +17,7 @@ interface ShareModalProps {
   onAddCollaborator: (email: string, callbacks: { onSuccess: () => void; onError: (err: any) => void }) => void;
   onInviteUser: (email: string, callbacks: { onSuccess: () => void; onError: (err: any) => void }) => void;
   onRemoveCollaborator: (userId: string) => void;
-  onOpenChat?: () => void;
+  onOpenChat?: (targetUser: { id: string, full_name: string | null, avatar_url: string | null }) => void;
 }
 
 export function ShareModal({
@@ -201,7 +201,11 @@ export function ShareModal({
                           onClick={() => {
                             onClose();
                             trigger('light');
-                            onOpenChat?.();
+                            onOpenChat?.({
+                              id: collab.profiles?.id || collab.user_id,
+                              full_name: collab.profiles?.full_name || collab.profiles?.email,
+                              avatar_url: collab.profiles?.avatar_url || null
+                            });
                           }}
                           className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-indigo-400 transition-colors"
                           title="Abrir Chat"

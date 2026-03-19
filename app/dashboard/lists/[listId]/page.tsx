@@ -37,6 +37,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
   const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatTarget, setChatTarget] = useState<{ id: string, full_name: string | null, avatar_url: string | null } | undefined>(undefined);
   
   const { data: collaborators } = useCollaborators(listId);
   const addCollaborator = useAddCollaborator(listId);
@@ -201,14 +202,21 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
         onAddCollaborator={(email, callbacks) => addCollaborator.mutate(email, callbacks)}
         onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
         onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}
-        onOpenChat={() => setIsChatOpen(true)}
+        onOpenChat={(target) => {
+          setChatTarget(target);
+          setIsChatOpen(true);
+        }}
       />
 
       <ListChat 
         listId={listId}
         currentUser={user}
         isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
+        onClose={() => {
+          setIsChatOpen(false);
+          setChatTarget(undefined);
+        }}
+        targetUser={chatTarget}
       />
     </main>
   );
