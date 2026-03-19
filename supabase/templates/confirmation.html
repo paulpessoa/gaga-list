@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirme seu e-mail - Gaga List</title>
+  <title>Confirme seu e-mail - Lista Pronta</title>
   <style>
     body {
       background-color: #09090b;
@@ -12,6 +13,7 @@
       padding: 0;
       color: #fafafa;
     }
+
     .container {
       max-width: 600px;
       margin: 40px auto;
@@ -20,10 +22,12 @@
       overflow: hidden;
       border: 1px solid #27272a;
     }
+
     .header {
       padding: 40px 40px 20px;
       text-align: center;
     }
+
     .logo {
       font-size: 24px;
       font-weight: bold;
@@ -34,21 +38,25 @@
       justify-content: center;
       gap: 8px;
     }
+
     .content {
       padding: 0 40px 40px;
       text-align: center;
     }
+
     h1 {
       font-size: 24px;
       font-weight: 700;
       margin-bottom: 16px;
     }
+
     p {
       color: #a1a1aa;
       font-size: 16px;
       line-height: 1.6;
       margin-bottom: 32px;
     }
+
     .button {
       display: inline-block;
       background-color: #6366f1;
@@ -59,6 +67,7 @@
       text-decoration: none;
       transition: background-color 0.2s;
     }
+
     .footer {
       padding: 24px;
       background-color: #09090b;
@@ -66,20 +75,24 @@
       color: #71717a;
       font-size: 12px;
     }
+
     .divider {
       height: 1px;
       background-color: #27272a;
       margin: 32px 0;
     }
+
     .token-section {
       margin-top: 32px;
       text-align: center;
     }
+
     .token-label {
       font-size: 14px;
       color: #71717a;
       margin-bottom: 12px;
     }
+
     .token-box {
       background-color: #09090b;
       border: 1px solid #27272a;
@@ -94,31 +107,35 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
       <div class="logo">
-        🛒 Gaga List
+        🛒 Lista Pronta
       </div>
     </div>
     <div class="content">
       <h1>Bem-vindo à sua nova forma de comprar!</h1>
-      <p>Obrigado por se juntar ao Gaga List. Para começar a organizar suas compras e colaborar com outros usuários, confirme seu endereço de e-mail clicando no botão abaixo.</p>
-      
+      <p>Obrigado por se juntar ao Lista Pronta. Para começar a organizar suas compras e colaborar com outros usuários,
+        confirme seu endereço de e-mail clicando no botão abaixo.</p>
+
       <a href="{{ .ConfirmationURL }}" class="button">Confirmar E-mail</a>
 
       <div class="token-section">
         <p class="token-label">Ou use este código para entrada manual:</p>
         <div class="token-box">{{ .Token }}</div>
       </div>
-      
+
       <div class="divider"></div>
-      <p style="font-size: 14px; margin-bottom: 0;">Se o botão não funcionar, copie e cole este link no seu navegador:</p>
+      <p style="font-size: 14px; margin-bottom: 0;">Se o botão não funcionar, copie e cole este link no seu navegador:
+      </p>
       <p style="font-size: 13px; color: #6366f1; word-break: break-all;">{{ .ConfirmationURL }}</p>
     </div>
     <div class="footer">
-      &copy; 2026 Gaga List. Feito para facilitar sua vida.
+      &copy; 2026 Lista Pronta. Feito para facilitar sua vida.
     </div>
   </div>
 </body>
+
 </html>
