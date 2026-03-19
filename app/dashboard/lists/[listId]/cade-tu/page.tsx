@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useHaptic } from '@/hooks/use-haptic';
+import { ListChat } from '@/components/lists/list-chat';
 
 // Importação dinâmica do mapa para evitar erros de SSR
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -40,6 +41,7 @@ export default function CadeTuPage() {
   
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [L, setL] = useState<any>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Inicializar ícones do Leaflet no lado do cliente
   useEffect(() => {
@@ -194,6 +196,10 @@ export default function CadeTuPage() {
                   <Bell className="w-5 h-5" />
                 </button>
                 <button 
+                  onClick={() => {
+                    trigger('light');
+                    setIsChatOpen(true);
+                  }}
                   className="p-3 rounded-2xl bg-zinc-800/50 text-zinc-400 hover:text-indigo-400 transition-colors"
                   title="Chat"
                 >
@@ -211,6 +217,13 @@ export default function CadeTuPage() {
         </div>
       </div>
 
+      <ListChat 
+        listId={listId}
+        currentUser={user}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
+
       <style jsx global>{`
         .map-tiles-dark {
           filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
@@ -226,6 +239,7 @@ export default function CadeTuPage() {
           background: #18181b !important;
           color: white !important;
           border-radius: 12px !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
         }
         .leaflet-popup-tip {
           background: #18181b !important;

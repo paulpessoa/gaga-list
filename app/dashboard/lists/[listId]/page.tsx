@@ -11,12 +11,14 @@ import {
   ArrowLeft, 
   Share2, 
   ShoppingCart, 
-  Navigation 
+  Navigation,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useUser } from '@/hooks/use-user';
 import { ShareModal } from '@/components/lists/share-modal';
+import { ListChat } from '@/components/lists/list-chat';
 import { Collaborator } from '@/types/database.types';
 
 export default function ListDetail({ params }: { params: Promise<{ listId: string }> }) {
@@ -34,6 +36,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
   const [newItemName, setNewItemName] = useState('');
   const [filter, setFilter] = useState<'all' | 'pending' | 'purchased'>('all');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   
   const { data: collaborators } = useCollaborators(listId);
   const addCollaborator = useAddCollaborator(listId);
@@ -81,6 +84,16 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           <h1 className="text-2xl font-semibold tracking-tight">{list?.title || 'Lista'}</h1>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => {
+              trigger('light');
+              setIsChatOpen(true);
+            }}
+            className="p-2 rounded-full hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white"
+            title="Abrir Chat"
+          >
+            <MessageSquare className="w-5 h-5" />
+          </button>
           <Link 
             href={`/dashboard/lists/${listId}/cade-tu`}
             className="flex items-center gap-2 py-2 px-4 rounded-full bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all font-medium text-sm group"
@@ -104,7 +117,7 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
           placeholder="Adicionar novo item..." 
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
-          className="flex-1 bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          className="w-full bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-6 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
         />
         <button 
           type="submit" 
@@ -188,6 +201,14 @@ export default function ListDetail({ params }: { params: Promise<{ listId: strin
         onAddCollaborator={(email, callbacks) => addCollaborator.mutate(email, callbacks)}
         onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
         onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}
+        onOpenChat={() => setIsChatOpen(true)}
+      />
+
+      <ListChat 
+        listId={listId}
+        currentUser={user}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
       />
     </main>
   );

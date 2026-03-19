@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { X, Users, Clock, Loader2, Bell, Phone, MessageSquare, Map as MapIcon } from 'lucide-react';
 import { Collaborator } from '@/types/database.types';
 import { usePresence } from '@/hooks/use-presence';
+import { useHaptic } from '@/hooks/use-haptic';
 import Link from 'next/link';
 
 interface ShareModalProps {
@@ -16,6 +17,7 @@ interface ShareModalProps {
   onAddCollaborator: (email: string, callbacks: { onSuccess: () => void; onError: (err: any) => void }) => void;
   onInviteUser: (email: string, callbacks: { onSuccess: () => void; onError: (err: any) => void }) => void;
   onRemoveCollaborator: (userId: string) => void;
+  onOpenChat?: () => void;
 }
 
 export function ShareModal({
@@ -27,7 +29,8 @@ export function ShareModal({
   currentUser,
   onAddCollaborator,
   onInviteUser,
-  onRemoveCollaborator
+  onRemoveCollaborator,
+  onOpenChat
 }: ShareModalProps) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -36,6 +39,7 @@ export function ShareModal({
   
   // Integração com Presence para o Sino (Nudge)
   const { onlineUsers, sendNudge } = usePresence(listId, currentUser);
+  const { trigger } = useHaptic();
 
   if (!isOpen) return null;
 
@@ -194,6 +198,11 @@ export function ShareModal({
                         )}
 
                         <button
+                          onClick={() => {
+                            onClose();
+                            trigger('light');
+                            onOpenChat?.();
+                          }}
                           className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-400 hover:text-indigo-400 transition-colors"
                           title="Abrir Chat"
                         >
