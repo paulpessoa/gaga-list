@@ -12,6 +12,7 @@ export interface PresenceUser {
   lng: number | null;
   last_seen: string;
   distance?: number; // em metros
+  bearing?: number | null; // em graus (0-360)
 }
 
 export function usePresence(listId: string, currentUser: any) {

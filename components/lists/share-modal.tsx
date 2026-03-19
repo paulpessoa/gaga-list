@@ -202,8 +202,8 @@ export function ShareModal({
                             onClose();
                             trigger('light');
                             onOpenChat?.({
-                              id: collab.profiles?.id || collab.user_id,
-                              full_name: collab.profiles?.full_name || collab.profiles?.email,
+                              id: (collab.profiles?.id || collab.user_id) as string,
+                              full_name: collab.profiles?.full_name || collab.profiles?.email || 'Usuário',
                               avatar_url: collab.profiles?.avatar_url || null
                             });
                           }}
