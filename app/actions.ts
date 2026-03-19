@@ -1,26 +1,43 @@
-"use server"
+'use server'
 
-// Nota: Em um ambiente real, você salvaria a assinatura no banco de dados (Supabase)
-// Para seguir a documentação oficial, vamos simular o armazenamento
+import { createClient } from '@/lib/supabase/server'
 
-let subscription: PushSubscription | null = null
-
+/**
+ * Salva a assinatura de Push no perfil do usuário logado no Supabase.
+ */
 export async function subscribeUser(sub: PushSubscription) {
-  subscription = sub
-  // console.log('Assinatura salva no servidor:', sub)
-  return { success: true }
-}
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export async function unsubscribeUser() {
-  subscription = null
-  return { success: true }
-}
+  if (!user) return { success: false, error: 'Não autenticado' }
 
-export async function sendNotification(message: string) {
-  if (!subscription) {
-    throw new Error("Nenhuma assinatura encontrada no servidor.")
+  // Salva o JSON da assinatura no campo push_subscription da tabela profiles
+  const { error } = await supabase
+    .from('profiles')
+    .update({ push_subscription: sub as any })
+    .eq('id', user.id)
+
+  if (error) {
+    console.error('Erro ao salvar assinatura push:', error)
+    return { success: false, error: error.message }
   }
 
-  // Em produção, aqui você usaria a biblioteca 'web-push' para disparar a notificação
+  return { success: true }
+}
+
+/**
+ * Remove a assinatura de Push.
+ */
+export async function unsubscribeUser() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { success: false }
+
+  await supabase
+    .from('profiles')
+    .update({ push_subscription: null })
+    .eq('id', user.id)
+
   return { success: true }
 }
