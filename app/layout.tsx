@@ -6,22 +6,23 @@ import Script from "next/script"
 import { NavigationWrapper } from "@/components/navigation-wrapper"
 
 export const metadata: Metadata = {
-  title: "Lista Pronta - Compras Colaborativas",
+  title: "Lista Pronta",
   description: "Listas de compras colaborativas em tempo real.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Lista Pronta"
   }
 }
 
 export const viewport: Viewport = {
-  themeColor: "#6366f1",
+  themeColor: "#09090b",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  userScalable: false
+  userScalable: false,
+  viewportFit: "cover"
 }
 
 export default function RootLayout({
@@ -30,10 +31,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        {/* Microsoft Clarity Script */}
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "YOUR_CLARITY_ID");
+          `}
+        </Script>
+      </head>
       <body
         className="bg-zinc-950 text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0"
-        suppressHydrationWarning
       >
         <Providers>
           {children}
@@ -43,7 +55,7 @@ export default function RootLayout({
           {`
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
-                navigator.worker.register('/sw.js').then(
+                navigator.serviceWorker.register('/sw.js').then(
                   function(registration) {
                     console.log('Service Worker registration successful with scope: ', registration.scope);
                   },
