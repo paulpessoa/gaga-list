@@ -4,11 +4,9 @@ import withPWAInit from "@ducanh2912/next-pwa"
 const withPWA = withPWAInit({
   dest: "public",
   register: true,
-  // customWorkerDir: "worker", // @ducanh2912/next-pwa should find this automatically
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  cacheOnFrontEndNav: false,
   reloadOnOnline: true,
-  disable: false // Forçar ativação para teste mesmo em dev
+  disable: false
 })
 
 const nextConfig: NextConfig = {

@@ -205,10 +205,10 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel w-full max-w-lg h-[85vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl flex flex-col relative shadow-2xl border border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="glass-panel w-full h-full sm:h-[600px] sm:max-w-lg sm:rounded-3xl flex flex-col relative shadow-2xl border-none sm:border sm:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
         
-        <header className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 rounded-t-3xl">
+        <header className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 sm:rounded-t-3xl">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isIndividual ? "bg-amber-500/10 text-amber-500" : "bg-indigo-500/10 text-indigo-400"}`}>
               {isIndividual ? <ShieldAlert className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}

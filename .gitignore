@@ -11,6 +11,7 @@ coverage/
 *.local
 .gemini/
 .geminirc
+GEMINI.md
 
 # Production build
 build/

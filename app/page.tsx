@@ -110,14 +110,25 @@ function PushNotificationManager() {
 function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [showIOSHint, setShowIOSHint] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Usar requestAnimationFrame para evitar cascading renders sÃ­ncronos detectados pelo ESLint
+    requestAnimationFrame(() => {
+      // Detectar se jÃ¡ estÃ¡ instalado
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
+      if (isStandalone) {
         setIsInstalled(true)
       }
-    }, 100)
 
+      // Detectar iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
+      if (isIOS && !window.matchMedia('(display-mode: standalone)').matches) {
+        setShowIOSHint(true)
+      }
+    })
+
+    // Detectar Android/Chrome Install Prompt
     const handler = (e: any) => {
       e.preventDefault()
       setDeferredPrompt(e)
@@ -126,7 +137,6 @@ function InstallPrompt() {
     
     return () => {
       window.removeEventListener('beforeinstallprompt', handler)
-      clearTimeout(timer)
     }
   }, [])
 
@@ -137,15 +147,40 @@ function InstallPrompt() {
     if (outcome === 'accepted') setDeferredPrompt(null)
   }
 
-  if (isInstalled || !deferredPrompt) return null
+  if (isInstalled) return null
 
-  return (
-    <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all border-none animate-bounce">
-        <Download className="w-4 h-4" /> Instalar App Nativo
-      </button>
-    </div>
-  )
+  // UI para Android/Chrome
+  if (deferredPrompt) {
+    return (
+      <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
+        <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce">
+          <Download className="w-4 h-4" /> Instalar App Nativo
+        </button>
+      </div>
+    )
+  }
+
+  // UI para iOS (Banner discreto no topo)
+  if (showIOSHint) {
+    return (
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm animate-in slide-in-from-top-4 duration-500">
+        <div className="bg-zinc-900/90 dark:bg-white/90 backdrop-blur-md text-white dark:text-black p-4 rounded-2xl shadow-2xl border border-white/10 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center flex-shrink-0">
+            <Download className="w-5 h-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1">Dica de Staff:</p>
+            <p className="text-[11px] leading-tight opacity-80">Toque em <b>Compartilhar</b> e depois em <b>&quot;Adicionar Ã  Tela de InÃ­cio&quot;</b> para usar como App Nativo.</p>
+          </div>
+          <button onClick={() => setShowIOSHint(false)} className="p-2 opacity-50 hover:opacity-100">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return null
 }
 
 function LandingContent() {
@@ -322,68 +357,70 @@ function LandingContent() {
       <LottieFooter />
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-white/10 animate-in zoom-in-95 duration-200">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-8 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 sm:dark:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 sm:top-8 sm:right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2">
               <X className="w-6 h-6" />
             </button>
 
-            <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
-              {inviteContext ? "Quase lá!" : "Bem-vindo"}
-            </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">
-              {inviteContext ? "Crie sua conta para aceitar o convite." : "Acesse suas listas colaborativas."}
-            </p>
+            <div className="mt-8 sm:mt-0">
+              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                {inviteContext ? "Quase lá!" : "Bem-vindo"}
+              </h2>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">
+                {inviteContext ? "Crie sua conta para aceitar o convite." : "Acesse suas listas colaborativas."}
+              </p>
 
-            <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
-              <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
-              <button onClick={() => setAuthMode("password_login")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode !== "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Senha</button>
-            </div>
-
-            <form onSubmit={handleAuth} className="flex flex-col gap-4">
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                <input type="email" placeholder="Seu e-mail" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
+              <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
+                <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
+                <button onClick={() => setAuthMode("password_login")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode !== "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Senha</button>
               </div>
 
-              {(authMode === "password_login" || authMode === "password_signup") && (
+              <form onSubmit={handleAuth} className="flex flex-col gap-4">
                 <div className="relative">
-                  <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                  <input type={showPassword ? "text" : "password"} placeholder="Sua senha" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-indigo-500 transition-colors">
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                  <input type="email" placeholder="Seu e-mail" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
+                </div>
+
+                {(authMode === "password_login" || authMode === "password_signup") && (
+                  <div className="relative">
+                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                    <input type={showPassword ? "text" : "password"} placeholder="Sua senha" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-indigo-500 transition-colors">
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between px-2 mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? "bg-indigo-500 border-indigo-500" : "border-zinc-300 dark:border-zinc-700"}`}>
+                      {rememberMe && <X className="w-3 h-3 text-white" />}
+                    </div>
+                    <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">Lembrar-me</span>
+                  </label>
+                  {authMode === "password_login" && (
+                    <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors">Esqueceu a senha?</button>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
+                    {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
+                  </button>
+                  <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
+                    <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
                   </button>
                 </div>
-              )}
 
-              <div className="flex items-center justify-between px-2 mb-2">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? "bg-indigo-500 border-indigo-500" : "border-zinc-300 dark:border-zinc-700"}`}>
-                    {rememberMe && <X className="w-3 h-3 text-white" />}
+                {message && (
+                  <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                    {message}
                   </div>
-                  <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">Lembrar-me</span>
-                </label>
-                {authMode === "password_login" && (
-                  <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors">Esqueceu a senha?</button>
                 )}
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
-                  {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
-                </button>
-                <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
-                  <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
-                </button>
-              </div>
-
-              {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
-                  {message}
-                </div>
-              )}
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}

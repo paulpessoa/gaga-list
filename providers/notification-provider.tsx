@@ -60,7 +60,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         
         if (targetId === user.id) {
           trigger("heavy")
-          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200])
           
           setNotifications(prev => [{
             id: Math.random().toString(),

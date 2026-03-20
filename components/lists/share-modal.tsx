@@ -154,247 +154,251 @@ export function ShareModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="glass-panel w-full max-w-md rounded-3xl p-6 sm:p-8 relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh] scrollbar-hide">
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="glass-panel w-full h-full sm:h-auto sm:max-w-md sm:rounded-3xl p-6 sm:p-8 relative shadow-2xl border-none sm:border sm:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors"
+            className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors p-2"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
-            Compartilhar
-          </h2>
-          <p className="text-zinc-400 text-sm mb-6">
-            Traga sua equipe para as compras.
-          </p>
+          <div className="mt-8 sm:mt-0">
+            <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
+              Compartilhar
+            </h2>
+            <p className="text-zinc-400 text-sm mb-6">
+              Traga sua equipe para as compras.
+            </p>
 
-          <div className="flex flex-col gap-4 mb-8">
-            <button
-              onClick={handleGenerateInvite}
-              disabled={isLoading}
-              className="w-full py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center gap-3 text-indigo-400 font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <QrCode className="w-5 h-5" /> Convite via QR Code
-                </>
-              )}
-            </button>
+            <div className="flex flex-col gap-4 mb-8">
+              <button
+                onClick={handleGenerateInvite}
+                disabled={isLoading}
+                className="w-full py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center gap-3 text-indigo-400 font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <QrCode className="w-5 h-5" /> Convite via QR Code
+                  </>
+                )}
+              </button>
 
-            <div className="flex items-center gap-4 text-zinc-800">
-              <div className="flex-1 h-px bg-current opacity-20" />
-              <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
-                ou por e-mail
-              </span>
-              <div className="flex-1 h-px bg-current opacity-20" />
+              <div className="flex items-center gap-4 text-zinc-800">
+                <div className="flex-1 h-px bg-current opacity-20" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
+                  ou por e-mail
+                </span>
+                <div className="flex-1 h-px bg-current opacity-20" />
+              </div>
             </div>
-          </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 mb-6"
-          >
-            <input
-              type="email"
-              placeholder="E-mail do colaborador"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !email.trim()}
-              className="px-6 py-4 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 min-w-[120px] flex items-center justify-center border-none outline-none"
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col sm:flex-row gap-3 mb-6"
             >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                "Convidar"
-              )}
-            </button>
-          </form>
+              <input
+                type="email"
+                placeholder="E-mail do colaborador"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !email.trim()}
+                className="px-6 py-4 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 min-w-[120px] flex items-center justify-center border-none outline-none"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Convidar"
+                )}
+              </button>
+            </form>
 
-          {message && (
-            <div
-              className={`p-4 rounded-2xl text-xs font-bold mb-6 flex flex-col gap-3 ${message.includes("Erro") || message.includes("não possui") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
-            >
-              <p>{message}</p>
-              {showInviteButton && (
-                <button
-                  onClick={handleInvite}
-                  className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-colors text-[10px] uppercase tracking-widest"
-                >
-                  Enviar convite por e-mail
-                </button>
-              )}
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
-              <Users className="w-3 h-3" />
-              Equipe ({otherMembers.length})
-            </h3>
-
-            <div className="flex flex-col gap-3 max-h-64 overflow-y-auto pr-1 scrollbar-hide">
-              {otherMembers.length === 0 ? (
-                <p className="text-sm text-zinc-600 italic py-4">
-                  Nenhum membro ainda.
-                </p>
-              ) : (
-                otherMembers.map((collab, index) => (
-                  <div
-                    key={
-                      collab.user_id || collab.profiles?.id || `collab-${index}`
-                    }
-                    className="flex flex-col gap-3 p-4 rounded-3xl bg-zinc-900/40 border border-white/5 shadow-sm"
+            {message && (
+              <div
+                className={`p-4 rounded-2xl text-xs font-bold mb-6 flex flex-col gap-3 ${message.includes("Erro") || message.includes("não possui") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
+              >
+                <p>{message}</p>
+                {showInviteButton && (
+                  <button
+                    onClick={handleInvite}
+                    className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-colors text-[10px] uppercase tracking-widest"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {collab.profiles?.avatar_url ? (
-                          <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg">
-                            <Image
-                              src={collab.profiles.avatar_url}
-                              fill
-                              className="object-cover"
-                              alt={collab.profiles.full_name || "Avatar"}
-                              sizes="40px"
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${collab.status === "pending" ? "bg-zinc-800 text-zinc-600" : "bg-indigo-500/20 text-indigo-400"}`}
-                          >
-                            {(collab.profiles?.email || "U")
-                              .charAt(0)
-                              .toUpperCase()}
-                          </div>
-                        )}
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-sm font-bold ${collab.status === "pending" ? "text-zinc-600" : "text-zinc-100"}`}
+                    Enviar convite por e-mail
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
+                <Users className="w-3 h-3" />
+                Equipe ({otherMembers.length})
+              </h3>
+
+              <div className="flex flex-col gap-3 max-h-96 sm:max-h-64 overflow-y-auto pr-1 scrollbar-hide pb-20 sm:pb-0">
+                {otherMembers.length === 0 ? (
+                  <p className="text-sm text-zinc-600 italic py-4">
+                    Nenhum membro ainda.
+                  </p>
+                ) : (
+                  otherMembers.map((collab, index) => (
+                    <div
+                      key={
+                        collab.user_id ||
+                        collab.profiles?.id ||
+                        `collab-${index}`
+                      }
+                      className="flex flex-col gap-3 p-4 rounded-3xl bg-zinc-900/40 border border-white/5 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {collab.profiles?.avatar_url ? (
+                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg">
+                              <Image
+                                src={collab.profiles.avatar_url}
+                                fill
+                                className="object-cover"
+                                alt={collab.profiles.full_name || "Avatar"}
+                                sizes="40px"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${collab.status === "pending" ? "bg-zinc-800 text-zinc-600" : "bg-indigo-500/20 text-indigo-400"}`}
                             >
-                              {collab.profiles?.full_name ||
-                                collab.profiles?.email?.split("@")[0] ||
-                                "Usuário"}
+                              {(collab.profiles?.email || "U")
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+                          )}
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`text-sm font-bold ${collab.status === "pending" ? "text-zinc-600" : "text-zinc-100"}`}
+                              >
+                                {collab.profiles?.full_name ||
+                                  collab.profiles?.email?.split("@")[0] ||
+                                  "Usuário"}
+                              </span>
+                              {isOnline(collab.profiles?.id) && (
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              )}
+                            </div>
+                            <span className="text-[10px] text-zinc-600 font-medium truncate max-w-[120px]">
+                              {collab.profiles?.email}
                             </span>
-                            {isOnline(collab.profiles?.id) && (
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            )}
                           </div>
-                          <span className="text-[10px] text-zinc-600 font-medium truncate max-w-[120px]">
-                            {collab.profiles?.email}
-                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {collab.role === "owner" && (
+                            <span className="text-[8px] font-black bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-zinc-500 uppercase tracking-tighter">
+                              Dono
+                            </span>
+                          )}
+                          {collab.role !== "owner" && isOwner && (
+                            <button
+                              onClick={() => {
+                                const idToRemove =
+                                  collab.status === "pending"
+                                    ? `pending-${collab.profiles?.email}`
+                                    : collab.user_id || collab.profiles?.id
+
+                                if (
+                                  idToRemove &&
+                                  confirm(`Remover este membro?`)
+                                ) {
+                                  onRemoveCollaborator(idToRemove)
+                                }
+                              }}
+                              className="p-2 text-zinc-700 hover:text-red-400 transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        {collab.role === "owner" && (
-                          <span className="text-[8px] font-black bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-zinc-500 uppercase tracking-tighter">
-                            Dono
-                          </span>
-                        )}
-                        {collab.role !== "owner" && isOwner && (
+                      {/* Action Bar */}
+                      {collab.status === "active" && (
+                        <div className="grid grid-cols-4 gap-2">
+                          <button
+                            onClick={() => handleNudge(collab.profiles.id)}
+                            disabled={!isOnline(collab.profiles.id)}
+                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-amber-400 disabled:opacity-20 transition-all"
+                          >
+                            <Bell className="w-4 h-4" />
+                            <span className="text-[8px] font-bold uppercase">
+                              Sino
+                            </span>
+                          </button>
+
+                          {collab.profiles?.phone ? (
+                            <a
+                              href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
+                              onClick={() => trigger("light")}
+                            >
+                              <MessageCircleMore className="w-4 h-4" />
+                              <span className="text-[8px] font-bold uppercase">
+                                Zap
+                              </span>
+                            </a>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-800 opacity-30 cursor-not-allowed">
+                              <MessageCircleMore className="w-4 h-4" />
+                              <span className="text-[8px] font-bold uppercase">
+                                Zap
+                              </span>
+                            </div>
+                          )}
+
                           <button
                             onClick={() => {
-                              const idToRemove =
-                                collab.status === "pending"
-                                  ? `pending-${collab.profiles?.email}`
-                                  : collab.user_id || collab.profiles?.id
-
-                              if (
-                                idToRemove &&
-                                confirm(`Remover este membro?`)
-                              ) {
-                                onRemoveCollaborator(idToRemove)
-                              }
+                              onClose()
+                              trigger("light")
+                              onOpenChat?.({
+                                id: (collab.profiles?.id ||
+                                  collab.user_id) as string,
+                                full_name:
+                                  collab.profiles?.full_name ||
+                                  collab.profiles?.email ||
+                                  "Usuário",
+                                avatar_url: collab.profiles?.avatar_url || null
+                              })
                             }}
-                            className="p-2 text-zinc-700 hover:text-red-400 transition-colors"
+                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
                           >
-                            <X className="w-4 h-4" />
+                            <MessageSquare className="w-4 h-4" />
+                            <span className="text-[8px] font-bold uppercase">
+                              Chat
+                            </span>
                           </button>
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Action Bar */}
-                    {collab.status === "active" && (
-                      <div className="grid grid-cols-4 gap-2">
-                        <button
-                          onClick={() => handleNudge(collab.profiles.id)}
-                          disabled={!isOnline(collab.profiles.id)}
-                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-amber-400 disabled:opacity-20 transition-all"
-                        >
-                          <Bell className="w-4 h-4" />
-                          <span className="text-[8px] font-bold uppercase">
-                            Sino
-                          </span>
-                        </button>
-
-                        {collab.profiles?.phone ? (
-                          <a
-                            href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                            onClick={() => trigger("light")}
+                          <Link
+                            href={`/dashboard/lists/${listId}/cade-tu`}
+                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
                           >
-                            <MessageCircleMore className="w-4 h-4" />
+                            <MapIcon className="w-4 h-4" />
                             <span className="text-[8px] font-bold uppercase">
-                              Zap
+                              Mapa
                             </span>
-                          </a>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-800 opacity-30 cursor-not-allowed">
-                            <MessageCircleMore className="w-4 h-4" />
-                            <span className="text-[8px] font-bold uppercase">
-                              Zap
-                            </span>
-                          </div>
-                        )}
-
-                        <button
-                          onClick={() => {
-                            onClose()
-                            trigger("light")
-                            onOpenChat?.({
-                              id: (collab.profiles?.id ||
-                                collab.user_id) as string,
-                              full_name:
-                                collab.profiles?.full_name ||
-                                collab.profiles?.email ||
-                                "Usuário",
-                              avatar_url: collab.profiles?.avatar_url || null
-                            })
-                          }}
-                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                          <span className="text-[8px] font-bold uppercase">
-                            Chat
-                          </span>
-                        </button>
-
-                        <Link
-                          href={`/dashboard/lists/${listId}/cade-tu`}
-                          className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
-                        >
-                          <MapIcon className="w-4 h-4" />
-                          <span className="text-[8px] font-bold uppercase">
-                            Mapa
-                          </span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
