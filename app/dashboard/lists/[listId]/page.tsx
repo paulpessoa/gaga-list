@@ -24,6 +24,8 @@ import {
   ShoppingCart,
   Navigation,
   MessageSquare,
+  MessageCircle,
+  Map as MapIcon,
   MoreVertical,
   ChevronDown,
   ChevronUp,
@@ -224,49 +226,55 @@ export default function ListDetail({
               </div>
             </div>
 
-            <div
-              className="flex items-center -space-x-2 cursor-pointer group"
-              onClick={() => setIsShareModalOpen(true)}
-            >
-              {otherCollaborators.slice(0, 3).map((collab, i) => (
-                  <div
-                    key={collab.user_id || `collab-${i}`}
-                    className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm"
-                    style={{ zIndex: 10 - i }}
-                  >
-                    <Image
-                      src={
-                        collab.profiles?.avatar_url ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
-                      }
-                      width={32}
-                      height={32}
-                      className="object-cover"
-                      alt="Avatar"
-                    />
-                  </div>
-              ))}
-              <div className="w-8 h-8 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-3">
-                <Plus className="w-4 h-4" />
+            <div className="flex items-center gap-2">
+              <div
+                className="flex items-center -space-x-2 cursor-pointer group hover:opacity-80 transition-opacity"
+                onClick={() => setIsShareModalOpen(true)}
+              >
+                {otherCollaborators.slice(0, 3).map((collab, i) => (
+                    <div
+                      key={collab.user_id || `collab-${i}`}
+                      className="w-9 h-9 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
+                      style={{ zIndex: 10 - i }}
+                    >
+                      <Image
+                        src={
+                          collab.profiles?.avatar_url ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
+                        }
+                        width={36}
+                        height={36}
+                        className="object-cover"
+                        alt="Avatar"
+                      />
+                    </div>
+                ))}
+                <div className="w-9 h-9 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-3 shadow-inner">
+                  <Plus className="w-4 h-4" />
+                </div>
+              </div>
+
+              <div className="h-8 w-px bg-zinc-100 dark:bg-zinc-900 mx-1" />
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    trigger("light")
+                    setIsChatOpen(true)
+                  }}
+                  className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-sm border border-indigo-500/20"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </button>
+                <Link
+                  href={`/dashboard/lists/${listId}/cade-tu`}
+                  onClick={() => trigger("light")}
+                  className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95 shadow-sm border border-zinc-200 dark:border-zinc-800"
+                >
+                  <MapIcon className="w-5 h-5" />
+                </Link>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => { trigger("light"); setIsChatOpen(true); }}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all text-[11px] font-black uppercase tracking-widest flex-1"
-            >
-              <MessageSquare className="w-4 h-4" />
-              Chat
-            </button>
-            <Link
-              href={`/dashboard/lists/${listId}/cade-tu`}
-              className="flex-[2] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white transition-all font-black text-[11px] uppercase tracking-[0.15em] shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
-            >
-              <Navigation className="w-4 h-4" />
-              Onde estamos?
-            </Link>
           </div>
         </div>
       </header>

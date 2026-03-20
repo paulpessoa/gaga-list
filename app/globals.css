@@ -16,9 +16,26 @@
            shadow-sm dark:shadow-xl;
   }
 
+  .glass-premium {
+    @apply bg-white/70 dark:bg-zinc-900/70 
+           backdrop-blur-md dark:backdrop-blur-2xl 
+           border border-white/20 dark:border-white/5 
+           shadow-xl dark:shadow-2xl;
+  }
+
   .card-hover {
     @apply hover:border-zinc-300 dark:hover:border-zinc-700 
            hover:shadow-md dark:hover:shadow-2xl 
            transition-all duration-200;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s ease-in-out infinite;
   }
 }

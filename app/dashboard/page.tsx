@@ -14,7 +14,8 @@ import {
   X,
   Edit2,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  QrCode
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -111,14 +112,6 @@ export default function Dashboard() {
                 <span>OFFLINE</span>
               </div>
             )}
-            
-            <Link 
-              href="/dashboard/trash"
-              className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
-              title="Lixeira"
-            >
-              <Trash2 className="w-5 h-5" />
-            </Link>
           </div>
         </div>
       </header>
@@ -316,13 +309,27 @@ export default function Dashboard() {
                 />
               </div>
               
-              <button
-                type="submit"
-                disabled={createList.isPending || !newListTitle.trim()}
-                className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.25rem] font-bold text-lg shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {createList.isPending ? "Criando..." : "Criar Lista"}
-              </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={createList.isPending || !newListTitle.trim()}
+                  className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.25rem] font-bold text-lg shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {createList.isPending ? "Criando..." : "Criar Lista"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    trigger("medium")
+                    alert("Funcionalidade de Câmera (QR Scanner) em desenvolvimento para a próxima sprint!")
+                  }}
+                  className="w-full py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-[1.25rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 shadow-sm"
+                >
+                  <QrCode className="w-4 h-4 text-indigo-500" />
+                  Ler QR CODE
+                </button>
+              </div>
             </form>
           </div>
         </div>

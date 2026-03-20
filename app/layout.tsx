@@ -44,10 +44,13 @@ export default function RootLayout({
                 try {
                   const theme = localStorage.getItem('theme');
                   const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-                  if (theme === 'dark' || (theme === 'system' && supportDarkMode) || !theme) {
+                  if (theme === 'dark' || (theme === 'system' && supportDarkMode) || (!theme && supportDarkMode)) {
                     document.documentElement.classList.add('dark');
                   } else if (theme === 'light') {
                     document.documentElement.classList.remove('dark');
+                  } else if (!theme) {
+                     // Default app preference is dark if no theme is set
+                     document.documentElement.classList.add('dark');
                   }
                 } catch (e) {}
               })();

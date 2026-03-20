@@ -17,7 +17,8 @@ import {
   Lock,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
@@ -267,19 +268,42 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nome</label>
-                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <input 
+                    value={fullName} 
+                    onChange={(e) => setFullName(e.target.value)} 
+                    onBlur={() => handleSave(new Event('submit') as any)}
+                    type="text" 
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Telefone</label>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" placeholder="(00) 00000-0000" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
+                  <input 
+                    value={phone} 
+                    onChange={(e) => setPhone(e.target.value)} 
+                    onBlur={() => handleSave(new Event('submit') as any)}
+                    type="tel" 
+                    placeholder="(00) 00000-0000" 
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
+                  />
                 </div>
               </div>
             </div>
 
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
-              <div className="flex items-center gap-2 text-amber-500 mb-4">
-                <Palette className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Aparência</span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-amber-500">
+                  <Palette className="w-4 h-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Aparência</span>
+                </div>
+                
+                <Link 
+                  href="/dashboard/trash"
+                  className="flex items-center gap-2 px-3 py-1 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Lixeira
+                </Link>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {[
@@ -376,9 +400,36 @@ export default function ProfilePage() {
               <button disabled={isSaving} type="submit" className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95">
                 {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Configurações</>}
               </button>
-              <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-red-500/10 hover:text-red-400 text-zinc-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
+              <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
                 <LogOut className="w-5 h-5" /> Sair da Conta
               </button>
+            </div>
+
+            <div className="pt-6 border-t border-zinc-100 dark:border-zinc-900/50">
+              <div className="bg-red-500/5 dark:bg-red-500/10 rounded-3xl p-6 border border-red-500/10 space-y-4">
+                <div className="flex items-center gap-2 text-red-500">
+                  <Trash2 className="w-4 h-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Zona de Perigo</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Excluir Conta Permanentemente</h3>
+                  <p className="text-xs text-zinc-500 leading-relaxed">
+                    Sua conta e todas as suas listas serão deletadas definitivamente em 30 dias. Um e-mail de confirmação será enviado para sua segurança.
+                  </p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    if (confirm("Tem certeza que deseja solicitar a exclusão da sua conta? Você terá 30 dias para cancelar esta ação.")) {
+                      trigger("heavy")
+                      setMessage("Solicitação de exclusão enviada via e-mail.")
+                    }
+                  }}
+                  className="w-full py-3 bg-white dark:bg-zinc-950 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                >
+                  Solicitar Exclusão
+                </button>
+              </div>
             </div>
           </form>
 

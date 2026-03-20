@@ -18,12 +18,13 @@ import {
   EyeOff,
   Fingerprint,
   Loader2,
-  PartyPopper
+  PartyPopper,
+  ChevronRight
 } from "lucide-react"
 import dynamic from "next/dynamic"
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { subscribeUser, unsubscribeUser } from './actions'
+import { subscribeUser, unsubscribeUser } from "./actions"
 
 import { createClient } from "@/lib/supabase/client"
 
@@ -33,8 +34,8 @@ const LottieFooter = dynamic(() => import("@/components/ui/lottie-footer"), {
 })
 
 function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
   const rawData = window.atob(base64)
   const outputArray = new Uint8Array(rawData.length)
   for (let i = 0; i < rawData.length; ++i) {
@@ -45,14 +46,22 @@ function urlBase64ToUint8Array(base64String: string) {
 
 function PushNotificationManager() {
   const [isSupported, setIsSupported] = useState(false)
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null)
+  const [subscription, setSubscription] = useState<PushSubscription | null>(
+    null
+  )
   const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window
+    ) {
       setIsSupported(true)
-      navigator.serviceWorker.ready.then(registration => {
-        registration.pushManager.getSubscription().then(sub => setSubscription(sub))
+      navigator.serviceWorker.ready.then((registration) => {
+        registration.pushManager
+          .getSubscription()
+          .then((sub) => setSubscription(sub))
       })
     }
   }, [])
@@ -62,16 +71,16 @@ function PushNotificationManager() {
     try {
       const registration = await navigator.serviceWorker.ready
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      if (!vapidPublicKey) throw new Error('Chave VAPID ausente')
-      
+      if (!vapidPublicKey) throw new Error("Chave VAPID ausente")
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       })
       setSubscription(sub)
       await subscribeUser(sub)
     } catch (err: any) {
-      console.error('Erro ao assinar push:', err)
+      console.error("Erro ao assinar push:", err)
     } finally {
       setIsProcessing(false)
     }
@@ -84,7 +93,7 @@ function PushNotificationManager() {
       setSubscription(null)
       await unsubscribeUser()
     } catch (err) {
-      console.error('Erro ao cancelar push:', err)
+      console.error("Erro ao cancelar push:", err)
     } finally {
       setIsProcessing(false)
     }
@@ -95,12 +104,28 @@ function PushNotificationManager() {
   return (
     <div className="fixed top-24 left-6 z-50 animate-in slide-in-from-left-4 duration-500">
       {subscription ? (
-        <button onClick={unsubscribeFromPush} className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl">
-          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellOff className="w-3.5 h-3.5" />} Notificações Ativas
+        <button
+          onClick={unsubscribeFromPush}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-bold text-emerald-500 backdrop-blur-md transition-all shadow-xl"
+        >
+          {isProcessing ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <BellOff className="w-3.5 h-3.5" />
+          )}{" "}
+          Notificações Ativas
         </button>
       ) : (
-        <button onClick={subscribeToPush} className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
-          {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3.5 h-3.5" />} Ativar Notificações
+        <button
+          onClick={subscribeToPush}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-500 border border-indigo-400 rounded-full text-[10px] font-bold text-white shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+        >
+          {isProcessing ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <Bell className="w-3.5 h-3.5" />
+          )}{" "}
+          Ativar Notificações
         </button>
       )}
     </div>
@@ -116,14 +141,18 @@ function InstallPrompt() {
     // Usar requestAnimationFrame para evitar cascading renders sÃ­ncronos detectados pelo ESLint
     requestAnimationFrame(() => {
       // Detectar se jÃ¡ estÃ¡ instalado
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone
+      const isStandalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone
       if (isStandalone) {
         setIsInstalled(true)
       }
 
       // Detectar iOS
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-      if (isIOS && !window.matchMedia('(display-mode: standalone)').matches) {
+      const isIOS =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        !(window as any).MSStream
+      if (isIOS && !window.matchMedia("(display-mode: standalone)").matches) {
         setShowIOSHint(true)
       }
     })
@@ -133,10 +162,10 @@ function InstallPrompt() {
       e.preventDefault()
       setDeferredPrompt(e)
     }
-    window.addEventListener('beforeinstallprompt', handler)
-    
+    window.addEventListener("beforeinstallprompt", handler)
+
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener("beforeinstallprompt", handler)
     }
   }, [])
 
@@ -144,7 +173,7 @@ function InstallPrompt() {
     if (!deferredPrompt) return
     deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
-    if (outcome === 'accepted') setDeferredPrompt(null)
+    if (outcome === "accepted") setDeferredPrompt(null)
   }
 
   if (isInstalled) return null
@@ -153,7 +182,10 @@ function InstallPrompt() {
   if (deferredPrompt) {
     return (
       <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
-        <button onClick={handleInstall} className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce">
+        <button
+          onClick={handleInstall}
+          className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce"
+        >
           <Download className="w-4 h-4" /> Instalar App Nativo
         </button>
       </div>
@@ -169,10 +201,19 @@ function InstallPrompt() {
             <Download className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1">Dica de Staff:</p>
-            <p className="text-[11px] leading-tight opacity-80">Toque em <b>Compartilhar</b> e depois em <b>&quot;Adicionar Ã  Tela de InÃ­cio&quot;</b> para usar como App Nativo.</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider mb-1">
+              Dica de Staff:
+            </p>
+            <p className="text-[11px] leading-tight opacity-80">
+              Toque em <b>Compartilhar</b> e depois em{" "}
+              <b>&quot;Adicionar Ã Tela de InÃ­cio&quot;</b> para usar como App
+              Nativo.
+            </p>
           </div>
-          <button onClick={() => setShowIOSHint(false)} className="p-2 opacity-50 hover:opacity-100">
+          <button
+            onClick={() => setShowIOSHint(false)}
+            className="p-2 opacity-50 hover:opacity-100"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -191,7 +232,9 @@ function LandingContent() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
-  const [authMode, setAuthMode] = useState<"magic_link" | "password_login" | "password_signup" | "password_reset">("magic_link")
+  const [authMode, setAuthMode] = useState<
+    "magic_link" | "password_login" | "password_signup" | "password_reset"
+  >("magic_link")
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [inviteContext, setInviteContext] = useState(false)
@@ -202,7 +245,9 @@ function LandingContent() {
       const pendingToken = localStorage.getItem("pending_invite_token")
       if (pendingToken) setInviteContext(true)
 
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user }
+      } = await supabase.auth.getUser()
       if (user) {
         if (pendingToken) {
           router.replace(`/join/${pendingToken}`)
@@ -237,13 +282,19 @@ function LandingContent() {
       const redirectUrl = `${appUrl}/api/auth/confirm`
 
       if (authMode === "magic_link") {
-        const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl } })
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: redirectUrl }
+        })
         if (error) throw error
         setMessage("Link enviado! Verifique seu e-mail.")
       } else if (authMode === "password_login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
         if (error) throw error
-        
+
         const pendingToken = localStorage.getItem("pending_invite_token")
         if (pendingToken) {
           router.push(`/join/${pendingToken}`)
@@ -251,11 +302,17 @@ function LandingContent() {
           window.location.href = "/dashboard"
         }
       } else if (authMode === "password_signup") {
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectUrl } })
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: redirectUrl }
+        })
         if (error) throw error
         setMessage("Cadastro realizado! Verifique seu e-mail.")
       } else if (authMode === "password_reset") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile` })
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`
+        })
         if (error) throw error
         setMessage("E-mail de recuperação enviado!")
       }
@@ -267,16 +324,19 @@ function LandingContent() {
   }
 
   const handleBiometricAuth = async () => {
-    if (!('credentials' in navigator)) {
-      alert('Seu dispositivo não suporta autenticação biométrica neste navegador.')
+    if (!("credentials" in navigator)) {
+      alert(
+        "Seu dispositivo não suporta autenticação biométrica neste navegador."
+      )
       return
     }
-    alert('Biometria em desenvolvimento: Para ativar o login 100% digital, acesse as Configurações após o primeiro login com senha.')
+    alert(
+      "Biometria em desenvolvimento: Para ativar o login 100% digital, acesse as Configurações após o primeiro login com senha."
+    )
   }
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <PushNotificationManager />
       <InstallPrompt />
 
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/10 dark:bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
@@ -304,7 +364,9 @@ function LandingContent() {
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
           Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-500 text-6xl md:text-8xl">perfeita sintonia.</span>
+          <span className="text-indigo-500 text-6xl md:text-8xl">
+            perfeita sintonia.
+          </span>
         </h1>
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
@@ -313,8 +375,17 @@ function LandingContent() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-          <button onClick={() => { setAuthMode(inviteContext ? "password_signup" : "magic_link"); setIsModalOpen(true); }} className="px-10 py-5 text-lg font-bold bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white rounded-full transition-all hover:scale-105 flex items-center justify-center gap-2 cursor-pointer shadow-xl active:scale-95">
-            {inviteContext ? "Criar conta e entrar na lista" : "Acessar minhas listas"}
+          <button
+            onClick={() => {
+              setAuthMode(inviteContext ? "password_signup" : "magic_link")
+              setIsModalOpen(true)
+            }}
+            className="px-12 py-5 text-sm font-black uppercase tracking-[0.2em] bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.25rem] transition-all hover:scale-105 flex items-center justify-center gap-3 cursor-pointer shadow-2xl shadow-indigo-500/20 active:scale-95"
+          >
+            {inviteContext
+              ? "Criar conta e entrar na lista"
+              : "Acessar minhas listas"}
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
@@ -324,31 +395,52 @@ function LandingContent() {
               <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-sm">
                 <Users className="w-7 h-7 text-indigo-400" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Colaboração Real</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Convide qualquer pessoa para editar a lista com você. Veja tudo em tempo real.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                Colaboração Real
+              </h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+                Convide qualquer pessoa para editar a lista com você. Veja tudo
+                em tempo real.
+              </p>
             </div>
             <div className="flex flex-col gap-4">
               <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
                 <Zap className="w-7 h-7 text-emerald-400" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Offline-First</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Sem internet? Sem problemas. O app funciona offline e sincroniza depois.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                Offline-First
+              </h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+                Sem internet? Sem problemas. O app funciona offline e sincroniza
+                depois.
+              </p>
             </div>
             <div className="flex flex-col gap-4">
               <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shadow-sm">
                 <ShieldCheck className="w-7 h-7 text-rose-400" />
               </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Segurança Staff</h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">Proteção de dados em nível bancário. Suas listas são privadas e seguras.</p>
+              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                Segurança Staff
+              </h3>
+              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
+                Proteção de dados em nível bancário. Suas listas são privadas e
+                seguras.
+              </p>
             </div>
           </div>
         </div>
 
         <div className="mt-20 mb-8 flex gap-8 z-10 opacity-60">
-          <Link href="/privacy" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
+          <Link
+            href="/privacy"
+            className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2"
+          >
             <Shield className="w-3.5 h-3.5" /> Privacidade
           </Link>
-          <Link href="/terms" className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2">
+          <Link
+            href="/terms"
+            className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2"
+          >
             <FileText className="w-3.5 h-3.5" /> Termos
           </Link>
         </div>
@@ -359,7 +451,10 @@ function LandingContent() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-900 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-8 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 sm:dark:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 sm:top-8 sm:right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 sm:top-8 sm:right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
+            >
               <X className="w-6 h-6" />
             </button>
 
@@ -368,54 +463,123 @@ function LandingContent() {
                 {inviteContext ? "Quase lá!" : "Bem-vindo"}
               </h2>
               <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">
-                {inviteContext ? "Crie sua conta para aceitar o convite." : "Acesse suas listas colaborativas."}
+                {inviteContext
+                  ? "Crie sua conta para aceitar o convite."
+                  : "Acesse suas listas colaborativas."}
               </p>
 
               <div className="flex bg-zinc-100 dark:bg-zinc-950 p-1.5 rounded-2xl mb-8 border border-zinc-200 dark:border-white/5">
-                <button onClick={() => setAuthMode("magic_link")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Magic Link</button>
-                <button onClick={() => setAuthMode("password_login")} className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode !== "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}>Senha</button>
+                <button
+                  onClick={() => setAuthMode("magic_link")}
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode === "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}
+                >
+                  Magic Link
+                </button>
+                <button
+                  onClick={() => setAuthMode("password_login")}
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${authMode !== "magic_link" ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-lg" : "text-zinc-500 hover:text-zinc-700"}`}
+                >
+                  Senha
+                </button>
               </div>
 
               <form onSubmit={handleAuth} className="flex flex-col gap-4">
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                  <input type="email" placeholder="Seu e-mail" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
+                  <input
+                    type="email"
+                    placeholder="Seu e-mail"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                  />
                 </div>
 
-                {(authMode === "password_login" || authMode === "password_signup") && (
+                {(authMode === "password_login" ||
+                  authMode === "password_signup") && (
                   <div className="relative">
                     <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-                    <input type={showPassword ? "text" : "password"} placeholder="Sua senha" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-indigo-500 transition-colors">
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Sua senha"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-4 pl-12 pr-12 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-indigo-500 transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between px-2 mb-2">
                   <label className="flex items-center gap-2 cursor-pointer group">
-                    <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? "bg-indigo-500 border-indigo-500" : "border-zinc-300 dark:border-zinc-700"}`}>
+                    <div
+                      className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${rememberMe ? "bg-indigo-500 border-indigo-500" : "border-zinc-300 dark:border-zinc-700"}`}
+                    >
                       {rememberMe && <X className="w-3 h-3 text-white" />}
                     </div>
-                    <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">Lembrar-me</span>
+                    <input
+                      type="checkbox"
+                      className="hidden"
+                      checked={rememberMe}
+                      onChange={() => setRememberMe(!rememberMe)}
+                    />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-300">
+                      Lembrar-me
+                    </span>
                   </label>
                   {authMode === "password_login" && (
-                    <button type="button" onClick={() => setAuthMode("password_reset")} className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors">Esqueceu a senha?</button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthMode("password_reset")}
+                      className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-indigo-400 transition-colors"
+                    >
+                      Esqueceu a senha?
+                    </button>
                   )}
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <button type="submit" disabled={isLoading} className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95">
-                    {isLoading ? "Aguarde..." : authMode === "magic_link" ? "Enviar Link" : authMode === "password_login" ? "Entrar" : authMode === "password_reset" ? "Recuperar" : "Criar Conta"}
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.5rem] font-bold text-sm uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-indigo-500/20 active:scale-95"
+                  >
+                    {isLoading
+                      ? "Aguarde..."
+                      : authMode === "magic_link"
+                        ? "Enviar Link"
+                        : authMode === "password_login"
+                          ? "Entrar"
+                          : authMode === "password_reset"
+                            ? "Recuperar"
+                            : "Criar Conta"}
                   </button>
-                  <button type="button" onClick={handleBiometricAuth} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all">
-                    <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar com Digital
+                  <button
+                    type="button"
+                    onClick={handleBiometricAuth}
+                    className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                  >
+                    <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar
+                    com Digital
                   </button>
                 </div>
 
                 {message && (
-                  <div className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                  <div
+                    className={`p-4 rounded-2xl text-xs font-bold text-center mt-4 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
+                  >
                     {message}
                   </div>
                 )}
@@ -430,7 +594,13 @@ function LandingContent() {
 
 export default function LandingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-indigo-500" /></div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+      }
+    >
       <LandingContent />
     </Suspense>
   )

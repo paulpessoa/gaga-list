@@ -315,11 +315,16 @@ export function ShareModal({
                       {collab.status === "active" && (
                         <div className="grid grid-cols-4 gap-2">
                           <button
-                            onClick={() => collab.profiles?.id && handleNudge(collab.profiles.id)}
+                            onClick={() => {
+                              if (collab.profiles?.id) {
+                                trigger("medium")
+                                handleNudge(collab.profiles.id)
+                              }
+                            }}
                             disabled={!collab.profiles?.id || !isOnline(collab.profiles.id)}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-amber-500/20 text-zinc-400 hover:text-amber-500 disabled:opacity-20 transition-all"
+                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${isOnline(collab.profiles?.id || "") ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-500 hover:text-white" : "bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-300 dark:text-zinc-800 opacity-40 cursor-not-allowed"}`}
                           >
-                            <Bell className="w-4 h-4" />
+                            <Bell className={`w-4 h-4 ${isOnline(collab.profiles?.id || "") ? "animate-shake" : ""}`} />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
                               Sino
                             </span>
@@ -333,7 +338,7 @@ export function ShareModal({
                             }
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] transition-all ${collab.profiles?.phone ? "bg-emerald-500/5 dark:bg-emerald-500/10 border border-transparent hover:border-emerald-500 text-emerald-500" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-200 dark:text-zinc-800 cursor-not-allowed"}`}
+                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${collab.profiles?.phone ? "bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-500 hover:text-white" : "bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-200 dark:text-zinc-800 cursor-not-allowed"}`}
                             onClick={() =>
                               collab.profiles?.phone && trigger("light")
                             }
@@ -346,19 +351,21 @@ export function ShareModal({
 
                           <button
                             onClick={() => {
-                              onClose()
-                              trigger("light")
-                              onOpenChat?.({
-                                id: (collab.profiles?.id ||
-                                  collab.user_id) as string,
-                                full_name:
-                                  collab.profiles?.full_name ||
-                                  collab.profiles?.email ||
-                                  "Usuário",
-                                avatar_url: collab.profiles?.avatar_url || null
-                              })
+                              if (collab.profiles?.id || collab.user_id) {
+                                trigger("light")
+                                onClose()
+                                onOpenChat?.({
+                                  id: (collab.profiles?.id ||
+                                    collab.user_id) as string,
+                                  full_name:
+                                    collab.profiles?.full_name ||
+                                    collab.profiles?.email ||
+                                    "Usuário",
+                                  avatar_url: collab.profiles?.avatar_url || null
+                                })
+                              }
                             }}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-indigo-500/20 text-zinc-400 hover:text-indigo-500 transition-all"
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95"
                           >
                             <MessageSquare className="w-4 h-4" />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
@@ -368,7 +375,8 @@ export function ShareModal({
 
                           <Link
                             href={`/dashboard/lists/${listId}/cade-tu`}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-indigo-500/20 text-zinc-400 hover:text-indigo-500 transition-all"
+                            onClick={() => trigger("light")}
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95"
                           >
                             <MapIcon className="w-4 h-4" />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
