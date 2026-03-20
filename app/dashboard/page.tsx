@@ -37,6 +37,13 @@ export default function Dashboard() {
   // Estado para edição rápida
   const [editingListId, setEditingListId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
+  const [selectedListId, setSelectedListId] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleClickOutside = () => setSelectedListId(null)
+    window.addEventListener("click", handleClickOutside)
+    return () => window.removeEventListener("click", handleClickOutside)
+  }, [])
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
@@ -179,9 +186,17 @@ export default function Dashboard() {
 
             return (
               <div key={list.id} className="relative group/card">
-                <Link
-                  href={`/dashboard/lists/${list.id}`}
-                  className="glass-panel card-hover rounded-3xl p-7 flex flex-col justify-between min-h-[180px] cursor-pointer block group"
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (selectedListId === list.id) {
+                      window.location.href = `/dashboard/lists/${list.id}`;
+                    } else {
+                      trigger("light");
+                      setSelectedListId(list.id);
+                    }
+                  }}
+                  className={`glass-panel rounded-3xl p-7 flex flex-col justify-between min-h-[180px] cursor-pointer transition-all duration-300 border-2 ${selectedListId === list.id ? "border-indigo-500 shadow-2xl scale-[1.02] bg-indigo-50/5 dark:bg-indigo-500/5" : "border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
                 >
                   <div>
                     <div className="flex items-start justify-between mb-4">
@@ -197,11 +212,11 @@ export default function Dashboard() {
                               onChange={(e) => setEditTitle(e.target.value)}
                               onBlur={() => submitRename(list.id)}
                               onKeyDown={(e) => e.key === "Enter" && submitRename(list.id)}
-                              onClick={(e) => e.preventDefault()}
+                              onClick={(e) => e.stopPropagation()}
                               className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold text-lg rounded px-2 py-0.5 outline-none ring-2 ring-indigo-500"
                             />
                           ) : (
-                            <h3 className="font-bold text-lg text-zinc-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            <h3 className={`font-bold text-lg truncate transition-colors ${selectedListId === list.id ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-900 dark:text-white"}`}>
                               {list.title}
                             </h3>
                           )}
@@ -210,6 +225,13 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </div>
+                      
+                      {/* Botão de Abrir Destacado quando selecionado */}
+                      {selectedListId === list.id && (
+                        <div className="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                           <ChevronRight className="w-6 h-6" />
+                        </div>
+                      )}
                     </div>
 
                     {/* Estatísticas de Itens */}
@@ -238,12 +260,12 @@ export default function Dashboard() {
                           Ativo agora
                        </span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-700 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-all transform group-hover:translate-x-1" />
+                    {selectedListId !== list.id && <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-700 transition-all" />}
                   </div>
-                </Link>
+                </div>
 
-                {/* Ações do Card */}
-                <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-all z-10 translate-y-[-4px] group-hover/card:translate-y-0">
+                {/* Ações do Card - Visíveis quando selecionado ou hover no PC */}
+                <div className={`absolute top-4 right-4 flex items-center gap-1 transition-all z-10 ${selectedListId === list.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[-4px] group-hover/card:opacity-100 group-hover/card:translate-y-0"}`}>
                   <button
                     onClick={(e) => {
                       e.preventDefault()
@@ -260,7 +282,7 @@ export default function Dashboard() {
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        if (confirm("Mover esta lista para a lixeira? Você terá 30 dias para restaurá-la.")) {
+                        if (confirm("Mover esta lista para a lixeira?")) {
                           deleteList.mutate(list.id)
                         }
                       }}

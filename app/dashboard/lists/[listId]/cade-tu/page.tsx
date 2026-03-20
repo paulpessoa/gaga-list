@@ -3,7 +3,7 @@
 import { useUser } from '@/hooks/use-user';
 import { usePresence } from '@/hooks/use-presence';
 import { useParams } from 'next/navigation';
-import { ArrowLeft, Bell, MessageSquare, Navigation, User, Map as MapIcon, Zap, ChevronUp, MessageCircleMore } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Navigation, User, Map as MapIcon, ChevronUp, MessageCircleMore, Lock, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
@@ -49,16 +49,24 @@ function getBearing(lat1: number, lon1: number, lat2: number, lon2: number) {
 export default function CadeTuPage() {
   const { listId } = useParams() as { listId: string };
   const { data: user } = useUser();
-  const { onlineUsers, myLocation, sendNudge } = usePresence(listId, user);
+  const { onlineUsers, myLocation } = usePresence(listId, user);
   const { trigger } = useHaptic();
   
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatTarget, setChatTarget] = useState<{ id: string, full_name: string | null, avatar_url: string | null } | undefined>(undefined);
   const [L, setL] = useState<any>(null);
+  const [gpsPermission, setGpsPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
 
   useEffect(() => {
     import('leaflet').then((leaflet) => setL(leaflet));
+    
+    if ('permissions' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' as any }).then((result) => {
+        setGpsPermission(result.state as any);
+        result.onchange = () => setGpsPermission(result.state as any);
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -66,6 +74,14 @@ export default function CadeTuPage() {
       setMapCenter([myLocation.lat, myLocation.lng]);
     }
   }, [myLocation, mapCenter]);
+
+  const requestGPS = () => {
+    trigger("medium");
+    navigator.geolocation.getCurrentPosition(
+      () => setGpsPermission('granted'),
+      () => setGpsPermission('denied')
+    );
+  };
 
   const colleagues = useMemo(() => {
     const list = Object.values(onlineUsers).filter(u => u.user_id !== user?.id);
@@ -101,7 +117,20 @@ export default function CadeTuPage() {
       </header>
 
       <div className="flex-1 w-full bg-zinc-900 relative">
-        {typeof window !== 'undefined' && L && mapCenter ? (
+        {gpsPermission === 'denied' ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-zinc-950 p-8 text-center">
+            <div className="w-24 h-24 rounded-[2rem] bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 shadow-2xl">
+              <Lock className="w-10 h-10" />
+            </div>
+            <div className="space-y-2 max-w-xs">
+              <h2 className="text-xl font-black">Acesso Bloqueado</h2>
+              <p className="text-zinc-500 text-sm font-medium">O radar precisa do seu GPS para mostrar onde estão os outros membros.</p>
+            </div>
+            <button onClick={() => window.location.reload()} className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">
+              <RefreshCw className="w-4 h-4" /> Tentar Novamente
+            </button>
+          </div>
+        ) : typeof window !== 'undefined' && L && mapCenter ? (
           <MapContainer center={mapCenter} zoom={18} className="h-full w-full" zoomControl={false}>
             <ChangeView center={mapCenter} zoom={18} />
             <TileLayer url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" subdomains={['mt0', 'mt1', 'mt2', 'mt3']} attribution="&copy; Google Maps" />
@@ -134,6 +163,9 @@ export default function CadeTuPage() {
               <Navigation className="w-10 h-10 text-indigo-500 animate-spin" />
             </div>
             <p className="text-zinc-500 text-sm font-medium animate-pulse">Triangulando posição...</p>
+            {gpsPermission === 'prompt' && (
+              <button onClick={requestGPS} className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg text-xs font-bold uppercase tracking-widest">Ativar GPS</button>
+            )}
           </div>
         )}
       </div>

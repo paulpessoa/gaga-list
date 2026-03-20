@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useUser } from "@/hooks/use-user"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -30,6 +30,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const supabase = createClient()
+  
+  // Referência para o contador anterior para detectar incrementos
+  const prevCountRef = useRef(0)
+
+  useEffect(() => {
+    if (unreadCount > prevCountRef.current) {
+      trigger("medium")
+    }
+    prevCountRef.current = unreadCount
+  }, [unreadCount, trigger])
 
   useEffect(() => {
     if (!user) return
@@ -41,7 +51,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const { content, profiles, user_id, listId, listTitle } = payload.payload
         
         if (user_id !== user.id) {
-          trigger("heavy")
           setNotifications(prev => [{
             id: Math.random().toString(),
             type: "dm",
@@ -59,8 +68,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const { senderName, targetId, listId, listTitle } = payload.payload
         
         if (targetId === user.id) {
-          trigger("heavy")
-          
           setNotifications(prev => [{
             id: Math.random().toString(),
             type: "nudge",
@@ -77,7 +84,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user, supabase, trigger])
+  }, [user, supabase])
 
   const clearNotifications = () => {
     setUnreadCount(0)
