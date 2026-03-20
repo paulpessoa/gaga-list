@@ -1,6 +1,6 @@
 // hooks/use-lists.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { List } from '@/types/database.types';
+import { List } from '@/types';
 
 // Chave do cache para as listas
 export const LISTS_QUERY_KEY = ['lists'];
@@ -68,6 +68,7 @@ export function useCreateList() {
         icon: '🛒',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        deleted_at: null,
       };
 
       queryClient.setQueryData<List[]>(LISTS_QUERY_KEY, (old) => {
@@ -215,6 +216,49 @@ export function useDeleteList() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LISTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['trash-lists'] });
+    },
+  });
+}
+
+/**
+ * Hook para buscar as listas na lixeira.
+ */
+export function useTrashLists() {
+  return useQuery({
+    queryKey: ['trash-lists'],
+    queryFn: async (): Promise<List[]> => {
+      const response = await fetch('/api/lists?trash=true');
+      if (!response.ok) {
+        throw new Error('Falha ao buscar lixeira');
+      }
+      const { data } = await response.json();
+      return data;
+    },
+    staleTime: 1000 * 60,
+  });
+}
+
+/**
+ * Hook para restaurar uma lista da lixeira.
+ */
+export function useRestoreList() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (listId: string) => {
+      const response = await fetch(`/api/lists/${listId}/restore`, {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao restaurar lista');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LISTS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ['trash-lists'] });
     },
   });
 }

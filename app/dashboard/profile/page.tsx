@@ -22,6 +22,7 @@ import {
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { useHaptic } from "@/hooks/use-haptic"
+import { useTheme } from "@/app/providers"
 import { createClient } from "@/lib/supabase/client"
 import { subscribeUser, unsubscribeUser } from "@/app/actions"
 import type { Database, Json } from "@/types/database.types"
@@ -44,6 +45,7 @@ function urlBase64ToUint8Array(base64String: string) {
 export default function ProfilePage() {
   const { data: user, isLoading: userLoading } = useUser()
   const { trigger } = useHaptic()
+  const { theme, setTheme } = useTheme()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -59,9 +61,6 @@ export default function ProfilePage() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isPushSupported, setIsPushSupported] = useState(false)
   const [isPushProcessing, setIsPushProcessing] = useState(false)
-
-  // Tema
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("dark")
 
   // Senha
   const [newPassword, setNewPassword] = useState("")
@@ -82,9 +81,6 @@ export default function ProfilePage() {
         })
       })
     }
-
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system"
-    if (savedTheme) setTheme(savedTheme)
 
     if (user) {
       const fetchProfile = async () => {
@@ -143,18 +139,8 @@ export default function ProfilePage() {
     }
   }
 
-  const applyTheme = (newTheme: "light" | "dark" | "system") => {
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme)
-    localStorage.setItem("theme", newTheme)
-    const root = window.document.documentElement
-    if (newTheme === "dark") {
-      root.classList.add("dark")
-    } else if (newTheme === "light") {
-      root.classList.remove("dark")
-    } else {
-      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      root.classList.toggle("dark", systemDark)
-    }
     trigger("light")
   }
 
@@ -304,7 +290,7 @@ export default function ProfilePage() {
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => applyTheme(t.id as any)}
+                    onClick={() => handleThemeChange(t.id as any)}
                     className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${theme === t.id ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-white border-zinc-300 dark:border-white/20 shadow-lg" : "bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
                   >
                     <t.icon className="w-5 h-5" />

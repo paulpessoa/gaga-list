@@ -205,83 +205,84 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="glass-panel w-full h-full sm:h-[600px] sm:max-w-lg sm:rounded-3xl flex flex-col relative shadow-2xl border-none sm:border sm:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-zinc-950 w-full h-[90vh] sm:h-[650px] sm:max-w-lg sm:rounded-[2.5rem] flex flex-col relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
         
-        <header className="p-6 border-b border-white/5 flex items-center justify-between bg-zinc-900/50 sm:rounded-t-3xl">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isIndividual ? "bg-amber-500/10 text-amber-500" : "bg-indigo-500/10 text-indigo-400"}`}>
+        <header className="p-6 px-8 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between sm:rounded-t-[2.5rem]">
+          <div className="flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${isIndividual ? "bg-amber-500/10 text-amber-600 dark:text-amber-500" : "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"}`}>
               {isIndividual ? <ShieldAlert className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white leading-tight">
-                {isIndividual ? targetUser.full_name || "Privado" : "Chat da Lista"}
+            <div className="flex flex-col">
+              <h2 className="text-lg font-black text-zinc-900 dark:text-white leading-tight">
+                {isIndividual ? targetUser.full_name || "Privado" : "Chat da Equipe"}
               </h2>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold flex items-center gap-1">
-                {isIndividual ? (
-                  <>Mensagens efêmeras (não salvas)</>
-                ) : (
-                  <>Histórico salvo <History className="w-2.5 h-2.5 ml-1" /></>
-                )}
-              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em] font-black">
+                  {isIndividual ? "Modo Efêmero" : "Nuvem Ativa"}
+                </span>
+                <div className={`w-1.5 h-1.5 rounded-full ${isIndividual ? "bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]" : "bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.5)]"}`} />
+              </div>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
+            className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </header>
 
         {isIndividual && (
-          <div className="bg-amber-500/10 border-b border-amber-500/10 px-6 py-2">
-            <p className="text-[10px] text-amber-500/80 text-center font-medium italic">
-              Esta conversa sumirá ao fechar o aplicativo.
+          <div className="bg-amber-500/5 dark:bg-amber-500/10 border-b border-amber-500/10 px-8 py-2.5">
+            <p className="text-[9px] text-amber-600 dark:text-amber-500 text-center font-black uppercase tracking-widest">
+              Estas mensagens não serão salvas no histórico.
             </p>
           </div>
         )}
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide bg-zinc-50/30 dark:bg-transparent">
           {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center gap-2 text-zinc-500">
-              <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
-              <span className="text-sm">Carregando histórico...</span>
+            <div className="h-full flex flex-col items-center justify-center gap-4 text-zinc-400">
+              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Sincronizando...</span>
             </div>
           ) : messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center gap-3 opacity-40">
-              <MessageSquare className="w-12 h-12 text-zinc-600" />
-              <p className="text-sm text-zinc-500 max-w-[200px]">
+            <div className="h-full flex flex-col items-center justify-center text-center gap-4 opacity-30">
+              <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                 <MessageSquare className="w-8 h-8 text-zinc-400" />
+              </div>
+              <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest max-w-[200px]">
                 {isIndividual 
-                  ? `Diga um "oi" para ${targetUser.full_name?.split(' ')[0]}`
-                  : "Nenhuma mensagem ainda. Comece a conversar!"}
+                  ? `Comece um papo privado com ${targetUser.full_name?.split(' ')[0]}`
+                  : "Silêncio por aqui... Diga algo!"}
               </p>
             </div>
           ) : (
             messages.map((msg) => {
               const isMine = msg.user_id === currentUser?.id
               return (
-                <div key={msg.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
-                  <div className={`flex gap-2 max-w-[85%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
+                <div key={msg.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                  <div className={`flex gap-3 max-w-[85%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
                     {!isMine && !isIndividual && (
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center overflow-hidden border border-white/5 relative">
+                      <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-900 relative shadow-sm">
                         {msg.profiles?.avatar_url ? (
-                          <Image src={msg.profiles.avatar_url} fill className="object-cover" alt="Avatar" sizes="32px" />
+                          <Image src={msg.profiles.avatar_url} fill className="object-cover" alt="Avatar" sizes="36px" />
                         ) : (
-                          <User className="w-4 h-4 text-zinc-600" />
+                          <User className="w-5 h-5 text-zinc-400" />
                         )}
                       </div>
                     )}
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       {!isMine && !isIndividual && (
-                        <span className="text-[10px] font-bold text-zinc-500 ml-1">
-                          {msg.profiles?.full_name || msg.profiles?.email.split("@")[0]}
+                        <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">
+                          {msg.profiles?.full_name?.split(' ')[0] || "Usuário"}
                         </span>
                       )}
-                      <div className={`py-3 px-4 rounded-2xl text-sm ${isMine ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-500/10" : "bg-zinc-800 text-zinc-200 rounded-tl-none border border-white/5"}`}>
+                      <div className={`py-3.5 px-5 rounded-[1.5rem] text-sm font-medium leading-relaxed shadow-sm ${isMine ? "bg-indigo-500 text-white rounded-tr-none" : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 rounded-tl-none border border-zinc-100 dark:border-zinc-800"}`}>
                         {msg.content}
                       </div>
-                      <span className={`text-[9px] text-zinc-600 ${isMine ? "text-right mr-1" : "ml-1"}`}>
+                      <span className={`text-[8px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-tighter ${isMine ? "text-right mr-1" : "ml-1"}`}>
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -292,21 +293,21 @@ export function ListChat({ listId, currentUser, isOpen, onClose, targetUser }: L
           )}
         </div>
 
-        <footer className="p-4 bg-zinc-950/50 border-t border-white/5 sm:rounded-b-3xl">
-          <form onSubmit={handleSendMessage} className="flex gap-2">
+        <footer className="p-6 px-8 bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900 sm:rounded-b-[2.5rem]">
+          <form onSubmit={handleSendMessage} className="flex gap-3">
             <input 
               type="text" 
               placeholder={isIndividual ? "Segredo efêmero..." : "Escreva uma mensagem..."}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-1 bg-zinc-900 border border-white/10 rounded-2xl py-3.5 px-5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              className="flex-1 bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
             />
             <button 
               type="submit" 
               disabled={!newMessage.trim() || isSending}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg ${isIndividual ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20" : "bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20"}`}
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl ${isIndividual ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20" : "bg-indigo-500 hover:bg-indigo-600 shadow-indigo-500/20"}`}
             >
-              {isSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 text-white" />}
+              {isSending ? <Loader2 className="w-6 h-6 animate-spin text-white" /> : <Send className="w-6 h-6 text-white" />}
             </button>
           </form>
         </footer>

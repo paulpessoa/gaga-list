@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Item, InsertItem, UpdateItem } from '@/types/database.types';
+import { Item, InsertItem, UpdateItem } from '@/types';
 
 export const ITEMS_QUERY_KEY = (listId: string) => ['items', listId];
 

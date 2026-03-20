@@ -1,12 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-glass-bg: rgba(24, 24, 27, 0.6);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-bg: rgba(255, 255, 255, 0.8);
+  --color-glass-border: rgba(0, 0, 0, 0.05);
+  
+  --color-dark-glass-bg: rgba(24, 24, 27, 0.6);
+  --color-dark-glass-border: rgba(255, 255, 255, 0.08);
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-[var(--color-glass-bg)] backdrop-blur-xl border border-[var(--color-glass-border)] shadow-xl;
+    @apply bg-white dark:bg-[var(--color-dark-glass-bg)] 
+           backdrop-blur-none dark:backdrop-blur-xl 
+           border border-zinc-200 dark:border-[var(--color-dark-glass-border)] 
+           shadow-sm dark:shadow-xl;
+  }
+
+  .card-hover {
+    @apply hover:border-zinc-300 dark:hover:border-zinc-700 
+           hover:shadow-md dark:hover:shadow-2xl 
+           transition-all duration-200;
   }
 }

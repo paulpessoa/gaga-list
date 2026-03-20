@@ -1,14 +1,16 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database, Item, InsertItem, UpdateItem } from '@/types/database.types';
+import { Database } from '@/types/database.types';
+import { Item, InsertItem, UpdateItem } from '@/types';
 import { supabaseServerClient } from '@/lib/supabase/server';
 
 export const ItemsService = {
-  async getListItems(supabase: any, listId: string): Promise<Item[]> {
+  async getListItems(supabase: any, listId: string): Promise<(Item & { checked_by_profile?: { full_name: string | null; avatar_url: string | null } })[]> {
     const { data, error } = await supabase
       .from('items')
-      .select('*')
+      .select('*, checked_by_profile:profiles!checked_by(full_name, avatar_url)')
       .eq('list_id', listId)
-      .order('created_at', { ascending: true });
+      .order('is_purchased', { ascending: true }) // Itens comprados vão para o fim
+      .order('created_at', { ascending: false }); // Itens novos no topo
 
     if (error) {
       console.error('Erro ao buscar itens:', error.message);

@@ -1,6 +1,6 @@
 // services/lists.service.ts
 import { supabaseServerClient } from '@/lib/supabase/server';
-import { List, InsertList } from '@/types/database.types';
+import { List, InsertList } from '@/types';
 
 /**
  * Serviço para gerenciamento de Listas de Compras.
@@ -11,19 +11,40 @@ export const ListsService = {
    * Busca todas as listas de um usuário (como dono ou colaborador).
    * @param userId ID do usuário autenticado
    */
-  async getUserLists(supabase: any): Promise<List[]> {
+  async getUserLists(supabase: any): Promise<(List & { items?: { is_purchased: boolean }[] })[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    // Busca listas onde o usuário é dono ou colaborador usando uma única query se possível,
-    // ou tratando os erros de forma silenciosa para retornar vazio.
+    // Busca listas ativas (deleted_at is null) onde o usuário tem acesso
     const { data: lists, error } = await supabase
       .from('lists')
-      .select('*')
+      .select('*, items(is_purchased)')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Erro ao buscar listas:', error.message);
+      return [];
+    }
+
+    return lists || [];
+  },
+
+  /**
+   * Busca listas na lixeira (deleted_at is not null).
+   */
+  async getTrashLists(supabase: any): Promise<(List & { items?: { is_purchased: boolean }[] })[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: lists, error } = await supabase
+      .from('lists')
+      .select('*, items(is_purchased)')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+
+    if (error) {
+      console.error('Erro ao buscar lixeira:', error.message);
       return [];
     }
 
@@ -61,10 +82,19 @@ export const ListsService = {
   async deleteList(supabase: any, listId: string): Promise<void> {
     const { error } = await supabase
       .from('lists')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', listId);
 
     if (error) throw new Error(`Erro ao deletar lista: ${error.message}`);
+  },
+
+  async restoreList(supabase: any, listId: string): Promise<void> {
+    const { error } = await supabase
+      .from('lists')
+      .update({ deleted_at: null })
+      .eq('id', listId);
+
+    if (error) throw new Error(`Erro ao restaurar lista: ${error.message}`);
   },
 
   async getCollaborators(supabase: any, listId: string) {

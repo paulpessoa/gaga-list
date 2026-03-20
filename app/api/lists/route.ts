@@ -9,6 +9,9 @@ import { createClient } from '@/lib/supabase/server';
  */
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const isTrash = searchParams.get('trash') === 'true';
+    
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
@@ -16,8 +19,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // 2. Chamar o Service passando o client autenticado
-    const lists = await ListsService.getUserLists(supabase);
+    // 2. Chamar o Service passando o client autenticado e o filtro de lixeira
+    const lists = isTrash 
+      ? await ListsService.getTrashLists(supabase)
+      : await ListsService.getUserLists(supabase);
 
     // 3. Retornar os dados
     return NextResponse.json({ data: lists });

@@ -11,9 +11,11 @@ import {
   MessageSquare,
   Map as MapIcon,
   MessageCircleMore,
-  QrCode
+  QrCode,
+  Mail,
+  UserPlus
 } from "lucide-react"
-import { Collaborator } from "@/types/database.types"
+import { Collaborator } from "@/types"
 import { usePresence } from "@/hooks/use-presence"
 import { useHaptic } from "@/hooks/use-haptic"
 import { formatPhoneForWhatsApp } from "@/lib/utils"
@@ -68,7 +70,6 @@ export function ShareModal({
   const { onlineUsers, sendNudge } = usePresence(listId, currentUser)
   const { trigger } = useHaptic()
 
-  // Filtrar apenas os OUTROS membros para evitar que o usuário interaja consigo mesmo
   const otherMembers = useMemo(() => {
     return (
       collaborators?.filter(
@@ -154,28 +155,30 @@ export function ShareModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="glass-panel w-full h-full sm:h-auto sm:max-w-md sm:rounded-3xl p-6 sm:p-8 relative shadow-2xl border-none sm:border sm:border-white/10 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white dark:bg-zinc-950 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 text-zinc-400 hover:text-white transition-colors p-2"
+            className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
 
           <div className="mt-8 sm:mt-0">
-            <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">
-              Compartilhar
-            </h2>
-            <p className="text-zinc-400 text-sm mb-6">
-              Traga sua equipe para as compras.
-            </p>
+            <div className="flex flex-col mb-8">
+              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                Compartilhar
+              </h2>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                Convide amigos e família para a lista.
+              </p>
+            </div>
 
-            <div className="flex flex-col gap-4 mb-8">
+            <div className="flex flex-col gap-4 mb-10">
               <button
                 onClick={handleGenerateInvite}
                 disabled={isLoading}
-                className="w-full py-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center gap-3 text-indigo-400 font-bold hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98]"
+                className="w-full py-4.5 bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-dashed border-indigo-500/20 rounded-[1.25rem] flex items-center justify-center gap-3 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -186,67 +189,72 @@ export function ShareModal({
                 )}
               </button>
 
-              <div className="flex items-center gap-4 text-zinc-800">
-                <div className="flex-1 h-px bg-current opacity-20" />
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-4 text-zinc-300 dark:text-zinc-800">
+                <div className="flex-1 h-px bg-current" />
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">
                   ou por e-mail
                 </span>
-                <div className="flex-1 h-px bg-current opacity-20" />
+                <div className="flex-1 h-px bg-current" />
               </div>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="flex flex-col sm:flex-row gap-3 mb-6"
-            >
-              <input
-                type="email"
-                placeholder="E-mail do colaborador"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-zinc-900/50 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-              />
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-8">
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="E-mail do colaborador"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-[1.25rem] py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
+                />
+                <Mail className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-zinc-700" />
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading || !email.trim()}
-                className="px-6 py-4 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 min-w-[120px] flex items-center justify-center border-none outline-none"
+                className="w-full py-4.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.25rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                  "Convidar"
+                  <>
+                    <UserPlus className="w-4 h-4" /> Adicionar à lista
+                  </>
                 )}
               </button>
             </form>
 
             {message && (
               <div
-                className={`p-4 rounded-2xl text-xs font-bold mb-6 flex flex-col gap-3 ${message.includes("Erro") || message.includes("não possui") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}
+                className={`p-5 rounded-[1.25rem] text-xs font-bold mb-8 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 ${message.includes("Erro") || message.includes("não possui") ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"}`}
               >
-                <p>{message}</p>
+                <p className="leading-relaxed">{message}</p>
                 {showInviteButton && (
                   <button
                     onClick={handleInvite}
-                    className="w-full py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold transition-colors text-[10px] uppercase tracking-widest"
+                    className="w-full py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-black transition-all text-[9px] uppercase tracking-widest shadow-lg shadow-indigo-500/20"
                   >
-                    Enviar convite por e-mail
+                    Enviar convite oficial do App
                   </button>
                 )}
               </div>
             )}
 
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
-                <Users className="w-3 h-3" />
-                Equipe ({otherMembers.length})
+            <div className="space-y-6">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 flex items-center gap-2 ml-1">
+                <Users className="w-4 h-4" />
+                Membros da Equipe ({otherMembers.length})
               </h3>
 
-              <div className="flex flex-col gap-3 max-h-96 sm:max-h-64 overflow-y-auto pr-1 scrollbar-hide pb-20 sm:pb-0">
+              <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide pb-10">
                 {otherMembers.length === 0 ? (
-                  <p className="text-sm text-zinc-600 italic py-4">
-                    Nenhum membro ainda.
-                  </p>
+                  <div className="py-8 text-center bg-zinc-50 dark:bg-zinc-900/30 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-900">
+                    <p className="text-sm text-zinc-400 font-medium">
+                      Você ainda está sozinho nesta lista.
+                    </p>
+                  </div>
                 ) : (
                   otherMembers.map((collab, index) => (
                     <div
@@ -255,112 +263,86 @@ export function ShareModal({
                         collab.profiles?.id ||
                         `collab-${index}`
                       }
-                      className="flex flex-col gap-3 p-4 rounded-3xl bg-zinc-900/40 border border-white/5 shadow-sm"
+                      className="flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 shadow-sm"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          {collab.profiles?.avatar_url ? (
-                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/10 shadow-lg">
-                              <Image
-                                src={collab.profiles.avatar_url}
-                                fill
-                                className="object-cover"
-                                alt={collab.profiles.full_name || "Avatar"}
-                                sizes="40px"
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${collab.status === "pending" ? "bg-zinc-800 text-zinc-600" : "bg-indigo-500/20 text-indigo-400"}`}
-                            >
-                              {(collab.profiles?.email || "U")
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-                          )}
+                          <div className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 shadow-sm">
+                            <Image
+                              src={
+                                collab.profiles?.avatar_url ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || collab.profiles?.email || "U")}&background=6366f1&color=fff`
+                              }
+                              fill
+                              className="object-cover"
+                              alt="Avatar"
+                            />
+                          </div>
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2">
-                              <span
-                                className={`text-sm font-bold ${collab.status === "pending" ? "text-zinc-600" : "text-zinc-100"}`}
-                              >
-                                {collab.profiles?.full_name ||
-                                  collab.profiles?.email?.split("@")[0] ||
-                                  "Usuário"}
+                              <span className={`text-sm font-black ${collab.status === "pending" ? "text-zinc-400" : "text-zinc-900 dark:text-zinc-100"}`}>
+                                {collab.profiles?.full_name || collab.profiles?.email?.split("@")[0] || "Usuário"}
                               </span>
-                              {isOnline(collab.profiles?.id) && (
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              {collab.profiles?.id && isOnline(collab.profiles.id) && (
+                                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
                               )}
+
                             </div>
-                            <span className="text-[10px] text-zinc-600 font-medium truncate max-w-[120px]">
+                            <span className="text-[10px] text-zinc-500 dark:text-zinc-500 font-bold tracking-tight truncate max-w-[140px]">
                               {collab.profiles?.email}
                             </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          {collab.role === "owner" && (
-                            <span className="text-[8px] font-black bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-zinc-500 uppercase tracking-tighter">
-                              Dono
-                            </span>
-                          )}
-                          {collab.role !== "owner" && isOwner && (
-                            <button
-                              onClick={() => {
-                                const idToRemove =
-                                  collab.status === "pending"
-                                    ? `pending-${collab.profiles?.email}`
-                                    : collab.user_id || collab.profiles?.id
-
-                                if (
-                                  idToRemove &&
-                                  confirm(`Remover este membro?`)
-                                ) {
-                                  onRemoveCollaborator(idToRemove)
-                                }
-                              }}
-                              className="p-2 text-zinc-700 hover:text-red-400 transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
+                        {isOwner && collab.role !== "owner" && (
+                          <button
+                            onClick={() => {
+                              const idToRemove =
+                                collab.status === "pending"
+                                  ? `pending-${collab.profiles?.email}`
+                                  : collab.user_id || collab.profiles?.id
+                              if (idToRemove && confirm(`Remover este membro?`))
+                                onRemoveCollaborator(idToRemove)
+                            }}
+                            className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-red-500 transition-all"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
 
                       {/* Action Bar */}
                       {collab.status === "active" && (
                         <div className="grid grid-cols-4 gap-2">
                           <button
-                            onClick={() => handleNudge(collab.profiles.id)}
-                            disabled={!isOnline(collab.profiles.id)}
-                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-amber-400 disabled:opacity-20 transition-all"
+                            onClick={() => collab.profiles?.id && handleNudge(collab.profiles.id)}
+                            disabled={!collab.profiles?.id || !isOnline(collab.profiles.id)}
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-amber-500/20 text-zinc-400 hover:text-amber-500 disabled:opacity-20 transition-all"
                           >
                             <Bell className="w-4 h-4" />
-                            <span className="text-[8px] font-bold uppercase">
+                            <span className="text-[8px] font-black uppercase tracking-tighter">
                               Sino
                             </span>
                           </button>
 
-                          {collab.profiles?.phone ? (
-                            <a
-                              href={`https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all"
-                              onClick={() => trigger("light")}
-                            >
-                              <MessageCircleMore className="w-4 h-4" />
-                              <span className="text-[8px] font-bold uppercase">
-                                Zap
-                              </span>
-                            </a>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-800 opacity-30 cursor-not-allowed">
-                              <MessageCircleMore className="w-4 h-4" />
-                              <span className="text-[8px] font-bold uppercase">
-                                Zap
-                              </span>
-                            </div>
-                          )}
+                          <a
+                            href={
+                              collab.profiles?.phone
+                                ? `https://wa.me/${formatPhoneForWhatsApp(collab.profiles.phone)}`
+                                : "#"
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] transition-all ${collab.profiles?.phone ? "bg-emerald-500/5 dark:bg-emerald-500/10 border border-transparent hover:border-emerald-500 text-emerald-500" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-200 dark:text-zinc-800 cursor-not-allowed"}`}
+                            onClick={() =>
+                              collab.profiles?.phone && trigger("light")
+                            }
+                          >
+                            <MessageCircleMore className="w-4 h-4" />
+                            <span className="text-[8px] font-black uppercase tracking-tighter">
+                              Zap
+                            </span>
+                          </a>
 
                           <button
                             onClick={() => {
@@ -376,20 +358,20 @@ export function ShareModal({
                                 avatar_url: collab.profiles?.avatar_url || null
                               })
                             }}
-                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-indigo-500/20 text-zinc-400 hover:text-indigo-500 transition-all"
                           >
                             <MessageSquare className="w-4 h-4" />
-                            <span className="text-[8px] font-bold uppercase">
+                            <span className="text-[8px] font-black uppercase tracking-tighter">
                               Chat
                             </span>
                           </button>
 
                           <Link
                             href={`/dashboard/lists/${listId}/cade-tu`}
-                            className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl bg-zinc-950/50 border border-white/5 text-zinc-500 hover:text-indigo-400 transition-all"
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1rem] bg-zinc-50 dark:bg-zinc-900/50 border border-transparent hover:border-indigo-500/20 text-zinc-400 hover:text-indigo-500 transition-all"
                           >
                             <MapIcon className="w-4 h-4" />
-                            <span className="text-[8px] font-bold uppercase">
+                            <span className="text-[8px] font-black uppercase tracking-tighter">
                               Mapa
                             </span>
                           </Link>
@@ -406,44 +388,44 @@ export function ShareModal({
 
       {/* QR Code Modal Overlay */}
       {isQrModalOpen && inviteToken && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="glass-panel w-full max-w-sm rounded-[2.5rem] p-10 flex flex-col items-center text-center relative shadow-2xl border border-white/10 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[3rem] p-12 flex flex-col items-center text-center relative shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setIsQrModalOpen(false)}
-              className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors"
+              className="absolute top-10 right-10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-7 h-7" />
             </button>
 
-            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6">
-              <QrCode className="w-8 h-8 text-indigo-400" />
+            <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6">
+              <QrCode className="w-8 h-8 text-indigo-500" />
             </div>
 
-            <h2 className="text-xl font-bold text-white mb-2">
-              Escaneie para entrar
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">
+              Convite Rápido
             </h2>
-            <p className="text-zinc-500 text-xs mb-8">
-              Aponte a câmera para entrar na lista.
+            <p className="text-zinc-500 text-sm mb-10 leading-relaxed">
+              Aponte a câmera para entrar na lista instantaneamente.
             </p>
 
-            <div className="p-6 bg-white rounded-3xl shadow-2xl mb-8">
+            <div className="p-8 bg-zinc-50 dark:bg-white rounded-[2.5rem] shadow-inner mb-8 border-4 border-white dark:border-zinc-800">
               <QRCodeSVG
                 value={`${window.location.origin}/join/${inviteToken}`}
-                size={200}
+                size={220}
                 level="H"
                 includeMargin={false}
               />
             </div>
 
-            <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+            <div className="bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
               Válido por 24 horas
-            </p>
+            </div>
 
             <button
               onClick={() => setIsQrModalOpen(false)}
-              className="mt-8 w-full py-4 bg-zinc-900 text-white rounded-2xl font-bold transition-all active:scale-95 border-none outline-none"
+              className="mt-10 w-full py-4.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.25rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95"
             >
-              Fechar
+              Concluído
             </button>
           </div>
         </div>
