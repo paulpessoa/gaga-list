@@ -136,11 +136,10 @@ function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [isInstalled, setIsInstalled] = useState(false)
   const [showIOSHint, setShowIOSHint] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    // Usar requestAnimationFrame para evitar cascading renders sÃ­ncronos detectados pelo ESLint
     requestAnimationFrame(() => {
-      // Detectar se jÃ¡ estÃ¡ instalado
       const isStandalone =
         window.matchMedia("(display-mode: standalone)").matches ||
         (window.navigator as any).standalone
@@ -148,7 +147,6 @@ function InstallPrompt() {
         setIsInstalled(true)
       }
 
-      // Detectar iOS
       const isIOS =
         /iPad|iPhone|iPod/.test(navigator.userAgent) &&
         !(window as any).MSStream
@@ -157,7 +155,6 @@ function InstallPrompt() {
       }
     })
 
-    // Detectar Android/Chrome Install Prompt
     const handler = (e: any) => {
       e.preventDefault()
       setDeferredPrompt(e)
@@ -176,17 +173,23 @@ function InstallPrompt() {
     if (outcome === "accepted") setDeferredPrompt(null)
   }
 
-  if (isInstalled) return null
+  if (isInstalled || !isVisible) return null
 
   // UI para Android/Chrome
   if (deferredPrompt) {
     return (
-      <div className="fixed bottom-24 right-6 z-50 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="fixed bottom-24 right-6 z-50 flex items-center gap-2 animate-in slide-in-from-bottom-4 duration-500">
         <button
           onClick={handleInstall}
-          className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce"
+          className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all"
         >
           <Download className="w-4 h-4" /> Instalar App
+        </button>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="p-4 bg-zinc-900/10 dark:bg-white/10 backdrop-blur-md text-zinc-500 hover:text-zinc-900 dark:hover:text-white rounded-full transition-colors border border-zinc-200 dark:border-white/10"
+        >
+          <X className="w-4 h-4" />
         </button>
       </div>
     )
@@ -565,14 +568,6 @@ function LandingContent() {
                           : authMode === "password_reset"
                             ? "Recuperar"
                             : "Criar Conta"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleBiometricAuth}
-                    className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[1.5rem] font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
-                  >
-                    <Fingerprint className="w-4 h-4 text-indigo-500" /> Acessar
-                    com Digital
                   </button>
                 </div>
 
