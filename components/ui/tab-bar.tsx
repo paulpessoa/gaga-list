@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, Settings, Bell } from 'lucide-react';
+import { LayoutGrid, Settings, Bell, ScanLine } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotifications } from '@/providers/notification-provider';
@@ -23,6 +23,16 @@ export function TabBar() {
         <LayoutGrid className="w-6 h-6" />
         <span className="text-[10px] font-bold uppercase tracking-tighter">Listas</span>
       </Link>
+
+      <button 
+        onClick={() => {
+          trigger('medium');
+          alert('Scanner de IA em desenvolvimento!');
+        }}
+        className="relative -top-6 w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40 border-4 border-white dark:border-zinc-950 active:scale-90 transition-all group"
+      >
+        <ScanLine className="w-8 h-8 group-hover:scale-110 transition-transform" />
+      </button>
 
       <Link 
         href="/dashboard/notifications" 

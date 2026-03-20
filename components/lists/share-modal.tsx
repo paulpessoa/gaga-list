@@ -245,7 +245,7 @@ export function ShareModal({
             <div className="space-y-6">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 flex items-center gap-2 ml-1">
                 <Users className="w-4 h-4" />
-                Membros da Equipe ({otherMembers.length})
+                Membros ({otherMembers.length})
               </h3>
 
               <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide pb-10">
@@ -280,13 +280,17 @@ export function ShareModal({
                           </div>
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2">
-                              <span className={`text-sm font-black ${collab.status === "pending" ? "text-zinc-400" : "text-zinc-900 dark:text-zinc-100"}`}>
-                                {collab.profiles?.full_name || collab.profiles?.email?.split("@")[0] || "Usuário"}
+                              <span
+                                className={`text-sm font-black ${collab.status === "pending" ? "text-zinc-400" : "text-zinc-900 dark:text-zinc-100"}`}
+                              >
+                                {collab.profiles?.full_name ||
+                                  collab.profiles?.email?.split("@")[0] ||
+                                  "Usuário"}
                               </span>
-                              {collab.profiles?.id && isOnline(collab.profiles.id) && (
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
-                              )}
-
+                              {collab.profiles?.id &&
+                                isOnline(collab.profiles.id) && (
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
+                                )}
                             </div>
                             <span className="text-[10px] text-zinc-500 dark:text-zinc-500 font-bold tracking-tight truncate max-w-[140px]">
                               {collab.profiles?.email}
@@ -321,10 +325,15 @@ export function ShareModal({
                                 handleNudge(collab.profiles.id)
                               }
                             }}
-                            disabled={!collab.profiles?.id || !isOnline(collab.profiles.id)}
+                            disabled={
+                              !collab.profiles?.id ||
+                              !isOnline(collab.profiles.id)
+                            }
                             className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${isOnline(collab.profiles?.id || "") ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-500 hover:text-white" : "bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-300 dark:text-zinc-800 opacity-40 cursor-not-allowed"}`}
                           >
-                            <Bell className={`w-4 h-4 ${isOnline(collab.profiles?.id || "") ? "animate-shake" : ""}`} />
+                            <Bell
+                              className={`w-4 h-4 ${isOnline(collab.profiles?.id || "") ? "animate-shake" : ""}`}
+                            />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
                               Sino
                             </span>
@@ -361,7 +370,8 @@ export function ShareModal({
                                     collab.profiles?.full_name ||
                                     collab.profiles?.email ||
                                     "Usuário",
-                                  avatar_url: collab.profiles?.avatar_url || null
+                                  avatar_url:
+                                    collab.profiles?.avatar_url || null
                                 })
                               }
                             }}

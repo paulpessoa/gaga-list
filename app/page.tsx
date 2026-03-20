@@ -186,7 +186,7 @@ function InstallPrompt() {
           onClick={handleInstall}
           className="flex items-center gap-3 px-6 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.5rem] border border-white/10 dark:border-none font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all animate-bounce"
         >
-          <Download className="w-4 h-4" /> Instalar App Nativo
+          <Download className="w-4 h-4" /> Instalar App
         </button>
       </div>
     )
@@ -559,7 +559,7 @@ function LandingContent() {
                     {isLoading
                       ? "Aguarde..."
                       : authMode === "magic_link"
-                        ? "Enviar Link"
+                        ? "Receber Link"
                         : authMode === "password_login"
                           ? "Entrar"
                           : authMode === "password_reset"

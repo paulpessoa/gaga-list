@@ -1,30 +1,34 @@
-# 🚀 Refinamento de UX/UI & Features Críticas (Fase 2)
+# 🚀 Visão Futurista: Inteligência e Praticidade (Fase 3)
 
-Este documento guia a próxima fase de polimento do **Gaga-List**. Foco em consistência visual, animações de feedback e fluxo de configurações.
-
----
-
-## 🎨 1. Consistência Visual & UI
-- [x] **Landing Page:** Ajustar botão principal para estilo `rounded-[1.25rem]` e tipografia `font-black`.
-- [x] **Landing Page:** Remover botão de notificações (manter apenas em Configurações).
-- [x] **Tab Bar (Bottom Nav):** Refinar cores e transparências (Light/Dark Mode).
-- [x] **Botões Primários:** Padronizar "Onde estamos?" e "Salvar" com Indigo vibrante.
-- [x] **Lixeira:** Mover acesso do Dashboard para o menu de Configurações.
-- [ ] **List View:** Reposicionar botões de "CHAT" e "ONDE ESTAMOS" no header, ao lado dos avatares.
-
-## ⚡ 2. Interações & Feedback (Haptics 2.0)
-- [x] **Estilo de Ícones:** Padronizar cores em avisos e listas de membros.
-- [x] **Feedback de Clique:** 
-    *   **Sino:** Animação de "chacoalhar" (shake) + vibração (haptic).
-    *   **Demais ícones:** Pulso leve + mudança de cor.
-- [ ] **Nova Lista:** Adicionar botão "Ler QRCODE" no modal de criação para entrada rápida.
-
-## ⚙️ 3. Fluxos de Configurações & Conta
-- [x] **Correção de Tema:** Preferência do usuário sobrepõe sistema após seleção manual.
-- [x] **Auto-save:** Salvamento `onBlur` nos campos de perfil.
-- [x] **Segurança:** Manter botão explícito para troca de senha.
-- [x] **Deleção de Conta:** Botão de exclusão com aviso de 30 dias e fluxo de e-mail.
-- [ ] **Permissões (Investigar):** Avaliar se qualquer colaborador pode convidar novos membros ou se restringimos ao dono.
+Este documento guia a evolução do **Gaga-List** para um assistente de compras inteligente usando **GROQ AI**.
 
 ---
-*Assinado: Staff Engineer & Product Owner.*
+
+## 🎨 1. Consistência e Limpeza (Concluído)
+- [x] Remoção de tema manual (foco 100% no sistema/dispositivo).
+- [x] Remoção de biometria (simplificação do core).
+- [x] Auto-save no perfil (`onBlur`).
+- [x] Botões de ação da lista no topo (Chat/Mapa).
+
+## 🤖 2. Inteligência Artificial (GROQ AI)
+- [ ] **AI Scanner (Menu Inferior):**
+    *   Botão central de scanner no TabBar.
+    *   Foto do produto -> GROQ Vision -> Identificação automática.
+    *   Fluxo: Salvar em "Meus Produtos" ou Adicionar à Lista Aberta.
+    *   Sugestões de IA: Benefícios do produto e usos em receitas.
+- [ ] **Criação de Lista por Voz:**
+    *   Botão de microfone no modal "Nova Lista".
+    *   Transcrição -> GROQ -> Extração de itens organizada por categoria.
+- [ ] **Criação por Foto de Papel:**
+    *   Fotografar lista escrita à mão ou folheto -> GROQ Vision -> Nova lista digital.
+
+## 📦 3. Novas Features de Valor
+- [ ] **Meus Produtos:** Banco de dados pessoal de itens scaneados com histórico de preços e marcas.
+- [ ] **Receitas Inteligentes:** Gerar listas completas a partir de uma receita (ex: "Ingredientes para Carbonara").
+- [ ] **QR Code Fix:** Implementar a entrada real em listas via scanner de QR Code.
+
+## 💰 4. Estrutura de Monetização
+- [ ] Organizar endpoints de IA (`/api/ai/*`) para permitir controle de uso por usuário (Pay-per-use ou Assinatura).
+
+---
+*Assinado: Staff Engineer & Visionary Founder.*

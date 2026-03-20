@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   User,
   Mail,
-  Palette,
   Save,
   MapPin,
   Camera,
@@ -15,15 +14,11 @@ import {
   BellOff,
   Phone,
   Lock,
-  Sun,
-  Moon,
-  Monitor,
   Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { useHaptic } from "@/hooks/use-haptic"
-import { useTheme } from "@/app/providers"
 import { createClient } from "@/lib/supabase/client"
 import { subscribeUser, unsubscribeUser } from "@/app/actions"
 import type { Database, Json } from "@/types/database.types"
@@ -31,7 +26,6 @@ import Image from "next/image"
 
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"]
 
-// Função auxiliar para VAPID
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
@@ -46,11 +40,9 @@ function urlBase64ToUint8Array(base64String: string) {
 export default function ProfilePage() {
   const { data: user, isLoading: userLoading } = useUser()
   const { trigger } = useHaptic()
-  const { theme, setTheme } = useTheme()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Perfil
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
@@ -58,22 +50,18 @@ export default function ProfilePage() {
   const [allowNotifications, setAllowNotifications] = useState(true)
   const [pushSubscription, setPushSubscription] = useState<Json | null>(null)
 
-  // Push Subscription State (Browser Object)
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isPushSupported, setIsPushSupported] = useState(false)
   const [isPushProcessing, setIsPushProcessing] = useState(false)
 
-  // Senha
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  // UI
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    // Check Push Support
     if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
       setIsPushSupported(true)
       navigator.serviceWorker.ready.then((registration) => {
@@ -140,11 +128,6 @@ export default function ProfilePage() {
     }
   }
 
-  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
-    setTheme(newTheme)
-    trigger("light")
-  }
-
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) return
@@ -167,8 +150,8 @@ export default function ProfilePage() {
     }
   }
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     if (!user) return
     setIsSaving(true)
     setMessage("")
@@ -179,7 +162,7 @@ export default function ProfilePage() {
         location_enabled: locationEnabled,
         phone: phone,
         allow_notifications: allowNotifications,
-        push_subscription: pushSubscription // Agora tipado como Json | null e opcional no Update
+        push_subscription: pushSubscription
       }
       const { error: profileError } = await (supabase.from("profiles") as any).update(updateData).eq("id", user.id)
       if (profileError) throw profileError
@@ -259,7 +242,6 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSave} className="space-y-6">
-            {/* Seções do Formulário */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />
@@ -271,7 +253,7 @@ export default function ProfilePage() {
                   <input 
                     value={fullName} 
                     onChange={(e) => setFullName(e.target.value)} 
-                    onBlur={() => handleSave(new Event('submit') as any)}
+                    onBlur={() => handleSave()}
                     type="text" 
                     className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
                   />
@@ -281,7 +263,7 @@ export default function ProfilePage() {
                   <input 
                     value={phone} 
                     onChange={(e) => setPhone(e.target.value)} 
-                    onBlur={() => handleSave(new Event('submit') as any)}
+                    onBlur={() => handleSave()}
                     type="tel" 
                     placeholder="(00) 00000-0000" 
                     className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
@@ -290,44 +272,10 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 text-amber-500">
-                  <Palette className="w-4 h-4" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Aparência</span>
-                </div>
-                
-                <Link 
-                  href="/dashboard/trash"
-                  className="flex items-center gap-2 px-3 py-1 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-red-500 transition-colors"
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Lixeira
-                </Link>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: "light", icon: Sun, label: "Claro" },
-                  { id: "dark", icon: Moon, label: "Escuro" },
-                  { id: "system", icon: Monitor, label: "Auto" }
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => handleThemeChange(t.id as any)}
-                    className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${theme === t.id ? "bg-white dark:bg-zinc-800 text-indigo-600 dark:text-white border-zinc-300 dark:border-white/20 shadow-lg" : "bg-white/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
-                  >
-                    <t.icon className="w-5 h-5" />
-                    <span className="text-[10px] font-bold uppercase tracking-tighter">{t.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <Bell className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações do Sistema</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações</span>
               </div>
               {isPushSupported ? (
                 <button
@@ -340,14 +288,14 @@ export default function ProfilePage() {
                     {subscription ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
                     <div className="flex flex-col items-start">
                       <span className="text-sm font-bold">{subscription ? "Notificações Ativas" : "Ativar Notificações"}</span>
-                      <span className="text-[9px] uppercase tracking-wider opacity-60">Alertas no celular</span>
+                      <span className="text-[9px] uppercase tracking-wider opacity-60">Alertas no dispositivo</span>
                     </div>
                   </div>
                   {isPushProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : subscription ? <CheckCircle2 className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                 </button>
               ) : (
                 <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-white/5 text-zinc-500 text-xs italic">
-                  Notificações Push exigem conexão segura (HTTPS).
+                  Notificações Push não suportadas neste navegador.
                 </div>
               )}
             </div>
@@ -367,26 +315,23 @@ export default function ProfilePage() {
                   <input value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} type="password" placeholder="••••••" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
                 </div>
               </div>
+              <button disabled={isSaving || !newPassword} type="submit" className="w-full py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-20">
+                Alterar Senha
+              </button>
             </div>
 
-            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-3">
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Localização no Mapa</span>
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <Trash2 className="w-4 h-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados</span>
                 </div>
-                <button type="button" onClick={() => setLocationEnabled(!locationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
-                </button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">Vibração & Buzina</span>
-                </div>
-                <button type="button" onClick={() => setAllowNotifications(!allowNotifications)} className={`w-10 h-5 rounded-full transition-colors relative ${allowNotifications ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                  <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${allowNotifications ? "left-6" : "left-1"}`} />
-                </button>
+                <Link 
+                  href="/dashboard/trash"
+                  className="px-4 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-300 dark:border-white/5 shadow-sm"
+                >
+                  Ver Lixeira
+                </Link>
               </div>
             </div>
 
@@ -397,9 +342,6 @@ export default function ProfilePage() {
             )}
 
             <div className="flex flex-col gap-3">
-              <button disabled={isSaving} type="submit" className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold transition-all shadow-xl shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2 active:scale-95">
-                {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Salvar Configurações</>}
-              </button>
               <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
                 <LogOut className="w-5 h-5" /> Sair da Conta
               </button>
@@ -413,14 +355,12 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Excluir Conta Permanentemente</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Sua conta e todas as suas listas serão deletadas definitivamente em 30 dias. Um e-mail de confirmação será enviado para sua segurança.
-                  </p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">Sua conta e listas serão deletadas definitivamente em 30 dias.</p>
                 </div>
                 <button 
                   type="button"
                   onClick={() => {
-                    if (confirm("Tem certeza que deseja solicitar a exclusão da sua conta? Você terá 30 dias para cancelar esta ação.")) {
+                    if (confirm("Deseja solicitar a exclusão da sua conta?")) {
                       trigger("heavy")
                       setMessage("Solicitação de exclusão enviada via e-mail.")
                     }
@@ -432,14 +372,6 @@ export default function ProfilePage() {
               </div>
             </div>
           </form>
-
-          <footer className="pt-8 flex flex-col items-center gap-2 opacity-40">
-            <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              <Link href="/privacy" className="hover:text-indigo-500">Privacidade</Link>
-              <Link href="/terms" className="hover:text-indigo-500">Termos</Link>
-            </div>
-            <p className="text-[9px] text-zinc-400 dark:text-zinc-600 uppercase font-bold tracking-widest">Lista Pronta v1.0.0</p>
-          </footer>
         </div>
       )}
     </main>

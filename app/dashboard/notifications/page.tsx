@@ -50,7 +50,9 @@ export default function NotificationsPage() {
               <Bell className="w-12 h-12" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-zinc-900 dark:text-white font-black text-xl">Tudo limpo por aqui</h2>
+              <h2 className="text-zinc-900 dark:text-white font-black text-xl">
+                Tudo limpo por aqui
+              </h2>
               <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-[240px]">
                 Você não tem notificações recentes no momento.
               </p>
@@ -127,7 +129,7 @@ export default function NotificationsPage() {
 
       <div className="mt-4 p-8 rounded-[2.5rem] bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/10 dark:border-indigo-500/5">
         <p className="text-[10px] text-indigo-500/60 dark:text-indigo-400/40 text-center font-black uppercase tracking-[0.2em] leading-relaxed">
-          Dica: Mensagens individuais são efêmeras e não ficam salvas após
+          Dica: Mensagens individuais são privadas e não ficam salvas após
           limpar esta lista.
         </p>
       </div>

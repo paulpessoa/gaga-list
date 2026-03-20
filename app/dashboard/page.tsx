@@ -15,7 +15,9 @@ import {
   Edit2,
   CheckCircle2,
   ChevronRight,
-  QrCode
+  QrCode,
+  Mic,
+  Camera
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -318,16 +320,41 @@ export default function Dashboard() {
                   {createList.isPending ? "Criando..." : "Criar Lista"}
                 </button>
 
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trigger("medium")
+                      alert("Voz para Lista (GROQ) em desenvolvimento!")
+                    }}
+                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5"
+                  >
+                    <Mic className="w-4 h-4 text-indigo-500" />
+                    Via Áudio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trigger("medium")
+                      alert("Foto de Papel para Lista (GROQ Vision) em desenvolvimento!")
+                    }}
+                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5"
+                  >
+                    <Camera className="w-4 h-4 text-indigo-500" />
+                    Via Foto
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
                     trigger("medium")
-                    alert("Funcionalidade de Câmera (QR Scanner) em desenvolvimento para a próxima sprint!")
+                    alert("Scanner de QR Code para entrar em listas em desenvolvimento!")
                   }}
-                  className="w-full py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-[1.25rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 shadow-sm"
+                  className="w-full py-4 bg-white dark:bg-zinc-950 text-indigo-500 rounded-[1.25rem] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border border-indigo-500/20 shadow-sm"
                 >
-                  <QrCode className="w-4 h-4 text-indigo-500" />
-                  Ler QR CODE
+                  <QrCode className="w-4 h-4" />
+                  Entrar via QR CODE
                 </button>
               </div>
             </form>
