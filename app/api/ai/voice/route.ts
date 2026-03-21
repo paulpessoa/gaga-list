@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || profile.credits < 1) {
+      return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 1 grão para usar a voz.' }, { status: 403 });
+    }
+
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Configuração de IA ausente (GROQ_API_KEY)' }, { status: 500 });
@@ -45,6 +58,15 @@ export async function POST(request: Request) {
 
     const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
     const items = Array.isArray(result) ? result : result.items || [];
+
+    // Deduzir créditos e logar
+    await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
+    await (supabase as any).from('ai_usage_logs').insert({
+      user_id: user.id,
+      feature: 'voice',
+      cost: 1,
+      model_used: 'whisper-large-v3 + llama-3.3'
+    });
 
     return NextResponse.json({ 
       transcription: text,

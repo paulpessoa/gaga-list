@@ -1,9 +1,22 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { cleanBase64Image } from '@/lib/ai-utils';
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || profile.credits < 2) {
+      return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 2 grãos para escanear fotos.' }, { status: 403 });
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Configuração de IA ausente' }, { status: 500 });
@@ -45,6 +58,15 @@ export async function POST(request: Request) {
     const content = response.choices[0]?.message?.content || '{}';
     const result = JSON.parse(content);
     const items = Array.isArray(result) ? result : (result.items || result.list || []);
+
+    // Deduzir créditos e logar
+    await (supabase as any).from('profiles').update({ credits: profile.credits - 2 }).eq('id', user.id);
+    await (supabase as any).from('ai_usage_logs').insert({
+      user_id: user.id,
+      feature: 'ocr',
+      cost: 2,
+      model_used: 'gpt-4o-mini'
+    });
 
     return NextResponse.json({ items });
 

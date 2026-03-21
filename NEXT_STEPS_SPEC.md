@@ -1,30 +1,40 @@
-# 🚀 Fase 4: Ecossistema de Receitas & Catálogo
+# 🚀 Lista Pronta - Roadmap de Produto & Arquitetura (Staff Level)
 
-Este documento guia a transformação do app em um assistente culinário e catálogo pessoal de produtos.
+Este documento guia a evolução do aplicativo de um MVP funcional para um produto SaaS escalável, documentado e rentável.
 
 ---
 
-## 🎨 1. Refatoração & Performance (Sprint de Arrumação)
-- [ ] **Extração de Componentes:** Mover o `ListCard` e modais de IA do Dashboard para arquivos separados em `components/dashboard/`.
-- [x] **Type Safety:** Tipos do Supabase atualizados manualmente para incluir `my_products` e `recipes`.
-- [ ] **Flattening de Rotas:** Mover conteúdo de `/dashboard/*` para a raiz `/` para URLs mais curtas. (KISS)
-- [ ] **Limpeza de UI:** Remover componentes não utilizados (ex: QR Scanner genérico).
+## 🎨 Fase 4: Refatoração & Reestruturação (Atual)
+- [ ] **Refatoração do Dashboard:** Extrair `ListCard` e modais para `components/dashboard/` (Limpando o `page.tsx`).
+- [ ] **Flattening de Rotas (KISS):** Mover rotas de `/dashboard/*` para a raiz `/` (ex: `/recipes`, `/products`).
+- [ ] **Documentação Contínua (ADR):** Criar pasta `docs/adr/` (Architecture Decision Records) para registrar o "Porquê" das decisões. Servirá como roteiro para vídeos do YouTube.
 
-## 🥘 2. Receitas Inteligentes (Gemini 1.5 Flash)
-- [x] **Infra de Receitas:** Tabela `recipes` criada no banco.
-- [x] **Nova Tela de Receitas:** Listar receitas sugeridas pela IA com base em itens frequentes do usuário.
-- [x] **Gerador de Lista via Receita:** Botão "Transformar em Lista" que cria uma nova lista com todos os ingredientes necessários.
-- [x] **Salvar Receitas:** Persistência de sugestões da IA no perfil do usuário.
-- [ ] ~~Busca de Receitas por Voz:~~ Removido para simplificação (KISS). O usuário pode usar o ditado do teclado.
+---
 
-## 🛍️ 3. Catálogo "Meus Produtos"
-- [x] **Tela de Meus Produtos:** Visualizar todos os itens escaneados via AI Vision (em `/dashboard/products`).
-- [x] **Busca & Filtros:** Organizar produtos por nome e marca.
-- [x] **Navegação:** `TabBar` atualizada com link direto para o catálogo.
+## 💰 Fase 5: Monetização & Gamificação de IA
+- [ ] **Sistema de Créditos ("Grãos"):** 
+  - Banco de Dados: Criar tabela `user_credits` (Free Tier vs. Paid).
+  - UI do Usuário: Exibir saldo de "Grãos" (ex: "Você tem 500 grãos"). Geração de IA custa N grãos.
+- [ ] **Gateway de Pagamento:** 
+  - Integrar Stripe ou Apacate Pay para compra de pacotes de "Grãos" ou Assinatura Premium.
+- [ ] **Admin Dashboard (Backoffice):** 
+  - Rota protegida (ex: `/admin`) apenas para o dono do sistema.
+  - Métricas: Custo da API (Gemini/Groq) vs. Consumo de Créditos vs. Receita.
+  - Controle de Usuários: Capacidade de dar bônus de créditos para usuários beta.
 
-## 🤖 4. IA Avançada (Gemini / GROQ)
-- [x] **OCR de Lista:** Criar lista a partir de foto de papel (Whisper Vision).
-- [ ] ~~Limites de IA:~~ Adiado. Focar em UX antes de custos de escala.
+---
+
+## 🛡️ Fase 6: Qualidade de Engenharia & Telemetria
+- [ ] **Testes Automatizados:**
+  - *Unitários:* Testar utilitários e funções isoladas (Vitest).
+  - *Integração:* Testar RLS do Supabase.
+  - *E2E (Ponta-a-Ponta):* Testar fluxo crítico com Playwright (Login -> Criar Lista -> Adicionar Item).
+- [ ] **Acessibilidade (A11y):**
+  - Revisar contrastes, navegação por teclado e `aria-labels` seguindo as diretrizes WCAG 2.1.
+- [ ] **Observabilidade & Telemetria:**
+  - Integrar *Sentry* para captura de exceções no frontend e backend.
+  - Integrar *PostHog* ou aprofundar *Clarity* para mapas de calor e funil de conversão.
+  - Log estruturado nas Edge Functions.
 
 ---
 *Assinado: Staff Engineer & Product Owner.*

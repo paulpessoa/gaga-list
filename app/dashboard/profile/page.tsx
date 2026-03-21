@@ -15,7 +15,8 @@ import {
   Camera,
   ChevronRight,
   CheckCircle2,
-  ShieldAlert
+  ShieldAlert,
+  Sparkles
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
@@ -248,6 +249,18 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSave} className="space-y-6">
+            
+            <div className="bg-gradient-to-br from-indigo-500/10 to-purple-600/10 rounded-3xl p-6 border border-indigo-500/20 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-indigo-500">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Energia IA</span>
+                </div>
+                <Link href="/dashboard/credits" className="px-4 py-2 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Ver Meus Grãos</Link>
+              </div>
+              <p className="text-xs text-zinc-500">Acompanhe seu saldo e recarregue seus créditos mágicos para usar a Inteligência Artificial.</p>
+            </div>
+
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />

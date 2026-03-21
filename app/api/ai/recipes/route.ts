@@ -1,8 +1,22 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
+
+    // 1. Verificar Créditos (Grãos)
+    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || profile.credits < 1) {
+      return NextResponse.json({ error: 'Energia insuficiente. Recarregue seus grãos.' }, { status: 403 });
+    }
+
     const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Configuração de IA ausente (GOOGLE_AI_STUDIO_API_KEY)' }, { status: 500 });
@@ -34,6 +48,15 @@ export async function POST(request: Request) {
     const response = result.response;
     const text = response.text();
     
+    // 2. Deduzir crédito e logar
+    await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
+    await (supabase as any).from('ai_usage_logs').insert({
+      user_id: user.id,
+      feature: 'recipe',
+      cost: 1,
+      model_used: 'gemini-1.5-flash'
+    });
+
     return NextResponse.json(JSON.parse(text));
 
   } catch (error: any) {
