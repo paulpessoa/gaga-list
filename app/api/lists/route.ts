@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { ListsService } from '@/services/lists.service';
 import { createClient } from '@/lib/supabase/server';
+import { sanitizeString } from '@/lib/utils';
 
 /**
  * GET /api/lists
@@ -55,11 +56,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Título da lista é obrigatório' }, { status: 400 });
     }
 
-    // 3. Chamar o Service
+    // 3. Chamar o Service com Sanitização
     const newList = await ListsService.createList(supabase, {
       owner_id: user.id,
-      title: body.title,
-      description: body.description || null,
+      title: sanitizeString(body.title, 100),
+      description: body.description ? sanitizeString(body.description, 255) : null,
       color_theme: body.color_theme || 'blue',
       icon: body.icon || '🛒',
     });

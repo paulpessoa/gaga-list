@@ -49,6 +49,7 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState("")
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [pushSubscription, setPushSubscription] = useState<Json | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isPushSupported, setIsPushSupported] = useState(false)
@@ -87,6 +88,7 @@ export default function ProfilePage() {
             setAvatarUrl(data.avatar_url)
             setPhone(data.phone || "")
             setPushSubscription(data.push_subscription)
+            setIsAdmin(data.is_admin || false)
           }
         } catch (err) {
           console.error("Erro ao carregar perfil:", err)
@@ -349,6 +351,14 @@ export default function ProfilePage() {
             </div>
 
             <div className="pt-6 border-t border-zinc-100 dark:border-zinc-900/50">
+              {isAdmin && (
+                <Link 
+                  href="/admin"
+                  className="w-full mb-4 py-4 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-xl shadow-red-500/20 active:scale-95 transition-all"
+                >
+                  <ShieldAlert className="w-4 h-4" /> Acessar Painel Staff
+                </Link>
+              )}
               <div className="bg-red-500/5 dark:bg-red-500/10 rounded-3xl p-6 border border-red-500/10 space-y-4">
                 <div className="flex items-center gap-2 text-red-500">
                   <ShieldAlert className="w-4 h-4" />

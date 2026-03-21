@@ -33,9 +33,11 @@ export async function POST(request: Request) {
 
     const prompt = type === 'from_list' 
       ? `Você é um Chef Gourmet. Baseado nesta lista de compras: ${items.join(', ')}, sugira 3 receitas criativas e práticas. Priorize o aproveitamento total dos ingredientes.
+         REGRA DE SEGURANÇA: Se a lista contiver majoritariamente itens não comestíveis (ex: eletrônicos, ferramentas, limpeza) que não podem compor uma receita, NÃO gere receitas. Em vez disso, explique o motivo.
          Retorne um JSON com a chave "recipes" contendo um array de objetos. 
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`
       : `Você é um Chef Gourmet. Sugira uma receita detalhada para: "${items[0]}".
+         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível ou um ingrediente culinário, NÃO gere a receita.
          Retorne un JSON com a chave "recipes" contendo um array com essa única receita.
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`;
 
@@ -48,6 +50,14 @@ export async function POST(request: Request) {
     // Limpar markdown se a IA retornar
     const cleanedText = text.replace(/```json|```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
+
+    if (parsedData.error || (!parsedData.recipes && !parsedData.title)) {
+       // Se a IA retornar erro de segurança ou não gerar receitas
+       return NextResponse.json({ 
+         error: parsedData.error || "A IA identificou itens não comestíveis. Por favor, use ingredientes culinários.",
+         recipes: [] 
+       }, { status: 200 }); // Status 200 para o front tratar a mensagem
+    }
 
     // 2. Deduzir crédito e logar
     await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);

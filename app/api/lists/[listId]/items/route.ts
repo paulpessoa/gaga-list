@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ItemsService } from '@/services/items.service';
 import { createClient } from '@/lib/supabase/server';
+import { sanitizeString } from '@/lib/utils';
 
 export async function GET(
   request: Request,
@@ -45,13 +46,14 @@ export async function POST(
       return NextResponse.json({ error: 'Nome do item é obrigatório' }, { status: 400 });
     }
 
+    // Criar item com Sanitização
     const newItem = await ItemsService.createItem(supabase, {
       list_id: listId,
       added_by: user.id,
-      name: body.name,
+      name: sanitizeString(body.name, 100),
       quantity: body.quantity || 1,
-      unit: body.unit || null,
-      category: body.category || null,
+      unit: body.unit ? sanitizeString(body.unit, 20) : null,
+      category: body.category ? sanitizeString(body.category, 50) : null,
     });
 
     return NextResponse.json({ data: newItem }, { status: 201 });

@@ -436,10 +436,6 @@ export function ShareModal({
               <X className="w-7 h-7" />
             </button>
 
-            <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6">
-              <QrCode className="w-8 h-8 text-indigo-500" />
-            </div>
-
             <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">
               Convite Rápido
             </h2>
