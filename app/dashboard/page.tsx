@@ -185,112 +185,80 @@ export default function Dashboard() {
             const isOwner = list.owner_id === user?.id
 
             return (
-              <div key={list.id} className="relative group/card">
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (selectedListId === list.id) {
-                      window.location.href = `/dashboard/lists/${list.id}`;
-                    } else {
-                      trigger("light");
-                      setSelectedListId(list.id);
-                    }
-                  }}
-                  className={`glass-panel rounded-3xl p-7 flex flex-col justify-between min-h-[180px] cursor-pointer transition-all duration-300 border-2 ${selectedListId === list.id ? "border-indigo-500 shadow-2xl scale-[1.02] bg-indigo-50/5 dark:bg-indigo-500/5" : "border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
-                >
-                  <div>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4 overflow-hidden">
-                        <div className="w-12 h-12 shrink-0 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-2xl shadow-inner">
-                          {list.icon || "🛒"}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          {editingListId === list.id ? (
-                            <input
-                              autoFocus
-                              value={editTitle}
-                              onChange={(e) => setEditTitle(e.target.value)}
-                              onBlur={() => submitRename(list.id)}
-                              onKeyDown={(e) => e.key === "Enter" && submitRename(list.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold text-lg rounded px-2 py-0.5 outline-none ring-2 ring-indigo-500"
-                            />
-                          ) : (
-                            <h3 className={`font-bold text-lg truncate transition-colors ${selectedListId === list.id ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-900 dark:text-white"}`}>
-                              {list.title}
-                            </h3>
-                          )}
-                          <span className="text-xs text-zinc-500 dark:text-zinc-500 font-medium">
-                            {isOwner ? "Sua lista" : "Colaborador"}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Botão de Abrir Destacado quando selecionado */}
-                      {selectedListId === list.id && (
-                        <div className="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-                           <ChevronRight className="w-6 h-6" />
-                        </div>
-                      )}
+              <div 
+                key={list.id} 
+                onClick={() => {
+                  trigger("light");
+                  window.location.href = `/dashboard/lists/${list.id}`;
+                }}
+                className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[200px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group"
+              >
+                {/* Header do Card */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-4 overflow-hidden">
+                    <div className="w-12 h-12 shrink-0 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-2xl shadow-inner border border-indigo-500/10">
+                      {list.icon || "🛒"}
                     </div>
-
-                    {/* Estatísticas de Itens */}
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                        <span className="text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Progresso</span>
-                        <span className="text-zinc-900 dark:text-zinc-100">{completedItems}/{totalItems} itens</span>
-                      </div>
-                      <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden shadow-inner">
-                        <div 
-                          className="h-full bg-indigo-500 transition-all duration-500 ease-out"
-                          style={{ width: `${progress}%` }}
-                        />
+                    <div className="flex flex-col min-w-0">
+                      <h3 className="font-black text-lg text-zinc-900 dark:text-white truncate group-hover:text-indigo-500 transition-colors">
+                        {list.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isOwner ? "bg-indigo-500/10 text-indigo-600" : "bg-amber-500/10 text-amber-600"}`}>
+                          {isOwner ? "Proprietário" : "Colaborador"}
+                        </span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                    <div className="flex items-center gap-2">
-                       <div className="flex -space-x-2">
-                          <div className="w-7 h-7 rounded-full bg-indigo-500 border-2 border-white dark:border-zinc-950 flex items-center justify-center text-[9px] font-black text-white shadow-sm">
-                            {isOwner ? "EU" : "CL"}
-                          </div>
-                       </div>
-                       <span className="text-[10px] text-zinc-400 font-medium uppercase tracking-tighter">
-                          Ativo agora
-                       </span>
-                    </div>
-                    {selectedListId !== list.id && <ChevronRight className="w-4 h-4 text-zinc-300 dark:text-zinc-700 transition-all" />}
                   </div>
                 </div>
 
-                {/* Ações do Card - Visíveis quando selecionado ou hover no PC */}
-                <div className={`absolute top-4 right-4 flex items-center gap-1 transition-all z-10 ${selectedListId === list.id ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[-4px] group-hover/card:opacity-100 group-hover/card:translate-y-0"}`}>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleRename(list.id, list.title)
-                    }}
-                    className="p-2 rounded-xl bg-white/90 dark:bg-zinc-900/90 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  
-                  {isOwner && (
+                {/* Corpo - Progresso */}
+                <div className="mt-4">
+                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-400">
+                    <span>Progresso</span>
+                    <span className="text-zinc-900 dark:text-zinc-100">{completedItems}/{totalItems} itens</span>
+                  </div>
+                  <div className="w-full h-2.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-full overflow-hidden shadow-inner border border-zinc-200/50 dark:border-white/5">
+                    <div 
+                      className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all duration-700 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Footer - Ações */}
+                <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={(e) => {
-                        e.preventDefault()
                         e.stopPropagation()
-                        if (confirm("Mover esta lista para a lixeira?")) {
-                          deleteList.mutate(list.id)
-                        }
+                        handleRename(list.id, list.title)
                       }}
-                      className="p-2 rounded-xl bg-white/90 dark:bg-zinc-900/90 text-zinc-500 hover:text-red-500 hover:bg-white dark:hover:bg-zinc-800 shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all"
+                      className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
+                      title="Renomear"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
-                  )}
+                    
+                    {isOwner && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm("Mover para a lixeira?")) {
+                            deleteList.mutate(list.id)
+                          }
+                        }}
+                        className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-red-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
+                        title="Excluir"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
+                    Acessar <ChevronRight className="w-3 h-3 ml-1" />
+                  </div>
                 </div>
               </div>
             )

@@ -15,7 +15,10 @@ import {
   Trash2,
   Camera,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Mic,
+  MapPin,
+  ShieldCheck
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
@@ -44,25 +47,41 @@ export default function ProfilePage() {
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Perfil
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
-  const [locationEnabled, setLocationEnabled] = useState(false)
-  const [allowNotifications, setAllowNotifications] = useState(true)
   const [pushSubscription, setPushSubscription] = useState<Json | null>(null)
 
+  // Hardware/Permissões Lógicas
+  const [locationEnabled, setLocationEnabled] = useState(true)
+  const [cameraEnabled, setCameraEnabled] = useState(true)
+  const [micEnabled, setMicEnabled] = useState(true)
+  const [hapticsEnabled, setHapticsEnabled] = useState(true)
+
+  // Notificações Push
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isPushSupported, setIsPushSupported] = useState(false)
   const [isPushProcessing, setIsPushProcessing] = useState(false)
 
+  // Senha
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
+  // UI
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
+    // Carregar preferências de hardware do localStorage
+    if (typeof window !== "undefined") {
+      setLocationEnabled(localStorage.getItem("hw_location") !== "false")
+      setCameraEnabled(localStorage.getItem("hw_camera") !== "false")
+      setMicEnabled(localStorage.getItem("hw_mic") !== "false")
+      setHapticsEnabled(localStorage.getItem("hw_haptics") !== "false")
+    }
+
     if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
       setIsPushSupported(true)
       navigator.serviceWorker.ready.then((registration) => {
@@ -85,9 +104,7 @@ export default function ProfilePage() {
           if (data) {
             setFullName(data.full_name || "")
             setAvatarUrl(data.avatar_url)
-            setLocationEnabled(!!data.location_enabled)
             setPhone(data.phone || "")
-            setAllowNotifications(!!data.allow_notifications)
             setPushSubscription(data.push_subscription)
           }
         } catch (err) {
@@ -97,6 +114,13 @@ export default function ProfilePage() {
       fetchProfile()
     }
   }, [user, supabase])
+
+  const toggleHardware = (key: string, current: boolean, setter: (v: boolean) => void) => {
+    const newValue = !current
+    setter(newValue)
+    localStorage.setItem(key, String(newValue))
+    trigger("light")
+  }
 
   const handleTogglePush = async () => {
     setIsPushProcessing(true)
@@ -160,9 +184,7 @@ export default function ProfilePage() {
     try {
       const updateData: ProfileUpdate = {
         full_name: fullName,
-        location_enabled: locationEnabled,
         phone: phone,
-        allow_notifications: allowNotifications,
         push_subscription: pushSubscription
       }
       const { error: profileError } = await (supabase.from("profiles") as any).update(updateData).eq("id", user.id)
@@ -243,6 +265,7 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSave} className="space-y-6">
+            {/* Dados Pessoais */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />
@@ -273,10 +296,61 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* Hardware & Privacidade */}
+            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
+              <div className="flex items-center gap-2 text-indigo-500 mb-2">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Hardware & Privacidade</span>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-4 h-4 text-zinc-400" />
+                    <span className="text-sm font-medium">GPS / Localização</span>
+                  </div>
+                  <button type="button" onClick={() => toggleHardware("hw_location", locationEnabled, setLocationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Camera className="w-4 h-4 text-zinc-400" />
+                    <span className="text-sm font-medium">Câmera (Scanner)</span>
+                  </div>
+                  <button type="button" onClick={() => toggleHardware("hw_camera", cameraEnabled, setCameraEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${cameraEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${cameraEnabled ? "left-6" : "left-1"}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Mic className="w-4 h-4 text-zinc-400" />
+                    <span className="text-sm font-medium">Microfone (Áudio AI)</span>
+                  </div>
+                  <button type="button" onClick={() => toggleHardware("hw_mic", micEnabled, setMicEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${micEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${micEnabled ? "left-6" : "left-1"}`} />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Bell className="w-4 h-4 text-zinc-400" />
+                    <span className="text-sm font-medium">Vibração Háptica</span>
+                  </div>
+                  <button type="button" onClick={() => toggleHardware("hw_haptics", hapticsEnabled, setHapticsEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${hapticsEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
+                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${hapticsEnabled ? "left-6" : "left-1"}`} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Notificações Push */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <Bell className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações do Sistema</span>
               </div>
               {isPushSupported ? (
                 <button
@@ -301,6 +375,7 @@ export default function ProfilePage() {
               )}
             </div>
 
+            {/* Segurança */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-emerald-500 mb-2">
                 <Lock className="w-4 h-4" />
@@ -321,11 +396,12 @@ export default function ProfilePage() {
               </button>
             </div>
 
+            {/* Gerenciar Dados */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-zinc-500">
                   <Trash2 className="w-4 h-4" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Gerenciar Dados</span>
                 </div>
                 <Link 
                   href="/dashboard/trash"
@@ -335,6 +411,12 @@ export default function ProfilePage() {
                 </Link>
               </div>
             </div>
+
+            {message && (
+              <div className={`p-4 rounded-2xl text-xs font-bold text-center animate-in fade-in zoom-in-95 ${message.includes("Erro") ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"}`}>
+                {message}
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               <button type="button" onClick={handleLogout} className="w-full py-4 bg-zinc-100 dark:bg-zinc-900/50 hover:bg-zinc-200 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-zinc-200 dark:border-white/5 active:scale-95">
