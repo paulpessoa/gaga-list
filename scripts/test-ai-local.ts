@@ -1,7 +1,7 @@
-import * as dotenv from 'dotenv';
-import Groq from 'groq-sdk';
-import * as fs from 'fs';
-import * as path from 'path';
+const dotenv = require('dotenv');
+const Groq = require('groq-sdk');
+const fs = require('fs');
+const path = require('path');
 
 dotenv.config({ path: '.env' });
 
@@ -31,7 +31,7 @@ async function testVision() {
           ],
         },
       ],
-      model: 'llama-3.2-11b-vision-preview',
+      model: 'llama-3.2-90b-vision-preview',
     });
 
     console.log('Resultado Vision:', completion.choices[0]?.message?.content);

@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
 import { cleanBase64Image } from '@/lib/ai-utils';
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json({ error: 'Configuração de IA ausente (GROQ_API_KEY)' }, { status: 500 });
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Configuração de IA ausente (OPENAI_API_KEY)' }, { status: 500 });
     }
+
+    const openai = new OpenAI({ apiKey });
 
     const { image } = await request.json();
 
@@ -20,14 +19,15 @@ export async function POST(request: Request) {
 
     const finalImage = cleanBase64Image(image);
 
-    const completion = await groq.chat.completions.create({
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { type: 'text', text: 'Identifique este produto de supermercado. Retorne um JSON com: "name", "brand", "category", "benefits" (breve texto), "suggested_uses" (array de ideias). Retorne APENAS o JSON.' },
+            { type: "text", text: "Identifique este produto de supermercado. Retorne um JSON com: \"name\", \"brand\", \"category\", \"benefits\" (breve texto), \"suggested_uses\" (array de ideias). Retorne APENAS o JSON." },
             {
-              type: 'image_url',
+              type: "image_url",
               image_url: {
                 url: finalImage,
               },
@@ -35,11 +35,10 @@ export async function POST(request: Request) {
           ],
         },
       ],
-      model: 'llama-3.2-11b-vision-preview',
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
     return NextResponse.json({ data: result });
 
   } catch (error: any) {
