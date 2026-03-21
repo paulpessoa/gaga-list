@@ -250,43 +250,43 @@ export type Database = {
       }
       my_products: {
         Row: {
-          id: string
-          user_id: string
-          name: string
-          category: string | null
-          brand: string | null
           barcode: string | null
-          image_url: string | null
-          metadata: Json
-          last_price: number | null
+          brand: string | null
+          category: string | null
           created_at: string
+          id: string
+          image_url: string | null
+          last_price: number | null
+          metadata: Json
+          name: string
           updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          name: string
-          category?: string | null
-          brand?: string | null
           barcode?: string | null
-          image_url?: string | null
-          metadata?: Json
-          last_price?: number | null
+          brand?: string | null
+          category?: string | null
           created_at?: string
+          id?: string
+          image_url?: string | null
+          last_price?: number | null
+          metadata?: Json
+          name: string
           updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          category?: string | null
-          brand?: string | null
           barcode?: string | null
-          image_url?: string | null
-          metadata?: Json
-          last_price?: number | null
+          brand?: string | null
+          category?: string | null
           created_at?: string
+          id?: string
+          image_url?: string | null
+          last_price?: number | null
+          metadata?: Json
+          name?: string
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
@@ -388,26 +388,110 @@ export type Database = {
         }
         Relationships: []
       }
+      recipes: {
+        Row: {
+          ai_metadata: Json
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          id: string
+          image_url: string | null
+          ingredients: Json
+          instructions: Json
+          prep_time: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_metadata?: Json
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          prep_time?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_metadata?: Json
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          instructions?: Json
+          prep_time?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       calculate_distance: {
-        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Args: {
+          lat1: number
+          lat2: number
+          lon1: number
+          lon2: number
+        }
         Returns: number
       }
-      check_collab: { Args: { l_id: string }; Returns: boolean }
+      check_collab: {
+        Args: {
+          l_id: string
+        }
+        Returns: boolean
+      }
       create_list: {
-        Args: { p_description?: string; p_title: string }
+        Args: {
+          p_description?: string
+          p_title: string
+        }
         Returns: {
           id: string
         }[]
       }
-      is_list_collaborator: { Args: { l_id: string }; Returns: boolean }
-      is_list_owner: { Args: { l_id: string }; Returns: boolean }
-      join_list_via_token: { Args: { token_uuid: string }; Returns: string }
-      permanently_delete_old_lists: { Args: never; Returns: undefined }
+      is_list_collaborator: {
+        Args: {
+          l_id: string
+        }
+        Returns: boolean
+      }
+      is_list_owner: {
+        Args: {
+          l_id: string
+        }
+        Returns: boolean
+      }
+      join_list_via_token: {
+        Args: {
+          token_uuid: string
+        }
+        Returns: string
+      }
+      permanently_delete_old_lists: {
+        Args: never
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
