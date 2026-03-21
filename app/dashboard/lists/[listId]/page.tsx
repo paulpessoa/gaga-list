@@ -43,13 +43,18 @@ import { ShareModal } from "@/components/lists/share-modal"
 import { ListChat } from "@/components/lists/list-chat"
 import { Collaborator, Item } from "@/types"
 import Image from "next/image"
-import { COMMON_GROCERY_ITEMS, GrocerySuggestion } from "@/lib/constants/grocery-items"
+import {
+  COMMON_GROCERY_ITEMS,
+  GrocerySuggestion
+} from "@/lib/constants/grocery-items"
+import { useRouter } from "next/navigation"
 
 export default function ListDetail({
   params
 }: {
   params: Promise<{ listId: string }>
 }) {
+  const router = useRouter()
   const { listId } = use(params)
   const searchParams = useSearchParams()
   const { data: lists } = useLists()
@@ -121,7 +126,7 @@ export default function ListDetail({
 
   const suggestions = useMemo(() => {
     if (!newItemName.trim()) return []
-    return COMMON_GROCERY_ITEMS.filter(item => 
+    return COMMON_GROCERY_ITEMS.filter((item) =>
       item.name.toLowerCase().includes(newItemName.toLowerCase())
     ).slice(0, 5)
   }, [newItemName])
@@ -129,7 +134,7 @@ export default function ListDetail({
   const handleAddItem = (name: string, category?: string, unit?: string) => {
     if (!name.trim()) return
     trigger("medium")
-    createItem.mutate({ 
+    createItem.mutate({
       name: name.trim(),
       category: category || null,
       unit: unit || null
@@ -143,7 +148,7 @@ export default function ListDetail({
     const isPurchased = !item.is_purchased
     updateItem.mutate({
       itemId: item.id,
-      updates: { 
+      updates: {
         is_purchased: isPurchased,
         checked_by: isPurchased ? user?.id : null,
         checked_at: isPurchased ? new Date().toISOString() : null
@@ -193,14 +198,20 @@ export default function ListDetail({
                     onChange={(e) => setEditTitle(e.target.value)}
                     onBlur={() => {
                       if (editTitle.trim() && editTitle !== list?.title) {
-                        updateList.mutate({ listId, updates: { title: editTitle } })
+                        updateList.mutate({
+                          listId,
+                          updates: { title: editTitle }
+                        })
                       }
                       setIsEditingTitle(false)
                     }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         if (editTitle.trim() && editTitle !== list?.title) {
-                          updateList.mutate({ listId, updates: { title: editTitle } })
+                          updateList.mutate({
+                            listId,
+                            updates: { title: editTitle }
+                          })
                         }
                         setIsEditingTitle(false)
                       }
@@ -209,7 +220,7 @@ export default function ListDetail({
                     className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500"
                   />
                 ) : (
-                  <h1 
+                  <h1
                     onClick={() => {
                       setEditTitle(list?.title || "")
                       setIsEditingTitle(true)
@@ -221,7 +232,8 @@ export default function ListDetail({
                 )}
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                    {pendingCount} {pendingCount === 1 ? "restante" : "restantes"}
+                    {pendingCount}{" "}
+                    {pendingCount === 1 ? "restante" : "restantes"}
                   </span>
                 </div>
               </div>
@@ -233,22 +245,22 @@ export default function ListDetail({
                 onClick={() => setIsShareModalOpen(true)}
               >
                 {otherCollaborators.slice(0, 3).map((collab, i) => (
-                    <div
-                      key={collab.user_id || `collab-${i}`}
-                      className="w-9 h-9 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
-                      style={{ zIndex: 10 - i }}
-                    >
-                      <Image
-                        src={
-                          collab.profiles?.avatar_url ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
-                        }
-                        width={36}
-                        height={36}
-                        className="object-cover"
-                        alt="Avatar"
-                      />
-                    </div>
+                  <div
+                    key={collab.user_id || `collab-${i}`}
+                    className="w-9 h-9 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
+                    style={{ zIndex: 10 - i }}
+                  >
+                    <Image
+                      src={
+                        collab.profiles?.avatar_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
+                      }
+                      width={36}
+                      height={36}
+                      className="object-cover"
+                      alt="Avatar"
+                    />
+                  </div>
                 ))}
                 <div className="w-9 h-9 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-3 shadow-inner">
                   <UserPlus className="w-4 h-4" />
@@ -283,8 +295,11 @@ export default function ListDetail({
       <div className="max-w-4xl mx-auto w-full p-6 flex flex-col gap-8">
         {/* ADD ITEM FORM COM AUTOCOMPLETE */}
         <div className="relative">
-          <form 
-            onSubmit={(e) => { e.preventDefault(); handleAddItem(newItemName); }} 
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleAddItem(newItemName)
+            }}
             className="flex gap-2"
           >
             <div className="relative flex-1">
@@ -294,8 +309,8 @@ export default function ListDetail({
                 value={newItemName}
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => {
-                  setNewItemName(e.target.value);
-                  setShowSuggestions(true);
+                  setNewItemName(e.target.value)
+                  setShowSuggestions(true)
                 }}
                 className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
               />
@@ -322,8 +337,12 @@ export default function ListDetail({
                   <div className="flex items-center gap-3">
                     <span className="text-lg">🛒</span>
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-white text-sm">{s.name}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase font-black">{s.category}</p>
+                      <p className="font-bold text-zinc-900 dark:text-white text-sm">
+                        {s.name}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 uppercase font-black">
+                        {s.category}
+                      </p>
                     </div>
                   </div>
                   <Plus className="w-4 h-4 text-zinc-300" />
@@ -349,8 +368,11 @@ export default function ListDetail({
         {/* LISTA DE ITENS */}
         <div className="flex flex-col gap-3">
           {isLoading ? (
-            [1, 2, 3].map(i => (
-              <div key={i} className="glass-panel rounded-2xl p-6 h-16 animate-pulse" />
+            [1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="glass-panel rounded-2xl p-6 h-16 animate-pulse"
+              />
             ))
           ) : filteredItems?.length === 0 ? (
             <div className="py-20 flex flex-col items-center justify-center gap-4 text-center">
@@ -358,8 +380,12 @@ export default function ListDetail({
                 <ShoppingCart className="w-10 h-10 text-zinc-200 dark:text-zinc-800" />
               </div>
               <div>
-                <p className="text-zinc-400 font-bold">Nenhum item encontrado</p>
-                <p className="text-zinc-500 text-xs">Comece a preencher sua lista!</p>
+                <p className="text-zinc-400 font-bold">
+                  Nenhum item encontrado
+                </p>
+                <p className="text-zinc-500 text-xs">
+                  Comece a preencher sua lista!
+                </p>
               </div>
             </div>
           ) : (
@@ -371,7 +397,7 @@ export default function ListDetail({
                 {/* Linha Principal do Item */}
                 <div className="flex items-center justify-between p-4 px-5">
                   <div className="flex items-center gap-4 flex-1">
-                    <button 
+                    <button
                       onClick={() => handleToggleItem(item)}
                       className="transition-transform active:scale-90"
                     >
@@ -383,12 +409,18 @@ export default function ListDetail({
                         <Circle className="w-7 h-7 text-zinc-200 dark:text-zinc-800 group-hover:text-indigo-500 transition-colors" />
                       )}
                     </button>
-                    
-                    <div 
+
+                    <div
                       className="flex flex-col flex-1 cursor-pointer min-w-0"
-                      onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
+                      onClick={() =>
+                        setExpandedItemId(
+                          expandedItemId === item.id ? null : item.id
+                        )
+                      }
                     >
-                      <span className={`font-bold text-sm truncate ${item.is_purchased ? "line-through text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-zinc-100"}`}>
+                      <span
+                        className={`font-bold text-sm truncate ${item.is_purchased ? "line-through text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-zinc-100"}`}
+                      >
                         {item.name}
                       </span>
                       <div className="flex items-center gap-2 mt-0.5">
@@ -402,13 +434,21 @@ export default function ListDetail({
                         )}
                         {item.is_purchased && item.checked_by_profile && (
                           <div className="flex items-center gap-1.5 ml-2">
-                             <div className="w-3.5 h-3.5 rounded-full bg-zinc-200 overflow-hidden">
-                                <Image 
-                                  src={item.checked_by_profile.avatar_url || `https://ui-avatars.com/api/?name=${item.checked_by_profile.full_name}&background=6366f1&color=fff`} 
-                                  width={14} height={14} alt="Avatar"
-                                />
-                             </div>
-                             <span className="text-[9px] font-bold text-zinc-500">Pego por {item.checked_by_profile.full_name?.split(' ')[0]}</span>
+                            <div className="w-3.5 h-3.5 rounded-full bg-zinc-200 overflow-hidden">
+                              <Image
+                                src={
+                                  item.checked_by_profile.avatar_url ||
+                                  `https://ui-avatars.com/api/?name=${item.checked_by_profile.full_name}&background=6366f1&color=fff`
+                                }
+                                width={14}
+                                height={14}
+                                alt="Avatar"
+                              />
+                            </div>
+                            <span className="text-[9px] font-bold text-zinc-500">
+                              Pego por{" "}
+                              {item.checked_by_profile.full_name?.split(" ")[0]}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -417,10 +457,18 @@ export default function ListDetail({
 
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
+                      onClick={() =>
+                        setExpandedItemId(
+                          expandedItemId === item.id ? null : item.id
+                        )
+                      }
                       className={`p-2 rounded-xl transition-all ${expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"}`}
                     >
-                      {expandedItemId === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      {expandedItemId === item.id ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -429,63 +477,89 @@ export default function ListDetail({
                 {expandedItemId === item.id && (
                   <div className="px-5 pb-6 pt-2 flex flex-col gap-5 border-t border-zinc-100 dark:border-zinc-900/50 animate-in slide-in-from-top-2 duration-300">
                     <div className="grid grid-cols-2 gap-4">
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Qtd / Medida</label>
-                          <div className="flex gap-2">
-                             <input 
-                                type="number"
-                                value={item.quantity}
-                                onChange={(e) => handleUpdateRichData(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                                className="w-16 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                             />
-                             <input 
-                                type="text"
-                                placeholder="un, kg, L..."
-                                value={item.unit || ""}
-                                onChange={(e) => handleUpdateRichData(item.id, 'unit', e.target.value)}
-                                className="flex-1 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                             />
-                          </div>
-                       </div>
-                       <div className="space-y-2">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Preço Unitário</label>
-                          <div className="relative">
-                             <input 
-                                type="number"
-                                step="0.01"
-                                placeholder="0,00"
-                                value={item.price || ""}
-                                onChange={(e) => handleUpdateRichData(item.id, 'price', parseFloat(e.target.value) || 0)}
-                                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                             />
-                             <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                          </div>
-                       </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                          Qtd / Medida
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleUpdateRichData(
+                                item.id,
+                                "quantity",
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
+                            className="w-16 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                          />
+                          <input
+                            type="text"
+                            placeholder="un, kg, L..."
+                            value={item.unit || ""}
+                            onChange={(e) =>
+                              handleUpdateRichData(
+                                item.id,
+                                "unit",
+                                e.target.value
+                              )
+                            }
+                            className="flex-1 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                          Preço Unitário
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="0.01"
+                            placeholder="0,00"
+                            value={item.price || ""}
+                            onChange={(e) =>
+                              handleUpdateRichData(
+                                item.id,
+                                "price",
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
+                            className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                          />
+                          <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">Observações</label>
-                        <textarea 
-                          placeholder="Ex: Marca preferida, ponto da carne..."
-                          value={item.notes || ""}
-                          onChange={(e) => handleUpdateRichData(item.id, 'notes', e.target.value)}
-                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none h-20 resize-none"
-                        />
+                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                        Observações
+                      </label>
+                      <textarea
+                        placeholder="Ex: Marca preferida, ponto da carne..."
+                        value={item.notes || ""}
+                        onChange={(e) =>
+                          handleUpdateRichData(item.id, "notes", e.target.value)
+                        }
+                        className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none h-20 resize-none"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                        <button
-                          onClick={() => handleDeleteItem(item.id)}
-                          className="flex items-center gap-2 py-2.5 px-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors text-[10px] font-black uppercase tracking-widest"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Remover Item
-                        </button>
-                        
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                           <Clock className="w-3.5 h-3.5" />
-                           Criado {new Date(item.created_at).toLocaleDateString()}
-                        </div>
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="flex items-center gap-2 py-2.5 px-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors text-[10px] font-black uppercase tracking-widest"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Remover Item
+                      </button>
+
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        <Clock className="w-3.5 h-3.5" />
+                        Criado {new Date(item.created_at).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -510,7 +584,7 @@ export default function ListDetail({
           removeCollaborator.mutate(userId, {
             onSuccess: () => {
               if (userId === user?.id) {
-                router.push('/dashboard');
+                router.push("/dashboard")
               }
             }
           })
