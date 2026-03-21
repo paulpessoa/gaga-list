@@ -212,19 +212,6 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link 
-              href="/dashboard/notifications"
-              onClick={() => trigger('light')}
-              className="relative p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 px-1">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
-
             {isOffline && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
                 <WifiOff className="w-3 h-3" />
