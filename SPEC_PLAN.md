@@ -61,7 +61,7 @@ Em cada card de colaborador dentro de uma lista, teremos uma "Action Bar" com 4 
 
 - [x] Criar tabela `list_messages` (se o chat for persistente) ou configurar um `Channel` Realtime puro.
 - [x] Criar o componente de Chat em tempo real (Drawer/Modal).
-- [x] Polimento no cálculo de distância e renderização do mapa no `cade-tu`.
+- [x] Polimento no cálculo de distância e renderização do mapa no `map`.
 
 ---
 

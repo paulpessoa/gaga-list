@@ -280,7 +280,7 @@ export default function ListDetail({
                   <MessageCircle className="w-5 h-5" />
                 </button>
                 <Link
-                  href={`/app/lists/${listId}/cade-tu`}
+                  href={`/app/lists/${listId}/map`}
                   onClick={() => trigger("light")}
                   className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95 shadow-sm border border-zinc-200 dark:border-zinc-800"
                 >
