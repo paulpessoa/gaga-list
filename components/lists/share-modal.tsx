@@ -287,6 +287,11 @@ export function ShareModal({
                                   collab.profiles?.email?.split("@")[0] ||
                                   "Usuário"}
                               </span>
+                              {collab.role === "owner" && (
+                                <span className="bg-indigo-500/10 text-indigo-500 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-indigo-500/20">
+                                  Dono
+                                </span>
+                              )}
                               {collab.profiles?.id &&
                                 isOnline(collab.profiles.id) && (
                                   <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
