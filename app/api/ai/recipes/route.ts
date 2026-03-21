@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * Gera receitas gourmet utilizando a IA do Gemini com base em uma lista de ingredientes ou um item específico.
+ * 
+ * PORQUÊ: Esta implementação centraliza a lógica de geração de conteúdo culinário no servidor para proteger
+ * a API Key e gerenciar o sistema de créditos (Grãos) de forma segura, garantindo que apenas usuários
+ * autenticados com saldo positivo possam utilizar o serviço.
+ * 
+ * @param {Request} request - O objeto da requisição contendo os itens e o tipo de geração.
+ * @returns {Promise<NextResponse>} - Resposta JSON com as receitas geradas ou erro.
+ */
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
@@ -12,8 +22,8 @@ export async function POST(request: Request) {
     }
 
     // 1. Verificar Créditos (Grãos)
-    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || profile.credits < 1) {
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || (profile.credits ?? 0) < 1) {
       return NextResponse.json({ error: 'Energia insuficiente. Recarregue seus grãos.' }, { status: 403 });
     }
 
@@ -60,7 +70,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Deduzir crédito e logar
-    await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
     await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'recipe',

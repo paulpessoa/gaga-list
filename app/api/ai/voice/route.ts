@@ -12,8 +12,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || profile.credits < 1) {
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || (profile.credits ?? 0) < 1) {
       return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 1 grão para usar a voz.' }, { status: 403 });
     }
 
@@ -69,8 +69,8 @@ export async function POST(request: Request) {
     }
 
     // Deduzir créditos e logar
-    await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
-    await (supabase as any).from('ai_usage_logs').insert({
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
+    await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'voice',
       cost: 1,

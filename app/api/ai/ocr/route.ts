@@ -12,8 +12,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile } = await (supabase as any).from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || profile.credits < 2) {
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || (profile.credits ?? 0) < 2) {
       return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 2 grãos para escanear fotos.' }, { status: 403 });
     }
 
@@ -60,8 +60,8 @@ export async function POST(request: Request) {
     const items = Array.isArray(result) ? result : (result.items || result.list || []);
 
     // Deduzir créditos e logar
-    await (supabase as any).from('profiles').update({ credits: profile.credits - 2 }).eq('id', user.id);
-    await (supabase as any).from('ai_usage_logs').insert({
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 2 }).eq('id', user.id);
+    await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'ocr',
       cost: 2,

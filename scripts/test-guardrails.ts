@@ -36,7 +36,7 @@ async function testGuardrails() {
     body: JSON.stringify({ items: ['Pneu de carro', 'Detergente', 'Martelo'], type: 'from_list' })
   })
   
-  const recipeData = await recipeRes.json()
+  const recipeData = await recipeRes.json() as any
   console.log('Status:', recipeRes.status)
   if (recipeData.error) {
     console.log('✅ Sucesso: IA recusou gerar receita para itens não comestíveis.')
@@ -61,7 +61,7 @@ async function testGuardrails() {
     body: JSON.stringify({ title: xssTitle })
   })
 
-  const listData = await listResCorrect.json()
+  const listData = await listResCorrect.json() as any
   if (listData.data && !listData.data.title.includes('<script>')) {
     console.log('✅ Sucesso: Título da lista sanitizado.')
     console.log('Título salvo:', listData.data.title)

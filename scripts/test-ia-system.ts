@@ -37,7 +37,7 @@ async function testSystem() {
   const baseUrl = 'http://localhost:3000'
 
   async function checkCredits() {
-    const { data: profile } = await supabaseAdmin.from('profiles').select('credits').eq('id', session.user.id).single()
+    const { data: profile } = await supabaseAdmin.from('profiles').select('credits').eq('id', session!.user.id).single()
     return profile?.credits || 0
   }
 

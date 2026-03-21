@@ -40,7 +40,7 @@ export default function AdminDashboard() {
       }
 
       // 1. Verificar se é admin
-      const { data: profile } = await (supabase as any).from('profiles')
+      const { data: profile } = await supabase.from('profiles')
         .select('is_admin')
         .eq('id', user.id)
         .single()
@@ -53,8 +53,8 @@ export default function AdminDashboard() {
       setIsAdmin(true)
 
       // 2. Buscar Métricas (Em um app de produção, isso viria de uma RPC no banco para otimização)
-      const { count: usersCount } = await (supabase as any).from('profiles').select('*', { count: 'exact', head: true })
-      const { data: logsData } = await (supabase as any).from('ai_usage_logs').select('feature, cost')
+      const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
+      const { data: logsData } = await supabase.from('ai_usage_logs').select('feature, cost')
       
       let totalSpent = 0
       const counts = { recipe: 0, ocr: 0, vision: 0 }
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
       })
 
       // 3. Buscar logs recentes detalhados
-      const { data: recent } = await (supabase as any).from('ai_usage_logs')
+      const { data: recent } = await supabase.from('ai_usage_logs')
         .select('*, profiles(full_name, email)')
         .order('created_at', { ascending: false })
         .limit(10)

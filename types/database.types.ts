@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_logs: {
+        Row: {
+          cost: number
+          created_at: string
+          feature: string
+          id: string
+          model_used: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          feature: string
+          id?: string
+          model_used?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          feature?: string
+          id?: string
+          model_used?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           added_by: string | null
@@ -342,9 +377,11 @@ export type Database = {
           allow_notifications: boolean | null
           avatar_url: string | null
           created_at: string
+          credits: number | null
           email: string
           full_name: string | null
           id: string
+          is_admin: boolean | null
           last_lat: number | null
           last_lng: number | null
           location_enabled: boolean | null
@@ -358,9 +395,11 @@ export type Database = {
           allow_notifications?: boolean | null
           avatar_url?: string | null
           created_at?: string
+          credits?: number | null
           email: string
           full_name?: string | null
           id: string
+          is_admin?: boolean | null
           last_lat?: number | null
           last_lng?: number | null
           location_enabled?: boolean | null
@@ -374,9 +413,11 @@ export type Database = {
           allow_notifications?: boolean | null
           avatar_url?: string | null
           created_at?: string
+          credits?: number | null
           email?: string
           full_name?: string | null
           id?: string
+          is_admin?: boolean | null
           last_lat?: number | null
           last_lng?: number | null
           location_enabled?: boolean | null

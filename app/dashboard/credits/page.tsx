@@ -20,15 +20,15 @@ export default function CreditsPage() {
     if (user) {
       const fetchData = async () => {
         // Fetch credits
-        const { data: profile } = await (supabase as any).from('profiles')
+        const { data: profile } = await supabase.from('profiles')
           .select('credits')
           .eq('id', user.id)
           .single()
         
-        if (profile) setCredits(profile.credits)
+        if (profile) setCredits(profile.credits ?? 0)
 
         // Fetch logs
-        const { data: usageLogs } = await (supabase as any).from('ai_usage_logs')
+        const { data: usageLogs } = await supabase.from('ai_usage_logs')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
