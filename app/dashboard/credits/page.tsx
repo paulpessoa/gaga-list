@@ -95,12 +95,12 @@ export default function CreditsPage() {
           <h3 className="text-lg font-black text-zinc-900 dark:text-white">Precisa de mais grãos?</h3>
           <p className="text-sm text-zinc-500 mt-1 max-w-[250px] mx-auto">Apoie o projeto e recarregue sua energia para continuar criando.</p>
         </div>
-        <button 
-          onClick={() => alert("Integração com Apacate Pay / Stripe em breve!")}
+        <Link 
+          href="/dashboard/plans"
           className="mt-2 w-full py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-bold uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xl"
         >
-          <CreditCard className="w-4 h-4" /> Comprar 500 Grãos (R$ 9,90)
-        </button>
+          <CreditCard className="w-4 h-4" /> Ver Planos de Recarga
+        </Link>
       </div>
 
       {/* Histórico */}
