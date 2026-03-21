@@ -13,7 +13,8 @@ import {
   MessageCircleMore,
   QrCode,
   Mail,
-  UserPlus
+  UserPlus,
+  LogOut
 } from "lucide-react"
 import { Collaborator } from "@/types"
 import { usePresence } from "@/hooks/use-presence"
@@ -157,35 +158,36 @@ export function ShareModal({
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white dark:bg-zinc-950 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
-          <button
-            onClick={onClose}
-            className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="absolute top-8 right-8 flex items-center gap-2">
+            {!isOwner && (
+              <button
+                onClick={() => {
+                  if (confirm("Tem certeza que deseja sair desta lista?")) {
+                    onRemoveCollaborator(currentUser.id)
+                  }
+                }}
+                className="p-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-95 border border-red-500/20"
+                title="Sair da Lista"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-white/5"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
 
           <div className="mt-8 sm:mt-0">
-            <div className="flex items-start justify-between mb-8">
-              <div className="flex flex-col">
-                <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
-                  Compartilhar
-                </h2>
-                <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-                  Convide amigos e família para a lista.
-                </p>
-              </div>
-              {!isOwner && (
-                <button
-                  onClick={() => {
-                    if (confirm("Tem certeza que deseja sair desta lista?")) {
-                      onRemoveCollaborator(currentUser.id)
-                    }
-                  }}
-                  className="px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/20 hover:bg-red-500 hover:text-white transition-all active:scale-95"
-                >
-                  Sair da Lista
-                </button>
-              )}
+            <div className="flex flex-col mb-8">
+              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                Compartilhar
+              </h2>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                Convide amigos e família para a lista.
+              </p>
             </div>
 
             <div className="flex flex-col gap-4 mb-10">
