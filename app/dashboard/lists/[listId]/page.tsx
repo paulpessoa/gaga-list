@@ -506,7 +506,15 @@ export default function ListDetail({
           addCollaborator.mutate(email, callbacks)
         }
         onInviteUser={(email, callbacks) => inviteUser.mutate(email, callbacks)}
-        onRemoveCollaborator={(userId) => removeCollaborator.mutate(userId)}
+        onRemoveCollaborator={(userId) => {
+          removeCollaborator.mutate(userId, {
+            onSuccess: () => {
+              if (userId === user?.id) {
+                router.push('/dashboard');
+              }
+            }
+          })
+        }}
         onOpenChat={(target) => {
           setChatTarget(target)
           setIsChatOpen(true)

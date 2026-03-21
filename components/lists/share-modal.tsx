@@ -165,13 +165,27 @@ export function ShareModal({
           </button>
 
           <div className="mt-8 sm:mt-0">
-            <div className="flex flex-col mb-8">
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
-                Compartilhar
-              </h2>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm">
-                Convide amigos e família para a lista.
-              </p>
+            <div className="flex items-start justify-between mb-8">
+              <div className="flex flex-col">
+                <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                  Compartilhar
+                </h2>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                  Convide amigos e família para a lista.
+                </p>
+              </div>
+              {!isOwner && (
+                <button
+                  onClick={() => {
+                    if (confirm("Tem certeza que deseja sair desta lista?")) {
+                      onRemoveCollaborator(currentUser.id)
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl font-black text-[10px] uppercase tracking-widest border border-red-500/20 hover:bg-red-500 hover:text-white transition-all active:scale-95"
+                >
+                  Sair da Lista
+                </button>
+              )}
             </div>
 
             <div className="flex flex-col gap-4 mb-10">
