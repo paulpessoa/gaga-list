@@ -6,7 +6,11 @@ import { usePathname } from 'next/navigation';
 import { useNotifications } from '@/providers/notification-provider';
 import { useHaptic } from '@/hooks/use-haptic';
 
-export function TabBar() {
+interface TabBarProps {
+  onScanClick?: () => void;
+}
+
+export function TabBar({ onScanClick }: TabBarProps) {
   const pathname = usePathname();
   const { unreadCount } = useNotifications();
   const { trigger } = useHaptic();
@@ -27,7 +31,7 @@ export function TabBar() {
       <button 
         onClick={() => {
           trigger('medium');
-          alert('Scanner de IA em desenvolvimento!');
+          if (onScanClick) onScanClick();
         }}
         className="relative -top-6 w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40 border-4 border-white dark:border-zinc-950 active:scale-90 transition-all group"
       >
