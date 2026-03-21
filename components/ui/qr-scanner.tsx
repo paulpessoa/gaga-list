@@ -23,7 +23,6 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
         return;
       }
 
-      // html5-qrcode pode falhar se o container não estiver pronto ou se houver múltiplas instâncias
       const timer = setTimeout(() => {
         try {
           const config = {
@@ -34,7 +33,6 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
           };
 
-          // Criar nova instância
           const scanner = new Html5QrcodeScanner('qr-reader', config, false);
           scannerRef.current = scanner;
 
@@ -53,12 +51,11 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
         } catch (err) {
           console.error("Erro ao iniciar QR Scanner:", err);
         }
-      }, 500); // Aumentado delay para garantir DOM
+      }, 500);
 
       return () => {
         clearTimeout(timer);
         if (scannerRef.current) {
-          // Usar try/catch no clear para evitar quebras no unmount
           try {
             scannerRef.current.clear().catch(e => {});
           } catch (e) {}
@@ -81,14 +78,36 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
 
         <h2 className="text-xl font-black text-zinc-900 dark:text-white mb-6 mt-2 tracking-tight uppercase">Escanear Convite</h2>
         
-        {/* Container do QR Reader */}
         <div className="w-full rounded-3xl overflow-hidden border-2 border-indigo-500/20 bg-zinc-100 dark:bg-zinc-950 shadow-inner min-h-[300px]">
           <div id="qr-reader" className="w-full"></div>
         </div>
         
         <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-8 text-center leading-relaxed max-w-[200px]">
-          Aponte a câmera para o QR Code de um amigo ou anexe uma imagem.
+          Aponte a câmera para o QR Code de um amigo.
         </p>
+
+        {/* Estilização para mover botões da lib para baixo */}
+        <style jsx global>{`
+          #qr-reader__dashboard_section_swaplink {
+            display: block !important;
+            margin-top: 20px !important;
+            color: #6366f1 !important;
+            text-decoration: none !important;
+            font-weight: bold !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+          }
+          #qr-reader button {
+            background-color: #6366f1 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 12px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            margin-top: 10px !important;
+          }
+        `}</style>
       </div>
     </div>
   );

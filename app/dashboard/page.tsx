@@ -22,7 +22,9 @@ import {
   Camera,
   Loader2,
   Square,
-  Bell
+  Bell,
+  Check,
+  RotateCcw
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
@@ -50,6 +52,11 @@ export default function Dashboard() {
   const [editingListId, setEditingListId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState("")
 
+  // Estados para Preview de Voz
+  const [voiceTranscription, setVoiceTranscription] = useState("")
+  const [voiceItems, setVoiceItems] = useState<any[]>([])
+  const [showVoicePreview, setShowVoicePreview] = useState(false)
+
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
     const handleOffline = () => setIsOffline(true)
@@ -68,39 +75,47 @@ export default function Dashboard() {
       const formData = new FormData();
       formData.append('file', blob, 'recording.webm');
       const response = await fetch('/api/ai/voice', { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Falha no processamento de voz');
+      if (!response.ok) throw new Error('Falha na transcrição');
       const data = await response.json();
       
-      // Prompt ajustado no servidor deve retornar itens. Se não, tentamos novamente com log.
       if (data.items && data.items.length > 0) {
-        const title = data.transcription?.slice(0, 25) + '...' || "Lista por Voz";
-        createList.mutate({ title, color_theme: "indigo" }, {
-          onSuccess: async (newList) => {
-            for (const item of data.items) {
-              await fetch(`/api/lists/${newList.id}/items`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: item.name, quantity: item.quantity || "1", category: item.category })
-              });
-            }
-            trigger("success" as any);
-            setIsAiProcessing(false);
-            setIsCreateModalOpen(false);
-            router.push(`/dashboard/lists/${newList.id}`);
-          }
-        });
+        setVoiceTranscription(data.transcription);
+        setVoiceItems(data.items);
+        setShowVoicePreview(true);
       } else {
-        alert("A IA não entendeu os itens. Tente falar mais pausadamente.");
+        alert("A IA não identificou itens claros. Tente novamente.");
       }
     } catch (err) {
       alert("Erro ao processar áudio.");
     } finally {
       setIsAiProcessing(false);
     }
-  }, [createList, router, trigger]);
+  }, [trigger]);
 
-  const handleOcrSuccess = async (items: any[]) => {
+  const confirmVoiceList = () => {
+    setIsAiProcessing(true);
+    const title = voiceTranscription.slice(0, 25) + '...' || "Lista por Voz";
+    createList.mutate({ title, color_theme: "indigo" }, {
+      onSuccess: async (newList) => {
+        for (const item of voiceItems) {
+          await fetch(`/api/lists/${newList.id}/items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: item.name, quantity: item.quantity || "1", category: item.category })
+          });
+        }
+        trigger("success" as any);
+        setIsAiProcessing(false);
+        setIsCreateModalOpen(false);
+        setShowVoicePreview(false);
+        router.push(`/dashboard/lists/${newList.id}`);
+      }
+    });
+  }
+
+  const handleOcrSuccess = async (result: any) => {
     setIsOcrScannerOpen(false);
+    const items = result.items || [];
     if (!items || items.length === 0) { alert("Nenhum item na foto."); return; }
     setIsAiProcessing(true);
     createList.mutate({ title: `Foto ${new Date().toLocaleDateString()}`, color_theme: "indigo" }, {
@@ -228,29 +243,59 @@ export default function Dashboard() {
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-white/5 animate-in zoom-in-95 duration-200">
-            <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white p-2"><X className="w-5 h-5" /></button>
-            <div className="mb-8 text-center sm:text-left">
-              <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-3xl flex items-center justify-center mb-6 mx-auto sm:mx-0"><ShoppingBag className="w-8 h-8 text-indigo-500" /></div>
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">Nova Lista</h2>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Organize suas compras com amigos e família.</p>
-            </div>
-            <form onSubmit={submitCreateList} className="flex flex-col gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">Nome da Lista</label>
-                <input type="text" placeholder="Ex: Mercado da Semana..." required autoFocus value={newListTitle} onChange={(e) => setNewListTitle(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner" />
-              </div>
-              <div className="flex flex-col gap-3">
-                <button type="submit" disabled={createList.isPending || !newListTitle.trim() || isAiProcessing} className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2">{createList.isPending || isAiProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}</button>
-                <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => isRecording ? stopRecording() : startRecording()} disabled={isAiProcessing} className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}>
-                    {isAiProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4 text-indigo-500" />}
-                    {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
-                  </button>
-                  <button type="button" onClick={() => { trigger("medium"); setIsOcrScannerOpen(true); }} disabled={isAiProcessing} className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"><Camera className="w-4 h-4 text-indigo-500" />Via Foto</button>
+            <button onClick={() => { setIsCreateModalOpen(false); setShowVoicePreview(false); }} className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"><X className="w-5 h-5" /></button>
+            
+            {!showVoicePreview ? (
+              <>
+                <div className="mb-8 text-center sm:text-left">
+                  <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-3xl flex items-center justify-center mb-6 mx-auto sm:mx-0"><ShoppingBag className="w-8 h-8 text-indigo-500" /></div>
+                  <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">Nova Lista</h2>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Organize suas compras com amigos e família.</p>
                 </div>
-                <button type="button" onClick={() => { trigger("medium"); setIsQrScannerOpen(true); }} disabled={isAiProcessing} className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95"><QrCode className="w-4 h-4" /> Entrar via QR CODE</button>
+                <form onSubmit={submitCreateList} className="flex flex-col gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">Nome da Lista</label>
+                    <input type="text" placeholder="Ex: Mercado da Semana..." required autoFocus value={newListTitle} onChange={(e) => setNewListTitle(e.target.value)} className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner" />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button type="submit" disabled={createList.isPending || !newListTitle.trim() || isAiProcessing} className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2">{createList.isPending || isAiProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}</button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button type="button" onClick={() => isRecording ? stopRecording() : startRecording()} disabled={isAiProcessing} className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}>
+                        {isAiProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4 text-indigo-500" />}
+                        {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
+                      </button>
+                      <button type="button" onClick={() => { trigger("medium"); setIsOcrScannerOpen(true); }} disabled={isAiProcessing} className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"><Camera className="w-4 h-4 text-indigo-500" />Via Foto</button>
+                    </div>
+                    <button type="button" onClick={() => { trigger("medium"); setIsQrScannerOpen(true); }} disabled={isAiProcessing} className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95"><QrCode className="w-4 h-4" /> Entrar via QR CODE</button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">Confirmar Lista</h2>
+                  <p className="text-zinc-500 text-sm font-medium">A IA identificou estes itens no seu áudio:</p>
+                </div>
+                <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl p-4 mb-6 max-h-48 overflow-y-auto border border-zinc-100 dark:border-white/5">
+                  <p className="text-xs text-indigo-500 font-bold mb-3 uppercase tracking-widest italic">&quot;{voiceTranscription}&quot;</p>
+                  <ul className="space-y-2">
+                    {voiceItems.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                        <Check className="w-4 h-4 text-emerald-500" /> {item.quantity} {item.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button onClick={confirmVoiceList} disabled={isAiProcessing} className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+                    {isAiProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5" /> Criar Lista Agora</>}
+                  </button>
+                  <button onClick={() => setShowVoicePreview(false)} className="w-full py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <RotateCcw className="w-4 h-4" /> Gravar Novamente
+                  </button>
+                </div>
               </div>
-            </form>
+            )}
           </div>
         </div>
       )}
