@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from "react"
 import { useUser } from "@/hooks/use-user"
 import { createClient } from "@/lib/supabase/client"
 import { MyProductsService, MyProduct } from "@/services/my-products.service"
-import { 
-  ShoppingBag, 
-  Search, 
-  Trash2, 
-  Loader2, 
-  ChevronRight, 
+import {
+  ShoppingBag,
+  Search,
+  Trash2,
+  Loader2,
+  ChevronRight,
   Plus,
   Zap,
   Tag,
@@ -49,25 +49,23 @@ export default function MyProductsPage() {
       trigger("medium")
       try {
         await MyProductsService.deleteProduct(supabase, id)
-        setProducts(prev => prev.filter(p => p.id !== id))
+        setProducts((prev) => prev.filter((p) => p.id !== id))
       } catch (err) {
         alert("Erro ao deletar produto.")
       }
     }
   }
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
           <div>
             <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
               Meus Produtos
@@ -93,7 +91,9 @@ export default function MyProductsPage() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Carregando Catálogo...</p>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">
+            Carregando Catálogo...
+          </p>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="glass-panel rounded-[2.5rem] p-16 flex flex-col items-center justify-center text-center gap-6 border-dashed border-2">
@@ -101,22 +101,30 @@ export default function MyProductsPage() {
             <ShoppingBag className="w-10 h-10" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-black text-zinc-900 dark:text-white">Seu catálogo está vazio</h3>
+            <h3 className="text-xl font-black text-zinc-900 dark:text-white">
+              Seu catálogo está vazio
+            </h3>
             <p className="text-zinc-500 text-sm max-w-xs mx-auto">
-              Use o AI Scanner no menu inferior para identificar produtos e salvá-los aqui.
+              Use o AI Scanner no menu inferior para identificar produtos e
+              salvá-los aqui.
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredProducts.map((product) => (
-            <div 
+            <div
               key={product.id}
               className="glass-panel p-5 rounded-[2rem] flex items-center gap-5 group hover:border-indigo-500/30 transition-all bg-white dark:bg-zinc-900/40"
             >
               <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl shadow-inner shrink-0 relative overflow-hidden border border-zinc-200 dark:border-white/5">
                 {product.image_url ? (
-                  <Image src={product.image_url} fill className="object-cover" alt={product.name} />
+                  <Image
+                    src={product.image_url}
+                    fill
+                    className="object-cover"
+                    alt={product.name}
+                  />
                 ) : (
                   <ShoppingBag className="w-7 h-7 text-indigo-500/40" />
                 )}
@@ -141,7 +149,7 @@ export default function MyProductsPage() {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={() => handleDelete(product.id)}
                 className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20 shadow-sm"
               >
@@ -159,9 +167,12 @@ export default function MyProductsPage() {
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-1">Dica da Staff IA</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-1">
+              Dica da Staff IA
+            </h4>
             <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
-              Produtos salvos aqui serão usados para treinar sua IA pessoal. Em breve, ela sugerirá receitas baseadas no que você costuma comprar!
+              Produtos salvos aqui serão usados para treinar sua IA pessoal. Em
+              breve, ela sugerirá receitas baseadas no que você costuma comprar!
             </p>
           </div>
         </div>

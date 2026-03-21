@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { cleanBase64Image } from '@/lib/ai-utils';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -11,13 +12,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Configuração de IA ausente (GROQ_API_KEY)' }, { status: 500 });
     }
 
-    const { image } = await request.json(); // Base64 image
+    const { image } = await request.json();
 
     if (!image) {
       return NextResponse.json({ error: 'Nenhuma imagem enviada' }, { status: 400 });
     }
 
-    // Identificar produto usando Llama Vision no GROQ
+    const finalImage = cleanBase64Image(image);
+
     const completion = await groq.chat.completions.create({
       messages: [
         {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
             {
               type: 'image_url',
               image_url: {
-                url: image, // Base64 data:image/jpeg;base64,...
+                url: finalImage,
               },
             },
           ],
@@ -38,7 +40,6 @@ export async function POST(request: Request) {
     });
 
     const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
-
     return NextResponse.json({ data: result });
 
   } catch (error: any) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { cleanBase64Image } from '@/lib/ai-utils';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -11,18 +12,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Configuração de IA ausente' }, { status: 500 });
     }
 
-    const { image } = await request.json(); // Base64 image
+    const { image } = await request.json();
 
     if (!image) {
       return NextResponse.json({ error: 'Nenhuma imagem enviada' }, { status: 400 });
     }
 
-    // Usar Llama Vision para extrair texto de listas (OCR Inteligente)
+    const finalImage = cleanBase64Image(image);
+
     const completion = await groq.chat.completions.create({
       messages: [
         {
           role: 'system',
-          content: 'Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras (escritas à mão ou impressas) e transformar em dados estruturados. Retorne APENAS um JSON array de objetos com "name", "quantity" e "category". Se não entender algo, ignore. Exemplo: [{"name": "Arroz", "quantity": "5kg", "category": "Mercearia"}]',
+          content: 'Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras (escritas à mão ou impressas) e transformar em dados estruturados. Retorne apenas um JSON array de objetos com as chaves "name", "quantity" e "category". Retorne apenas o array principal.',
         },
         {
           role: 'user',
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
             {
               type: 'image_url',
               image_url: {
-                url: image,
+                url: finalImage,
               },
             },
           ],
@@ -41,8 +43,9 @@ export async function POST(request: Request) {
       response_format: { type: 'json_object' },
     });
 
-    const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
-    const items = Array.isArray(result) ? result : result.items || [];
+    const content = completion.choices[0]?.message?.content || '{}';
+    const result = JSON.parse(content);
+    const items = Array.isArray(result) ? result : (result.items || result.list || []);
 
     return NextResponse.json({ items });
 

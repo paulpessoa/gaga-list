@@ -10,15 +10,11 @@ import {
   LogOut,
   Bell,
   BellOff,
-  Phone,
   Lock,
   Trash2,
   Camera,
   ChevronRight,
-  CheckCircle2,
-  Mic,
-  MapPin,
-  ShieldCheck
+  CheckCircle2
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
@@ -47,41 +43,23 @@ export default function ProfilePage() {
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Perfil
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [pushSubscription, setPushSubscription] = useState<Json | null>(null)
 
-  // Hardware/Permissões Lógicas
-  const [locationEnabled, setLocationEnabled] = useState(true)
-  const [cameraEnabled, setCameraEnabled] = useState(true)
-  const [micEnabled, setMicEnabled] = useState(true)
-  const [hapticsEnabled, setHapticsEnabled] = useState(true)
-
-  // Notificações Push
   const [subscription, setSubscription] = useState<PushSubscription | null>(null)
   const [isPushSupported, setIsPushSupported] = useState(false)
   const [isPushProcessing, setIsPushProcessing] = useState(false)
 
-  // Senha
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  // UI
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState("")
 
   useEffect(() => {
-    // Carregar preferências de hardware do localStorage
-    if (typeof window !== "undefined") {
-      setLocationEnabled(localStorage.getItem("hw_location") !== "false")
-      setCameraEnabled(localStorage.getItem("hw_camera") !== "false")
-      setMicEnabled(localStorage.getItem("hw_mic") !== "false")
-      setHapticsEnabled(localStorage.getItem("hw_haptics") !== "false")
-    }
-
     if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
       setIsPushSupported(true)
       navigator.serviceWorker.ready.then((registration) => {
@@ -114,34 +92,6 @@ export default function ProfilePage() {
       fetchProfile()
     }
   }, [user, supabase])
-
-  const toggleHardware = async (key: string, current: boolean, setter: (v: boolean) => void) => {
-    const newValue = !current
-    
-    // Se o usuário está tentando ATIVAR, pedir permissão real ao browser
-    if (newValue) {
-      try {
-        if (key === "hw_location") {
-          await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject)
-          })
-        } else if (key === "hw_camera") {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true })
-          stream.getTracks().forEach(t => t.stop())
-        } else if (key === "hw_mic") {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          stream.getTracks().forEach(t => t.stop())
-        }
-      } catch (err) {
-        alert("Para ativar esta função, você também precisa permitir o acesso nas configurações do seu navegador/celular.")
-        return // Não muda o toggle se o browser negou
-      }
-    }
-
-    setter(newValue)
-    localStorage.setItem(key, String(newValue))
-    trigger("light")
-  }
 
   const handleTogglePush = async () => {
     setIsPushProcessing(true)
@@ -242,7 +192,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400">
+        <Link href="/dashboard" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">Configurações</h1>
@@ -286,7 +236,6 @@ export default function ProfilePage() {
           </div>
 
           <form onSubmit={handleSave} className="space-y-6">
-            {/* Dados Pessoais */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <User className="w-4 h-4" />
@@ -295,83 +244,19 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Nome</label>
-                  <input 
-                    value={fullName} 
-                    onChange={(e) => setFullName(e.target.value)} 
-                    onBlur={() => handleSave()}
-                    type="text" 
-                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
-                  />
+                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} onBlur={() => handleSave()} type="text" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-zinc-500 ml-1 uppercase tracking-widest">Telefone</label>
-                  <input 
-                    value={phone} 
-                    onChange={(e) => setPhone(e.target.value)} 
-                    onBlur={() => handleSave()}
-                    type="tel" 
-                    placeholder="(00) 00000-0000" 
-                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" 
-                  />
+                  <input value={phone} onChange={(e) => setPhone(e.target.value)} onBlur={() => handleSave()} type="tel" placeholder="(00) 00000-0000" className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl py-3.5 px-5 text-zinc-900 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
                 </div>
               </div>
             </div>
 
-            {/* Hardware & Privacidade */}
-            <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
-              <div className="flex items-center gap-2 text-indigo-500 mb-2">
-                <ShieldCheck className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Hardware & Privacidade</span>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm font-medium">GPS / Localização</span>
-                  </div>
-                  <button type="button" onClick={() => toggleHardware("hw_location", locationEnabled, setLocationEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${locationEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${locationEnabled ? "left-6" : "left-1"}`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-3">
-                    <Camera className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm font-medium">Câmera (Scanner)</span>
-                  </div>
-                  <button type="button" onClick={() => toggleHardware("hw_camera", cameraEnabled, setCameraEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${cameraEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${cameraEnabled ? "left-6" : "left-1"}`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-3">
-                    <Mic className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm font-medium">Microfone (Áudio AI)</span>
-                  </div>
-                  <button type="button" onClick={() => toggleHardware("hw_mic", micEnabled, setMicEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${micEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${micEnabled ? "left-6" : "left-1"}`} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-white dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-white/5">
-                  <div className="flex items-center gap-3">
-                    <Bell className="w-4 h-4 text-zinc-400" />
-                    <span className="text-sm font-medium">Vibração Háptica</span>
-                  </div>
-                  <button type="button" onClick={() => toggleHardware("hw_haptics", hapticsEnabled, setHapticsEnabled)} className={`w-10 h-5 rounded-full transition-colors relative ${hapticsEnabled ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-800"}`}>
-                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-transform ${hapticsEnabled ? "left-6" : "left-1"}`} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Notificações Push */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-indigo-500 mb-2">
                 <Bell className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações do Sistema</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Notificações</span>
               </div>
               {isPushSupported ? (
                 <button
@@ -396,7 +281,6 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Segurança */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5 space-y-4">
               <div className="flex items-center gap-2 text-emerald-500 mb-2">
                 <Lock className="w-4 h-4" />
@@ -417,19 +301,13 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            {/* Gerenciar Dados */}
             <div className="bg-zinc-50 dark:bg-zinc-900/20 rounded-3xl p-6 border border-zinc-200 dark:border-white/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-zinc-500">
                   <Trash2 className="w-4 h-4" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Gerenciar Dados</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados</span>
                 </div>
-                <Link 
-                  href="/dashboard/trash"
-                  className="px-4 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-300 dark:border-white/5 shadow-sm"
-                >
-                  Ver Lixeira
-                </Link>
+                <Link href="/dashboard/trash" className="px-4 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-300 dark:border-white/5 shadow-sm">Ver Lixeira</Link>
               </div>
             </div>
 
@@ -455,18 +333,7 @@ export default function ProfilePage() {
                   <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Excluir Conta Permanentemente</h3>
                   <p className="text-xs text-zinc-500 leading-relaxed">Sua conta e listas serão deletadas definitivamente em 30 dias.</p>
                 </div>
-                <button 
-                  type="button"
-                  onClick={() => {
-                    if (confirm("Deseja solicitar a exclusão da sua conta?")) {
-                      trigger("heavy")
-                      setMessage("Solicitação de exclusão enviada via e-mail.")
-                    }
-                  }}
-                  className="w-full py-3 bg-white dark:bg-zinc-950 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
-                >
-                  Solicitar Exclusão
-                </button>
+                <button type="button" onClick={() => { if (confirm("Deseja solicitar a exclusão da sua conta?")) { trigger("heavy"); setMessage("Solicitação de exclusão enviada via e-mail."); } }} className="w-full py-3 bg-white dark:bg-zinc-950 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Solicitar Exclusão</button>
               </div>
             </div>
           </form>

@@ -31,6 +31,7 @@ import {
   ChevronUp,
   X,
   User,
+  UserPlus,
   Clock,
   Coins
 } from "lucide-react"
@@ -250,7 +251,7 @@ export default function ListDetail({
                     </div>
                 ))}
                 <div className="w-9 h-9 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-3 shadow-inner">
-                  <Plus className="w-4 h-4" />
+                  <UserPlus className="w-4 h-4" />
                 </div>
               </div>
 
