@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, Settings, Bell, ScanLine, ShoppingBag } from 'lucide-react';
+import { LayoutGrid, Settings, Bell, ScanLine, UtensilsCrossed } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotifications } from '@/providers/notification-provider';
@@ -29,17 +29,12 @@ export function TabBar({ onScanClick }: TabBarProps) {
       </Link>
 
       <Link 
-        href="/dashboard/notifications" 
+        href="/dashboard/recipes" 
         onClick={() => trigger('light')}
-        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive('/dashboard/notifications') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
+        className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive('/dashboard/recipes') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
       >
-        <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[1rem] h-[1rem] bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 px-1">
-            {unreadCount}
-          </span>
-        )}
-        <span className="text-[9px] font-bold uppercase tracking-tighter">Avisos</span>
+        <UtensilsCrossed className="w-5 h-5" />
+        <span className="text-[9px] font-bold uppercase tracking-tighter">Receitas</span>
       </Link>
 
       <button 
@@ -53,12 +48,17 @@ export function TabBar({ onScanClick }: TabBarProps) {
       </button>
 
       <Link 
-        href="/dashboard/products" 
+        href="/dashboard/notifications" 
         onClick={() => trigger('light')}
-        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive('/dashboard/products') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
+        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive('/dashboard/notifications') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
       >
-        <ShoppingBag className="w-5 h-5" />
-        <span className="text-[9px] font-bold uppercase tracking-tighter">Produtos</span>
+        <Bell className="w-5 h-5" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[1rem] h-[1rem] bg-red-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 px-1">
+            {unreadCount}
+          </span>
+        )}
+        <span className="text-[9px] font-bold uppercase tracking-tighter">Avisos</span>
       </Link>
 
       <Link 

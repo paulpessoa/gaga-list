@@ -9,11 +9,13 @@ import { useUser } from '@/hooks/use-user';
 import { createClient } from '@/lib/supabase/client';
 import { MyProductsService } from '@/services/my-products.service';
 import { useHaptic } from '@/hooks/use-haptic';
+import { useLists } from '@/hooks/use-lists';
 
 export function NavigationWrapper() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: user } = useUser();
+  const { data: lists } = useLists();
   const { trigger } = useHaptic();
   const supabase = createClient();
 
@@ -21,26 +23,26 @@ export function NavigationWrapper() {
   const [scannedData, setScannedData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Detectar listId se estiver em uma rota de lista
   const listId = pathname.startsWith('/dashboard/lists/') ? pathname.split('/')[3] : null;
 
-  const handleScanSuccess = (data: any) => {
+  const handleScanSuccess = (result: any) => {
     setIsScannerOpen(false);
-    setScannedData(data);
+    // result.data vem da OpenAI no modo product
+    setScannedData(result.data || result); 
   };
 
-  const handleSaveToMyProducts = async () => {
-    if (!user || !scannedData) return;
+  const handleSaveToMyProducts = async (finalData: any) => {
+    if (!user || !finalData) return;
     setIsSaving(true);
     try {
       await MyProductsService.addProduct(supabase, {
         user_id: user.id,
-        name: scannedData.name,
-        brand: scannedData.brand,
-        category: scannedData.category,
+        name: finalData.name,
+        brand: finalData.brand,
+        category: finalData.category,
         metadata: {
-          benefits: scannedData.benefits,
-          suggested_uses: scannedData.suggested_uses
+          benefits: finalData.benefits,
+          suggested_uses: finalData.suggested_uses
         } as any
       });
       trigger('success' as any);
@@ -53,28 +55,27 @@ export function NavigationWrapper() {
     }
   };
 
-  const handleAddToList = async () => {
-    if (!scannedData || !listId) {
-      if (!listId) alert('Abra uma lista primeiro para adicionar o produto.');
-      return;
-    }
+  const handleAddToList = async (targetListId: string, finalData: any) => {
+    if (!finalData || !targetListId) return;
     
     setIsSaving(true);
     try {
-      await fetch(`/api/lists/${listId}/items`, {
+      await fetch(`/api/lists/${targetListId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: scannedData.name,
-          category: scannedData.category,
+          name: finalData.name,
+          category: finalData.category,
           quantity: "1"
         })
       });
       trigger('success' as any);
       setScannedData(null);
-      // O react-query vai invalidar automaticamente se houver listeners, 
-      // mas como estamos no wrapper, talvez precise de um refresh ou trigger manual
-      window.location.reload(); 
+      if (listId === targetListId) {
+        window.location.reload(); 
+      } else {
+        router.push(`/dashboard/lists/${targetListId}`);
+      }
     } catch (err) {
       console.error(err);
       alert('Erro ao adicionar à lista.');
@@ -83,7 +84,6 @@ export function NavigationWrapper() {
     }
   };
 
-  // Lista de rotas onde a TabBar NÃO deve aparecer (ex: login, landing page)
   const hideOnPaths = ['/', '/login', '/api/auth/confirm'];
   const shouldHide = hideOnPaths.includes(pathname);
 
@@ -101,6 +101,8 @@ export function NavigationWrapper() {
 
       <ScannedProductModal 
         data={scannedData}
+        lists={lists || []}
+        activeListId={listId}
         onClose={() => setScannedData(null)}
         onSaveToMyProducts={handleSaveToMyProducts}
         onAddToList={handleAddToList}

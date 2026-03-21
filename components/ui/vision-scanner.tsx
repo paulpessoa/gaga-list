@@ -103,7 +103,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
       if (!response.ok) throw new Error(result.details || result.error || 'Falha na análise');
       
       trigger('success' as any);
-      onScanSuccess(mode === 'product' ? result.data : result.items);
+      onScanSuccess(result);
     } catch (err: any) {
       console.error(err);
       alert(`IA: ${err.message}`);

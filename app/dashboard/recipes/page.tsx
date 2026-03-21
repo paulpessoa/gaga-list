@@ -1,0 +1,188 @@
+"use client"
+
+import { useState } from "react"
+import { useLists } from "@/hooks/use-lists"
+import { useHaptic } from "@/hooks/use-haptic"
+import { 
+  UtensilsCrossed, 
+  ChefHat, 
+  Loader2, 
+  Clock, 
+  Wand2
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+
+export default function RecipesPage() {
+  const { data: lists } = useLists()
+  const { trigger } = useHaptic()
+  const router = useRouter()
+  
+  const [selectedListId, setSelectedListId] = useState("")
+  const [customQuery, setCustomQuery] = useState("")
+  const [recipes, setRecipes] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const generateRecipes = async (type: 'from_list' | 'custom') => {
+    setIsLoading(true)
+    trigger("medium")
+    try {
+      let items: string[] = []
+      
+      if (type === 'from_list') {
+        // Buscar itens da lista selecionada via API
+        const response = await fetch(`/api/lists/${selectedListId}/items`)
+        const listItems = await response.json()
+        items = listItems.map((i: any) => i.name)
+      } else {
+        items = [customQuery]
+      }
+
+      const response = await fetch('/api/ai/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, type })
+      })
+      const data = await response.json()
+      setRecipes(data.recipes || [])
+      trigger("success" as any)
+    } catch (err) {
+      alert("Erro ao gerar receitas.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const createListFromRecipe = async (recipe: any) => {
+    trigger("medium")
+    try {
+      const response = await fetch('/api/lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: `Receita: ${recipe.title}` })
+      })
+      const newList = await response.json()
+
+      for (const ingredient of recipe.ingredients) {
+        await fetch(`/api/lists/${newList.id}/items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: ingredient.name,
+            quantity: ingredient.quantity || "1"
+          })
+        })
+      }
+      trigger("success" as any)
+      router.push(`/dashboard/lists/${newList.id}`)
+    } catch (err) {
+      alert("Erro ao criar lista da receita.")
+    }
+  }
+
+  return (
+    <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">Sugestões de Receitas</h1>
+        <p className="text-sm text-zinc-500 font-medium">Crie pratos incríveis com o que você já tem</p>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-indigo-500/10">
+          <div className="flex items-center gap-3 text-indigo-500">
+            <UtensilsCrossed className="w-6 h-6" />
+            <h2 className="font-black uppercase tracking-widest text-xs">Usar uma Lista</h2>
+          </div>
+          <select 
+            value={selectedListId}
+            onChange={(e) => setSelectedListId(e.target.value)}
+            className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+          >
+            <option value="">Selecione uma lista...</option>
+            {lists?.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+          </select>
+          <button 
+            onClick={() => generateRecipes('from_list')}
+            disabled={!selectedListId || isLoading}
+            className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Gerar 3 Sugestões"}
+          </button>
+        </div>
+
+        <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-emerald-500/5 border-emerald-500/10">
+          <div className="flex items-center gap-3 text-emerald-500">
+            <ChefHat className="w-6 h-6" />
+            <h2 className="font-black uppercase tracking-widest text-xs">Pedir Receita Específica</h2>
+          </div>
+          <input 
+            type="text"
+            placeholder="Ex: Macarronada, Bolo de Cenoura..."
+            value={customQuery}
+            onChange={(e) => setCustomQuery(e.target.value)}
+            className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+          <button 
+            onClick={() => generateRecipes('custom')}
+            disabled={!customQuery || isLoading}
+            className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "Buscar Receita"}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {recipes.map((recipe, idx) => (
+          <div key={idx} className="glass-panel p-8 rounded-[3rem] animate-in slide-in-from-bottom duration-500 bg-white dark:bg-zinc-900/40">
+            <div className="flex flex-col md:flex-row justify-between gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-[10px] font-black uppercase tracking-widest">{recipe.difficulty}</span>
+                  <div className="flex items-center gap-1 text-zinc-400 text-[10px] font-bold uppercase">
+                    <Clock className="w-3 h-3" /> {recipe.prep_time}
+                  </div>
+                </div>
+                <h3 className="text-2xl font-black text-zinc-900 dark:text-white mb-3">{recipe.title}</h3>
+                <p className="text-zinc-500 text-sm font-medium leading-relaxed mb-6">{recipe.description}</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 ml-1">Ingredientes</h4>
+                    <ul className="space-y-2">
+                      {recipe.ingredients.map((ing: any, i: number) => (
+                        <li key={i} className="flex items-center gap-3 text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                          {ing.quantity} {ing.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 ml-1">Modo de Preparo</h4>
+                    <ol className="space-y-3">
+                      {recipe.instructions.map((step: string, i: number) => (
+                        <li key={i} className="flex gap-3 text-xs font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                          <span className="font-black text-indigo-500">{i+1}.</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              <div className="md:w-48">
+                <button 
+                  onClick={() => createListFromRecipe(recipe)}
+                  className="w-full py-6 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-3xl flex flex-col items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all group"
+                >
+                  <Wand2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Criar Lista</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  )
+}
