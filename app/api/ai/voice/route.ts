@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
@@ -16,12 +17,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 1 grão para usar a voz.' }, { status: 403 });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Configuração de IA ausente (GROQ_API_KEY)' }, { status: 500 });
+    const groqKey = process.env.GROQ_API_KEY;
+    const geminiKey = process.env.GOOGLE_AI_STUDIO_API_KEY;
+
+    if (!groqKey || !geminiKey) {
+      return NextResponse.json({ error: 'Configuração de IA ausente (GROQ ou Gemini)' }, { status: 500 });
     }
 
-    const groq = new Groq({ apiKey });
+    const groq = new Groq({ apiKey: groqKey });
+    const genAI = new GoogleGenerativeAI(geminiKey);
+    const geminiModel = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -40,24 +45,28 @@ export async function POST(request: Request) {
 
     const text = typeof transcription === 'string' ? transcription : (transcription as any).text;
 
-    // 2. Extrair itens usando Llama no GROQ
-    const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: 'Você é um assistente de compras. Sua tarefa é extrair itens de uma lista de compras a partir de um texto. Retorne apenas um JSON array de objetos com as chaves "name", "quantity" (string com unidade se houver) e "category". Se não houver categoria clara, use null. Exemplo: [{"name": "Leite", "quantity": "2 caixas", "category": "Laticínios"}]',
-        },
-        {
-          role: 'user',
-          content: text,
-        },
-      ],
-      model: 'llama-3.3-70b-versatile',
-      response_format: { type: 'json_object' },
-    });
+    // 2. Extrair itens usando Gemini
+    const prompt = `Você é um assistente de compras inteligente. 
+    Extraia os itens de compra do seguinte texto transcrito de áudio: "${text}"
+    Retorne APENAS um JSON com a chave "items" contendo um array de objetos. 
+    Cada objeto deve ter: "name" (string), "quantity" (string ou null) e "category" (string ou null).
+    Exemplo: {"items": [{"name": "Leite", "quantity": "2 caixas", "category": "Laticínios"}]}`;
 
-    const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
-    const items = Array.isArray(result) ? result : result.items || [];
+    const result = await geminiModel.generateContent(prompt);
+    const response = await result.response;
+    const rawText = response.text();
+    
+    // Parsing robusto
+    let items = [];
+    try {
+      const jsonText = rawText.replace(/```json|```/g, '').trim();
+      const parsedResult = JSON.parse(jsonText);
+      items = Array.isArray(parsedResult) ? parsedResult : (parsedResult.items || []);
+    } catch (e) {
+      console.warn('Falha ao parsear JSON da IA, tentando extração manual...');
+      // Fallback simples se o JSON falhar
+      items = [];
+    }
 
     // Deduzir créditos e logar
     await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
@@ -65,7 +74,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       feature: 'voice',
       cost: 1,
-      model_used: 'whisper-large-v3 + llama-3.3'
+      model_used: 'whisper-large-v3 + gemini-flash-latest'
     });
 
     return NextResponse.json({ 

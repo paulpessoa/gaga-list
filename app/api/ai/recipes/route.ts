@@ -23,12 +23,7 @@ export async function POST(request: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-      }
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const { items, type } = await request.json();
 
@@ -41,23 +36,29 @@ export async function POST(request: Request) {
          Retorne um JSON com a chave "recipes" contendo um array de objetos. 
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`
       : `Você é um Chef Gourmet. Sugira uma receita detalhada para: "${items[0]}".
-         Retorne um JSON com a chave "recipes" contendo um array com essa única receita.
+         Retorne un JSON com a chave "recipes" contendo um array com essa única receita.
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`;
 
+    console.log('Gerando conteúdo com Gemini...');
     const result = await model.generateContent(prompt);
-    const response = result.response;
+    const response = await result.response;
     const text = response.text();
+    console.log('Resposta bruta Gemini:', text);
     
+    // Limpar markdown se a IA retornar
+    const cleanedText = text.replace(/```json|```/g, '').trim();
+    const parsedData = JSON.parse(cleanedText);
+
     // 2. Deduzir crédito e logar
     await (supabase as any).from('profiles').update({ credits: profile.credits - 1 }).eq('id', user.id);
-    await (supabase as any).from('ai_usage_logs').insert({
+    await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'recipe',
       cost: 1,
-      model_used: 'gemini-1.5-flash'
+      model_used: 'gemini-flash-latest'
     });
 
-    return NextResponse.json(JSON.parse(text));
+    return NextResponse.json(parsedData);
 
   } catch (error: any) {
     console.error('Erro ao gerar receitas com Gemini:', error);
