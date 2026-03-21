@@ -57,7 +57,8 @@ export default function RecipesPage() {
       let items: string[] = []
       if (type === 'from_list') {
         const response = await fetch(`/api/lists/${selectedListId}/items`)
-        const listItems = await response.json()
+        const result = await response.json()
+        const listItems = result.data || []
         items = listItems.map((i: any) => i.name)
       } else {
         items = [customQuery]
