@@ -59,6 +59,13 @@ export default function RecipesPage() {
         const response = await fetch(`/api/lists/${selectedListId}/items`)
         const result = await response.json()
         const listItems = result.data || []
+        
+        if (listItems.length === 0) {
+          alert("Sua lista está vazia! Adicione alguns ingredientes antes de pedir sugestões.")
+          setIsLoadingList(false)
+          return
+        }
+        
         items = listItems.map((i: any) => i.name)
       } else {
         items = [customQuery]

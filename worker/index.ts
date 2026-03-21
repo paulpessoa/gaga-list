@@ -16,10 +16,12 @@ self.addEventListener('push', (event) => {
       body: data.body || 'Alguém interagiu com sua lista!',
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-96x96.png',
-      vibrate: [100, 50, 100],
+      vibrate: [200, 100, 200, 100, 400], // Padrão mais forte: curto, curto, longo
       data: {
         url: data.url || '/'
-      }
+      },
+      tag: 'nudge-notification', // Evita empilhar várias notificações iguais
+      renotify: true // Vibra novamente se uma nova chegar com a mesma tag
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
