@@ -488,17 +488,6 @@ export default function Dashboard() {
                         Via Foto
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        trigger("medium")
-                        setIsQrScannerOpen(true)
-                      }}
-                      disabled={isAiProcessing}
-                      className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95"
-                    >
-                      <QrCode className="w-4 h-4" /> Entrar via QR CODE
-                    </button>
                   </div>
                 </form>
               </>
