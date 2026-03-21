@@ -57,7 +57,6 @@ export default function Dashboard() {
 
   const [isOffline, setIsOffline] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
@@ -210,20 +209,6 @@ export default function Dashboard() {
       { listId, updates: { title: editTitle } },
       { onSuccess: () => setEditingListId(null) }
     )
-  }
-  const handleScanSuccess = (decodedText: string) => {
-    trigger("success" as any)
-    setIsQrScannerOpen(false)
-    try {
-      if (decodedText.includes("/join/")) {
-        const url = new URL(decodedText)
-        router.push(url.pathname)
-      } else {
-        alert("QR Inválido.")
-      }
-    } catch (e) {
-      alert("Erro no QR.")
-    }
   }
 
   return (
@@ -569,11 +554,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      <QRScanner
-        isOpen={isQrScannerOpen}
-        onClose={() => setIsQrScannerOpen(false)}
-        onScanSuccess={handleScanSuccess}
-      />
       <VisionScanner
         mode="ocr"
         isOpen={isOcrScannerOpen}
