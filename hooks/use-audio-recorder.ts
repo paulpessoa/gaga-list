@@ -29,9 +29,15 @@ export function useAudioRecorder() {
 
       mediaRecorder.start();
       setIsRecording(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao acessar microfone:', err);
-      alert('Não foi possível acessar o microfone.');
+      if (err.name === 'NotAllowedError') {
+        alert('Acesso ao microfone negado. Por favor, habilite as permissões nas configurações do seu navegador.');
+      } else if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        alert('Para usar o microfone, o site precisa estar em HTTPS (SSL).');
+      } else {
+        alert('Não foi possível acessar o microfone. Verifique se outro app está usando ou se as permissões foram bloqueadas.');
+      }
     }
   };
 
