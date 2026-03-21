@@ -9,6 +9,8 @@ Este documento guia a evolução do **Gaga-List** para um assistente de compras 
 - [x] Remoção de biometria (simplificação do core).
 - [x] Auto-save no perfil (`onBlur`).
 - [x] Botões de ação da lista no topo (Chat/Mapa).
+- [x] Redesenho dos Cards do Dashboard (UX Premium).
+- [x] Toggles de Hardware em Configurações.
 
 ## 🤖 2. Inteligência Artificial (GROQ AI)
 - [ ] **AI Scanner (Menu Inferior):**
@@ -23,9 +25,10 @@ Este documento guia a evolução do **Gaga-List** para um assistente de compras 
     *   Fotografar lista escrita à mão ou folheto -> GROQ Vision -> Nova lista digital.
 
 ## 📦 3. Novas Features de Valor
-- [ ] **Meus Produtos:** Banco de dados pessoal de itens scaneados com histórico de preços e marcas.
+- [x] **Permissões 2.0:** Qualquer membro da lista pode convidar novos membros (RLS atualizado).
+- [x] **Infra Meus Produtos:** Tabela `my_products` criada e pronta para o scanner.
 - [ ] **Receitas Inteligentes:** Gerar listas completas a partir de uma receita (ex: "Ingredientes para Carbonara").
-- [ ] **QR Code Fix:** Implementar a entrada real em listas via scanner de QR Code.
+- [x] **QR Code Real:** Leitura de QR Code funcional no Dashboard para entrar em listas.
 
 ## 💰 4. Estrutura de Monetização
 - [ ] Organizar endpoints de IA (`/api/ai/*`) para permitir controle de uso por usuário (Pay-per-use ou Assinatura).

@@ -4,6 +4,7 @@
 import { useLists, useCreateList, useDeleteList, useUpdateList } from "@/hooks/use-lists"
 import { useUser } from "@/hooks/use-user"
 import { useHaptic } from "@/hooks/use-haptic"
+import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import {
   Plus,
   ShoppingBag,
@@ -18,9 +19,10 @@ import {
   QrCode,
   Mic,
   Camera,
-  Loader2
+  Loader2,
+  Square
 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { QRScanner } from "@/components/ui/qr-scanner"
@@ -33,10 +35,12 @@ export default function Dashboard() {
   const deleteList = useDeleteList()
   const updateList = useUpdateList()
   const { trigger } = useHaptic()
+  const { isRecording, audioBlob, startRecording, stopRecording, setAudioBlob } = useAudioRecorder()
 
   const [isOffline, setIsOffline] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false)
+  const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
   
   const [editingListId, setEditingListId] = useState<string | null>(null)
@@ -54,6 +58,66 @@ export default function Dashboard() {
       window.removeEventListener("offline", handleOffline)
     }
   }, [])
+
+  const handleProcessVoice = useCallback(async (blob: Blob) => {
+    setIsAiProcessing(true)
+    trigger("medium")
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', blob, 'recording.webm')
+      
+      const response = await fetch('/api/ai/voice', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) throw new Error('Falha no processamento de voz')
+      
+      const data = await response.json()
+      
+      if (data.items && data.items.length > 0) {
+        const title = data.transcription?.slice(0, 30) + '...' || "Nova Lista por Voz"
+        
+        createList.mutate({
+          title,
+          color_theme: "indigo"
+        }, {
+          onSuccess: async (newList) => {
+            for (const item of data.items) {
+              await fetch(`/api/lists/${newList.id}/items`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  name: item.name,
+                  quantity: item.quantity || "1",
+                  category: item.category
+                })
+              })
+            }
+            trigger("success" as any)
+            setIsCreateModalOpen(false)
+            router.push(`/dashboard/lists/${newList.id}`)
+          }
+        })
+      } else {
+        alert("Não foi possível identificar itens no áudio.")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Erro ao processar áudio com IA.")
+    } finally {
+      setIsAiProcessing(false)
+    }
+  }, [createList, router, trigger]);
+
+  // Efeito para processar o áudio assim que parar de gravar
+  useEffect(() => {
+    if (audioBlob && !isRecording) {
+      handleProcessVoice(audioBlob)
+      setAudioBlob(null)
+    }
+  }, [audioBlob, isRecording, handleProcessVoice, setAudioBlob])
 
   const handleCreateList = () => {
     trigger("medium")
@@ -291,7 +355,7 @@ export default function Dashboard() {
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-border animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setIsCreateModalOpen(false)}
               className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
@@ -326,7 +390,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
-                  disabled={createList.isPending || !newListTitle.trim()}
+                  disabled={createList.isPending || !newListTitle.trim() || isAiProcessing}
                   className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {createList.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}
@@ -335,14 +399,18 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      trigger("medium")
-                      alert("Voz para Lista (GROQ) em desenvolvimento!")
-                    }}
-                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5"
+                    onClick={() => isRecording ? stopRecording() : startRecording()}
+                    disabled={isAiProcessing}
+                    className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
                   >
-                    <Mic className="w-4 h-4 text-indigo-500" />
-                    Via Áudio
+                    {isAiProcessing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isRecording ? (
+                      <Square className="w-4 h-4 fill-current" />
+                    ) : (
+                      <Mic className="w-4 h-4 text-indigo-500" />
+                    )}
+                    {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
                   </button>
                   <button
                     type="button"
@@ -350,7 +418,8 @@ export default function Dashboard() {
                       trigger("medium")
                       alert("Foto de Papel para Lista (GROQ Vision) em desenvolvimento!")
                     }}
-                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5"
+                    disabled={isAiProcessing}
+                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95 disabled:opacity-50"
                   >
                     <Camera className="w-4 h-4 text-indigo-500" />
                     Via Foto
@@ -363,7 +432,8 @@ export default function Dashboard() {
                     trigger("medium")
                     setIsQrScannerOpen(true)
                   }}
-                  className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95"
+                  disabled={isAiProcessing}
+                  className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95 disabled:opacity-50"
                 >
                   <QrCode className="w-4 h-4" />
                   Entrar via QR CODE
