@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx
+// app/pp/page.tsx
 "use client"
 
 import {
@@ -40,7 +40,7 @@ import { VisionScanner } from "@/components/ui/vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
 
-export default function Dashboard() {
+export default function PPPage() {
   const router = useRouter()
   const { data: lists, isLoading, isError, error } = useLists()
   const { data: user } = useUser()
@@ -133,7 +133,7 @@ export default function Dashboard() {
           setIsAiProcessing(false)
           setIsCreateModalOpen(false)
           setShowVoicePreview(false)
-          router.push(`/dashboard/lists/${newList.id}`)
+          router.push(`/pp/lists/${newList.id}`)
         }
       }
     )
@@ -168,7 +168,7 @@ export default function Dashboard() {
           trigger("success" as any)
           setIsAiProcessing(false)
           setIsCreateModalOpen(false)
-          router.push(`/dashboard/lists/${newList.id}`)
+          router.push(`/pp/lists/${newList.id}`)
         }
       }
     )
@@ -227,7 +227,7 @@ export default function Dashboard() {
 
         <div className="flex items-center gap-2">
           <Link 
-            href="/dashboard/recipes"
+            href="/pp/recipes"
             onClick={() => trigger('light')}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
           >
@@ -236,7 +236,7 @@ export default function Dashboard() {
           </Link>
 
           <Link 
-            href="/dashboard/products"
+            href="/pp/products"
             onClick={() => trigger('light')}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
           >
@@ -338,3 +338,4 @@ export default function Dashboard() {
     </main>
   )
 }
+

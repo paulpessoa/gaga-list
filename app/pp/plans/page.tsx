@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useHaptic } from "@/hooks/use-haptic"
-import { ArrowLeft, Check, Sparkles, Zap, Wheat, Leaf, Tractor, Star } from "lucide-react"
+import { ArrowLeft, Check, Sparkles, Zap, Wheat, Leaf, Tractor, Star, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 const PLANS = [
@@ -56,20 +56,42 @@ const PLANS = [
 export default function PlansPage() {
   const router = useRouter()
   const { trigger } = useHaptic()
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
-  const handleSelectPlan = (id: string) => {
+  const handleSelectPlan = async (id: string) => {
     trigger('medium')
-    setSelectedPlan(id)
-    // Aqui no futuro entraria a lógica de checkout do Stripe/Apacate Pay
-    alert(`Checkout para o plano ${id.toUpperCase()} em desenvolvimento!`)
+    
+    if (id === 'semente') {
+      alert("Este plano é o inicial gratuito para novos usuários.")
+      return
+    }
+
+    setLoadingPlan(id)
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: id })
+      })
+      
+      const data = await response.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error(data.error || "Erro ao iniciar checkout")
+      }
+    } catch (err: any) {
+      alert(`Erro: ${err.message}. Certifique-se de que as chaves do Stripe estão configuradas.`)
+    } finally {
+      setLoadingPlan(null)
+    }
   }
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex flex-col gap-4">
         <Link 
-          href="/dashboard/credits"
+          href="/pp/credits"
           onClick={() => trigger('light')}
           className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group w-fit"
         >
@@ -90,6 +112,8 @@ export default function PlansPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {PLANS.map((plan) => {
           const Icon = plan.icon
+          const isLoading = loadingPlan === plan.id
+
           return (
             <div 
               key={plan.id}
@@ -130,9 +154,10 @@ export default function PlansPage() {
 
               <button
                 onClick={() => handleSelectPlan(plan.id)}
-                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg ${plan.popular ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-90'}`}
+                disabled={!!loadingPlan}
+                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${plan.popular ? 'bg-indigo-500 text-white hover:bg-indigo-600' : 'bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-90'} disabled:opacity-50`}
               >
-                Colher Agora
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Colher Agora"}
               </button>
             </div>
           )

@@ -103,7 +103,7 @@ export default function CadeTuPage() {
     <main className="h-screen bg-black text-white flex flex-col overflow-hidden">
       <header className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-[1000] pointer-events-none">
         <div className="flex items-center gap-4 pointer-events-auto">
-          <Link href={`/dashboard/lists/${listId}`} className="p-3 rounded-2xl bg-zinc-950/80 backdrop-blur-md border border-white/10 text-zinc-400 hover:text-white shadow-2xl">
+          <Link href={`/pp/lists/${listId}`} className="p-3 rounded-2xl bg-zinc-950/80 backdrop-blur-md border border-white/10 text-zinc-400 hover:text-white shadow-2xl">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div className="bg-zinc-950/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl shadow-2xl">

@@ -44,7 +44,7 @@ export default function JoinListPage({ params }: { params: Promise<{ tokenId: st
         setStatus("success")
         
         // Redireciona após 2 segundos de comemoração
-        setTimeout(() => router.push(`/dashboard/lists/${listId}`), 2000)
+        setTimeout(() => router.push(`/pp/lists/${listId}`), 2000)
       } catch (err) {
         console.error("Erro ao entrar na lista:", err)
         setStatus("error")
@@ -86,7 +86,7 @@ export default function JoinListPage({ params }: { params: Promise<{ tokenId: st
           <h1 className="text-xl font-bold text-white">Convite Inválido</h1>
           <p className="text-zinc-500 text-sm">Este link de convite expirou ou já foi utilizado.</p>
           <button 
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/pp")}
             className="mt-4 px-6 py-2 bg-zinc-900 text-white rounded-xl font-bold"
           >
             Voltar para o Início

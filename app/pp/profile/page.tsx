@@ -207,7 +207,7 @@ export default function ProfilePage() {
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-center gap-4">
-        <Link href="/dashboard" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500">
+        <Link href="/pp" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white leading-tight">Configurações</h1>
@@ -258,7 +258,7 @@ export default function ProfilePage() {
                   <Sparkles className="w-4 h-4" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Energia IA</span>
                 </div>
-                <Link href="/dashboard/credits" className="px-4 py-2 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Ver Meus Grãos</Link>
+                <Link href="/pp/credits" className="px-4 py-2 rounded-xl bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">Ver Meus Grãos</Link>
               </div>
               <p className="text-xs text-zinc-500">Acompanhe seu saldo e recarregue seus créditos mágicos para usar a Inteligência Artificial.</p>
             </div>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
                   <Trash2 className="w-4 h-4" />
                   <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Dados</span>
                 </div>
-                <Link href="/dashboard/trash" className="px-4 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-300 dark:border-white/5 shadow-sm">Ver Lixeira</Link>
+                <Link href="/pp/trash" className="px-4 py-2 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-300 dark:border-white/5 shadow-sm">Ver Lixeira</Link>
               </div>
             </div>
 
@@ -401,3 +401,4 @@ export default function ProfilePage() {
     </main>
   )
 }
+

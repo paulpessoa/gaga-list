@@ -37,7 +37,7 @@
   "shortcuts": [
     {
       "name": "Minhas Listas",
-      "url": "/dashboard",
+      "url": "/pp",
       "icons": [
         {
           "src": "/icons/icon-96x96.png",

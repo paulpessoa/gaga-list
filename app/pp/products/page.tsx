@@ -69,7 +69,7 @@ export default function MyProductsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
-              href="/dashboard"
+              href="/pp"
               className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -84,7 +84,7 @@ export default function MyProductsPage() {
             </div>
           </div>
           <Link
-            href="/dashboard/recipes"
+            href="/pp/recipes"
             onClick={() => trigger("light")}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
           >
@@ -189,7 +189,7 @@ export default function MyProductsPage() {
               o que já tem em casa?
             </p>
             <Link
-              href="/dashboard/recipes"
+              href="/pp/recipes"
               className="inline-flex items-center gap-1 text-indigo-500 font-black uppercase text-[9px] mt-2 hover:underline"
             >
               Ir para Receitas <ChevronRight className="w-3 h-3" />
@@ -200,3 +200,4 @@ export default function MyProductsPage() {
     </main>
   )
 }
+

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
         .single()
       
       if (!profile?.is_admin) {
-        router.push("/dashboard")
+        router.push("/pp")
         return
       }
 
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
       <div className="max-w-5xl mx-auto space-y-8">
         <header className="flex items-center justify-between pb-6 border-b border-white/10">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
+            <Link href="/pp" className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
@@ -200,3 +200,4 @@ export default function AdminDashboard() {
     </main>
   )
 }
+

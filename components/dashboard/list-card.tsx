@@ -38,7 +38,7 @@ export function ListCard({ list, user, deleteList, updateList }: ListCardProps) 
     <div
       onClick={() => {
         trigger("light")
-        router.push(`/dashboard/lists/${list.id}`)
+        router.push(`/pp/lists/${list.id}`)
       }}
       className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[200px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group"
     >

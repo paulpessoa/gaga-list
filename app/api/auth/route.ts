@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
     else if (action === 'password_reset') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`,
+        redirectTo: `${appUrl}/api/auth/confirm?next=/pp/profile`,
       });
       if (error) throw error;
       return NextResponse.json({ message: 'E-mail de recuperação enviado! Verifique sua caixa de entrada.' });

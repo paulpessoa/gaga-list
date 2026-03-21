@@ -23,7 +23,7 @@ export function NavigationWrapper() {
   const [scannedData, setScannedData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const listId = pathname.startsWith('/dashboard/lists/') ? pathname.split('/')[3] : null;
+  const listId = pathname.startsWith('/pp/lists/') ? pathname.split('/')[3] : null;
 
   const handleScanSuccess = (result: any) => {
     setIsScannerOpen(false);
@@ -74,7 +74,7 @@ export function NavigationWrapper() {
       if (listId === targetListId) {
         window.location.reload(); 
       } else {
-        router.push(`/dashboard/lists/${targetListId}`);
+        router.push(`/pp/lists/${targetListId}`);
       }
     } catch (err) {
       console.error(err);

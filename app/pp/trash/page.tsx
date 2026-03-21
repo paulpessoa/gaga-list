@@ -1,4 +1,4 @@
-// app/dashboard/trash/page.tsx
+// app/pp/trash/page.tsx
 "use client"
 
 import { useTrashLists, useRestoreList } from "@/hooks/use-lists"
@@ -26,11 +26,11 @@ export default function TrashPage() {
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10">
       <header className="flex flex-col gap-4">
         <Link 
-          href="/dashboard"
+          href="/pp"
           className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors group w-fit"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-bold uppercase tracking-widest">Voltar ao Dashboard</span>
+          <span className="text-sm font-bold uppercase tracking-widest">Voltar ao PP</span>
         </Link>
         
         <div className="flex flex-col">
@@ -101,3 +101,4 @@ export default function TrashPage() {
     </main>
   )
 }
+

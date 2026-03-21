@@ -255,7 +255,7 @@ function LandingContent() {
         if (pendingToken) {
           router.replace(`/join/${pendingToken}`)
         } else {
-          router.replace("/dashboard")
+          router.replace("/pp")
         }
       }
     }
@@ -302,7 +302,7 @@ function LandingContent() {
         if (pendingToken) {
           router.push(`/join/${pendingToken}`)
         } else {
-          window.location.href = "/dashboard"
+          window.location.href = "/pp"
         }
       } else if (authMode === "password_signup") {
         const { error } = await supabase.auth.signUp({
@@ -314,7 +314,7 @@ function LandingContent() {
         setMessage("Cadastro realizado! Verifique seu e-mail.")
       } else if (authMode === "password_reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${appUrl}/api/auth/confirm?next=/dashboard/profile`
+          redirectTo: `${appUrl}/api/auth/confirm?next=/pp/profile`
         })
         if (error) throw error
         setMessage("E-mail de recuperação enviado!")
@@ -600,3 +600,4 @@ export default function LandingPage() {
     </Suspense>
   )
 }
+
