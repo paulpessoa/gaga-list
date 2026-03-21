@@ -405,7 +405,7 @@ export function ShareModal({
                           </button>
 
                           <Link
-                            href={`/pp/lists/${listId}/cade-tu`}
+                            href={`/app/lists/${listId}/cade-tu`}
                             onClick={() => trigger("light")}
                             className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95"
                           >

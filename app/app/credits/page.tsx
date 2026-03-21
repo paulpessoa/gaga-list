@@ -76,8 +76,8 @@ export default function CreditsPage() {
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-center gap-4">
         <Link
-          href="/pp/profile"
-          onClick={() => trigger('light')}
+          href="/app/profile"
+          onClick={() => trigger("light")}
           className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -96,7 +96,7 @@ export default function CreditsPage() {
       <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-indigo-500/30 border border-white/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-400/20 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col items-center text-center gap-2">
           <div className="w-20 h-20 bg-white/20 backdrop-blur-xl rounded-[2rem] flex items-center justify-center mb-4 shadow-inner border border-white/30 animate-float">
             <Sparkles className="w-10 h-10 text-amber-300" />
@@ -151,21 +151,22 @@ export default function CreditsPage() {
       {/* Recarga / Monetização */}
       <div className="bg-zinc-900 dark:bg-white rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-2xl relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-           <Zap className="w-20 h-20 text-white dark:text-zinc-900" />
+          <Zap className="w-20 h-20 text-white dark:text-zinc-900" />
         </div>
-        
+
         <div className="relative z-10">
           <h3 className="text-xl font-black text-white dark:text-zinc-900">
             Sua energia acabou?
           </h3>
           <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-2 max-w-[280px] mx-auto font-medium">
-            Apoie o projeto e garanta grãos ilimitados para suas criações culinárias.
+            Apoie o projeto e garanta grãos ilimitados para suas criações
+            culinárias.
           </p>
         </div>
-        
+
         <Link
-          href="/pp/plans"
-          onClick={() => trigger('medium')}
+          href="/app/plans"
+          onClick={() => trigger("medium")}
           className="relative z-10 w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
         >
           <CreditCard className="w-4 h-4" /> Comprar Grãos
@@ -180,24 +181,29 @@ export default function CreditsPage() {
             Histórico de Uso
           </h3>
         </div>
-        
+
         {isLoading ? (
           <div className="flex flex-col gap-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-20 bg-zinc-100 dark:bg-zinc-900 rounded-3xl animate-pulse" />
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-20 bg-zinc-100 dark:bg-zinc-900 rounded-3xl animate-pulse"
+              />
             ))}
           </div>
         ) : logs.length === 0 ? (
           <div className="text-center py-16 bg-zinc-50 dark:bg-zinc-900/20 rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-white/5">
             <Sparkles className="w-8 h-8 text-zinc-200 dark:text-zinc-800 mx-auto mb-3" />
-            <p className="text-zinc-500 text-sm font-medium">Você ainda não usou grãos mágicos.</p>
+            <p className="text-zinc-500 text-sm font-medium">
+              Você ainda não usou grãos mágicos.
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {logs.map((log) => {
               const Icon = FEATURE_ICONS[log.feature] || Zap
               const label = FEATURE_LABELS[log.feature] || log.feature
-              
+
               return (
                 <div
                   key={log.id}
@@ -213,7 +219,11 @@ export default function CreditsPage() {
                       </span>
                       <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
                         <Clock className="w-3 h-3" />
-                        {new Date(log.created_at).toLocaleDateString()} às {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(log.created_at).toLocaleDateString()} às{" "}
+                        {new Date(log.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
                       </span>
                     </div>
                   </div>

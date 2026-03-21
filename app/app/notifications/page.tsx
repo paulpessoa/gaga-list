@@ -61,7 +61,7 @@ export default function NotificationsPage() {
         ) : (
           notifications.map((notif) => {
             // Construir a URL de destino
-            const baseUrl = `/pp/lists/${notif.listId}`
+            const baseUrl = `/app/lists/${notif.listId}`
             const queryParams = new URLSearchParams()
             queryParams.set("openChat", "true")
             if (notif.type === "dm" && notif.senderId) {

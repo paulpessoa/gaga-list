@@ -1,4 +1,4 @@
-// app/pp/page.tsx
+// app/app/page.tsx
 "use client"
 
 import {
@@ -40,7 +40,7 @@ import { VisionScanner } from "@/components/ui/vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
 
-export default function PPPage() {
+export default function AppPage() {
   const router = useRouter()
   const { data: lists, isLoading, isError, error } = useLists()
   const { data: user } = useUser()
@@ -133,7 +133,7 @@ export default function PPPage() {
           setIsAiProcessing(false)
           setIsCreateModalOpen(false)
           setShowVoicePreview(false)
-          router.push(`/pp/lists/${newList.id}`)
+          router.push(`/app/lists/${newList.id}`)
         }
       }
     )
@@ -168,7 +168,7 @@ export default function PPPage() {
           trigger("success" as any)
           setIsAiProcessing(false)
           setIsCreateModalOpen(false)
-          router.push(`/pp/lists/${newList.id}`)
+          router.push(`/app/lists/${newList.id}`)
         }
       }
     )
@@ -226,22 +226,26 @@ export default function PPPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link 
-            href="/pp/recipes"
-            onClick={() => trigger('light')}
+          <Link
+            href="/app/recipes"
+            onClick={() => trigger("light")}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
           >
             <UtensilsCrossed className="w-5 h-5" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Receitas</span>
+            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+              Receitas
+            </span>
           </Link>
 
-          <Link 
-            href="/pp/products"
-            onClick={() => trigger('light')}
+          <Link
+            href="/app/products"
+            onClick={() => trigger("light")}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
           >
             <ShoppingBag className="w-5 h-5" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">Produtos</span>
+            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+              Produtos
+            </span>
           </Link>
 
           {isOffline && (
@@ -299,12 +303,12 @@ export default function PPPage() {
           </div>
         ) : (
           lists?.map((list: any) => (
-            <ListCard 
-              key={list.id} 
-              list={list} 
-              user={user} 
-              deleteList={deleteList} 
-              updateList={updateList} 
+            <ListCard
+              key={list.id}
+              list={list}
+              user={user}
+              deleteList={deleteList}
+              updateList={updateList}
             />
           ))
         )}
@@ -338,4 +342,3 @@ export default function PPPage() {
     </main>
   )
 }
-

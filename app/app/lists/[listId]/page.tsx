@@ -185,7 +185,7 @@ export default function ListDetail({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link
-                href="/pp"
+                href="/app"
                 className="p-2 -ml-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -280,7 +280,7 @@ export default function ListDetail({
                   <MessageCircle className="w-5 h-5" />
                 </button>
                 <Link
-                  href={`/pp/lists/${listId}/cade-tu`}
+                  href={`/app/lists/${listId}/cade-tu`}
                   onClick={() => trigger("light")}
                   className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95 shadow-sm border border-zinc-200 dark:border-zinc-800"
                 >
@@ -584,7 +584,7 @@ export default function ListDetail({
           removeCollaborator.mutate(userId, {
             onSuccess: () => {
               if (userId === user?.id) {
-                router.push("/pp")
+                router.push("/app")
               }
             }
           })

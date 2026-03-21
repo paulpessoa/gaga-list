@@ -12,14 +12,20 @@ interface ListCardProps {
   updateList: any
 }
 
-export function ListCard({ list, user, deleteList, updateList }: ListCardProps) {
+export function ListCard({
+  list,
+  user,
+  deleteList,
+  updateList
+}: ListCardProps) {
   const router = useRouter()
   const { trigger } = useHaptic()
   const [isEditing, setIsEditing] = useState(false)
   const [editTitle, setEditTitle] = useState(list.title)
 
   const totalItems = list.items?.length || 0
-  const completedItems = list.items?.filter((i: any) => i.is_purchased).length || 0
+  const completedItems =
+    list.items?.filter((i: any) => i.is_purchased).length || 0
   const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0
   const isOwner = list.owner_id === user?.id
 
@@ -38,7 +44,7 @@ export function ListCard({ list, user, deleteList, updateList }: ListCardProps) 
     <div
       onClick={() => {
         trigger("light")
-        router.push(`/pp/lists/${list.id}`)
+        router.push(`/app/lists/${list.id}`)
       }}
       className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[200px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group"
     >
@@ -73,7 +79,7 @@ export function ListCard({ list, user, deleteList, updateList }: ListCardProps) 
           </div>
         </div>
       </div>
-      
+
       <div className="mt-4">
         <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-400">
           <span>Progresso</span>

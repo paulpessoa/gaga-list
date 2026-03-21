@@ -177,7 +177,7 @@ export default function RecipesPage() {
         })
       }
       trigger("success" as any)
-      router.push(`/pp/lists/${newList.id}`)
+      router.push(`/app/lists/${newList.id}`)
     } catch (err) {
       alert("Erro ao criar lista.")
     }
@@ -359,7 +359,7 @@ export default function RecipesPage() {
             ))}
             {myProducts.length === 0 && (
               <Link
-                href="/pp/products"
+                href="/app/products"
                 className="text-[10px] font-bold text-zinc-400 py-4 hover:text-emerald-500 underline"
               >
                 Você ainda não tem produtos salvos. Scaneie produtos para
@@ -638,4 +638,3 @@ export default function RecipesPage() {
     </main>
   )
 }
-

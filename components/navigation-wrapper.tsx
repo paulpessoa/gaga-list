@@ -1,39 +1,41 @@
-'use client';
+"use client"
 
-import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { TabBar } from './ui/tab-bar';
-import { VisionScanner } from './ui/vision-scanner';
-import { ScannedProductModal } from './lists/scanned-product-modal';
-import { useUser } from '@/hooks/use-user';
-import { createClient } from '@/lib/supabase/client';
-import { MyProductsService } from '@/services/my-products.service';
-import { useHaptic } from '@/hooks/use-haptic';
-import { useLists } from '@/hooks/use-lists';
+import { usePathname, useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { TabBar } from "./ui/tab-bar"
+import { VisionScanner } from "./ui/vision-scanner"
+import { ScannedProductModal } from "./lists/scanned-product-modal"
+import { useUser } from "@/hooks/use-user"
+import { createClient } from "@/lib/supabase/client"
+import { MyProductsService } from "@/services/my-products.service"
+import { useHaptic } from "@/hooks/use-haptic"
+import { useLists } from "@/hooks/use-lists"
 
 export function NavigationWrapper() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { data: user } = useUser();
-  const { data: lists } = useLists();
-  const { trigger } = useHaptic();
-  const supabase = createClient();
+  const pathname = usePathname()
+  const router = useRouter()
+  const { data: user } = useUser()
+  const { data: lists } = useLists()
+  const { trigger } = useHaptic()
+  const supabase = createClient()
 
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [scannedData, setScannedData] = useState<any>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const [scannedData, setScannedData] = useState<any>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const listId = pathname.startsWith('/pp/lists/') ? pathname.split('/')[3] : null;
+  const listId = pathname.startsWith("/app/lists/")
+    ? pathname.split("/")[3]
+    : null
 
   const handleScanSuccess = (result: any) => {
-    setIsScannerOpen(false);
+    setIsScannerOpen(false)
     // result.data vem da OpenAI no modo product
-    setScannedData(result.data || result); 
-  };
+    setScannedData(result.data || result)
+  }
 
   const handleSaveToMyProducts = async (finalData: any) => {
-    if (!user || !finalData) return;
-    setIsSaving(true);
+    if (!user || !finalData) return
+    setIsSaving(true)
     try {
       await MyProductsService.addProduct(supabase, {
         user_id: user.id,
@@ -44,62 +46,62 @@ export function NavigationWrapper() {
           benefits: finalData.benefits,
           suggested_uses: finalData.suggested_uses
         } as any
-      });
-      trigger('success' as any);
-      setScannedData(null);
+      })
+      trigger("success" as any)
+      setScannedData(null)
     } catch (err) {
-      console.error(err);
-      alert('Erro ao salvar produto.');
+      console.error(err)
+      alert("Erro ao salvar produto.")
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   const handleAddToList = async (targetListId: string, finalData: any) => {
-    if (!finalData || !targetListId) return;
-    
-    setIsSaving(true);
+    if (!finalData || !targetListId) return
+
+    setIsSaving(true)
     try {
       await fetch(`/api/lists/${targetListId}/items`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: finalData.name,
           category: finalData.category,
           quantity: "1"
         })
-      });
-      trigger('success' as any);
-      setScannedData(null);
+      })
+      trigger("success" as any)
+      setScannedData(null)
       if (listId === targetListId) {
-        window.location.reload(); 
+        window.location.reload()
       } else {
-        router.push(`/pp/lists/${targetListId}`);
+        router.push(`/app/lists/${targetListId}`)
       }
     } catch (err) {
-      console.error(err);
-      alert('Erro ao adicionar à lista.');
+      console.error(err)
+      alert("Erro ao adicionar à lista.")
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
-  const hideOnPaths = ['/', '/login', '/api/auth/confirm'];
-  const shouldHide = hideOnPaths.includes(pathname);
+  const hideOnPaths = ["/", "/login", "/api/auth/confirm"]
+  const shouldHide = hideOnPaths.includes(pathname)
 
-  if (shouldHide) return null;
+  if (shouldHide) return null
 
   return (
     <>
       <TabBar onScanClick={() => setIsScannerOpen(true)} />
-      
-      <VisionScanner 
-        isOpen={isScannerOpen} 
-        onClose={() => setIsScannerOpen(false)} 
-        onScanSuccess={handleScanSuccess} 
+
+      <VisionScanner
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleScanSuccess}
       />
 
-      <ScannedProductModal 
+      <ScannedProductModal
         data={scannedData}
         lists={lists || []}
         activeListId={listId}
@@ -109,5 +111,5 @@ export function NavigationWrapper() {
         isSaving={isSaving}
       />
     </>
-  );
+  )
 }
