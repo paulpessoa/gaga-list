@@ -1,9 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-// ... rest of imports
+import { X, RefreshCw, Loader2, ShoppingBag } from 'lucide-react';
+import { useHaptic } from '@/hooks/use-haptic';
 
-export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerProps) {
+interface VisionScannerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onScanSuccess: (data: any) => void;
+  mode?: 'product' | 'ocr';
+}
+
+export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product' }: VisionScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -47,7 +55,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [isOpen, startCamera, stopCamera]);
+  }, [isOpen, startCamera, stopCamera, stream]);
 
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
@@ -69,7 +77,8 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
   const processImage = async (base64Image: string) => {
     setIsAiProcessing(true);
     try {
-      const response = await fetch('/api/ai/vision', {
+      const endpoint = mode === 'product' ? '/api/ai/vision' : '/api/ai/ocr';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: base64Image })
@@ -77,9 +86,9 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
 
       if (!response.ok) throw new Error('Falha na análise da IA');
       
-      const { data } = await response.json();
+      const data = await response.json();
       trigger('success' as any);
-      onScanSuccess(data);
+      onScanSuccess(mode === 'product' ? data.data : data.items);
     } catch (err) {
       console.error(err);
       alert('Erro ao identificar produto com IA.');
@@ -104,10 +113,10 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
         <div className="bg-zinc-900/50 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white">
           <span className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            AI Scanner
+            {mode === 'product' ? 'AI Scanner' : 'Lista via Foto'}
           </span>
         </div>
-        <div className="w-12" /> {/* Spacer */}
+        <div className="w-12" />
       </div>
 
       {/* Viewport */}
@@ -135,7 +144,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
               <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-indigo-500/30 animate-scan" />
             </div>
             <p className="text-white/60 text-xs font-bold uppercase tracking-widest mt-8 bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">
-              Enquadre o produto ou rótulo
+              {mode === 'product' ? 'Enquadre o produto ou rótulo' : 'Enquadre a lista de papel'}
             </p>
           </div>
         )}
@@ -148,7 +157,9 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
             </div>
             <div className="space-y-1">
               <h3 className="text-xl font-black">Analisando com IA</h3>
-              <p className="text-zinc-400 text-sm font-medium">O GROQ está identificando o produto e buscando sugestões...</p>
+              <p className="text-zinc-400 text-sm font-medium">
+                {mode === 'product' ? 'O GROQ está identificando o produto...' : 'O GROQ está lendo sua lista de papel...'}
+              </p>
             </div>
           </div>
         )}
@@ -177,7 +188,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess }: VisionScannerP
           </div>
         </button>
 
-        <div className="w-14 h-14" /> {/* Spacer para alinhar centro */}
+        <div className="w-14 h-14" />
       </div>
 
       <canvas ref={canvasRef} className="hidden" />

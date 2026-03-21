@@ -26,6 +26,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { QRScanner } from "@/components/ui/qr-scanner"
+import { VisionScanner } from "@/components/ui/vision-scanner"
 
 export default function Dashboard() {
   const router = useRouter()
@@ -40,6 +41,7 @@ export default function Dashboard() {
   const [isOffline, setIsOffline] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isQrScannerOpen, setIsQrScannerOpen] = useState(false)
+  const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
   
@@ -110,6 +112,38 @@ export default function Dashboard() {
       setIsAiProcessing(false)
     }
   }, [createList, router, trigger]);
+
+  const handleOcrSuccess = async (items: any[]) => {
+    setIsOcrScannerOpen(false)
+    if (!items || items.length === 0) {
+      alert("Nenhum item identificado na foto.")
+      return
+    }
+
+    setIsAiProcessing(true)
+    createList.mutate({
+      title: `Lista via Foto (${new Date().toLocaleDateString()})`,
+      color_theme: "indigo"
+    }, {
+      onSuccess: async (newList) => {
+        for (const item of items) {
+          await fetch(`/api/lists/${newList.id}/items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: item.name,
+              quantity: item.quantity || "1",
+              category: item.category
+            })
+          })
+        }
+        trigger("success" as any)
+        setIsAiProcessing(false)
+        setIsCreateModalOpen(false)
+        router.push(`/dashboard/lists/${newList.id}`)
+      }
+    })
+  }
 
   // Efeito para processar o áudio assim que parar de gravar
   useEffect(() => {
@@ -321,7 +355,7 @@ export default function Dashboard() {
                         e.stopPropagation()
                         handleRename(list.id, list.title)
                       }}
-                      className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
+                      className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
                       title="Renomear"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -355,7 +389,7 @@ export default function Dashboard() {
 
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-border animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-white/5 animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setIsCreateModalOpen(false)}
               className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
@@ -393,7 +427,7 @@ export default function Dashboard() {
                   disabled={createList.isPending || !newListTitle.trim() || isAiProcessing}
                   className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {createList.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}
+                  {createList.isPending || isAiProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}
                 </button>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -403,20 +437,18 @@ export default function Dashboard() {
                     disabled={isAiProcessing}
                     className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
                   >
-                    {isAiProcessing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : isRecording ? (
+                    {isRecording ? (
                       <Square className="w-4 h-4 fill-current" />
                     ) : (
                       <Mic className="w-4 h-4 text-indigo-500" />
                     )}
-                    {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
+                    {isRecording ? "Parar" : "Via Áudio"}
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       trigger("medium")
-                      alert("Foto de Papel para Lista (GROQ Vision) em desenvolvimento!")
+                      setIsOcrScannerOpen(true)
                     }}
                     disabled={isAiProcessing}
                     className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95 disabled:opacity-50"
@@ -448,6 +480,13 @@ export default function Dashboard() {
         isOpen={isQrScannerOpen} 
         onClose={() => setIsQrScannerOpen(false)} 
         onScanSuccess={handleScanSuccess} 
+      />
+
+      <VisionScanner
+        mode="ocr"
+        isOpen={isOcrScannerOpen}
+        onClose={() => setIsOcrScannerOpen(false)}
+        onScanSuccess={handleOcrSuccess}
       />
     </main>
   )
