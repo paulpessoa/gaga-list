@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, Settings, Bell, ScanLine } from 'lucide-react';
+import { LayoutGrid, Settings, Bell, ScanLine, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useNotifications } from '@/providers/notification-provider';
@@ -39,17 +39,12 @@ export function TabBar({ onScanClick }: TabBarProps) {
       </button>
 
       <Link 
-        href="/dashboard/notifications" 
+        href="/dashboard/products" 
         onClick={() => trigger('light')}
-        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive('/dashboard/notifications') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
+        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive('/dashboard/products') ? 'text-indigo-500 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500 hover:text-indigo-500'}`}
       >
-        <Bell className="w-6 h-6" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-bounce shadow-lg border-2 border-white dark:border-zinc-950 px-1">
-            {unreadCount}
-          </span>
-        )}
-        <span className="text-[10px] font-bold uppercase tracking-tighter">Avisos</span>
+        <ShoppingBag className="w-6 h-6" />
+        <span className="text-[10px] font-bold uppercase tracking-tighter">Produtos</span>
       </Link>
 
       <Link 

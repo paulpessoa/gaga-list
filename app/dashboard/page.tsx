@@ -5,6 +5,7 @@ import { useLists, useCreateList, useDeleteList, useUpdateList } from "@/hooks/u
 import { useUser } from "@/hooks/use-user"
 import { useHaptic } from "@/hooks/use-haptic"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
+import { useNotifications } from "@/providers/notification-provider"
 import {
   Plus,
   ShoppingBag,
@@ -20,7 +21,8 @@ import {
   Mic,
   Camera,
   Loader2,
-  Square
+  Square,
+  Bell
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const router = useRouter()
   const { data: lists, isLoading, isError, error } = useLists()
   const { data: user } = useUser()
+  const { unreadCount } = useNotifications()
   const createList = useCreateList()
   const deleteList = useDeleteList()
   const updateList = useUpdateList()
@@ -75,16 +78,11 @@ export default function Dashboard() {
       })
       
       if (!response.ok) throw new Error('Falha no processamento de voz')
-      
       const data = await response.json()
       
       if (data.items && data.items.length > 0) {
         const title = data.transcription?.slice(0, 30) + '...' || "Nova Lista por Voz"
-        
-        createList.mutate({
-          title,
-          color_theme: "indigo"
-        }, {
+        createList.mutate({ title, color_theme: "indigo" }, {
           onSuccess: async (newList) => {
             for (const item of data.items) {
               await fetch(`/api/lists/${newList.id}/items`, {
@@ -98,6 +96,7 @@ export default function Dashboard() {
               })
             }
             trigger("success" as any)
+            setIsAiProcessing(false)
             setIsCreateModalOpen(false)
             router.push(`/dashboard/lists/${newList.id}`)
           }
@@ -145,7 +144,6 @@ export default function Dashboard() {
     })
   }
 
-  // Efeito para processar o áudio assim que parar de gravar
   useEffect(() => {
     if (audioBlob && !isRecording) {
       handleProcessVoice(audioBlob)
@@ -162,18 +160,12 @@ export default function Dashboard() {
     e.preventDefault()
     if (!newListTitle.trim()) return
 
-    createList.mutate(
-      {
-        title: newListTitle,
-        color_theme: "indigo"
-      },
-      {
-        onSuccess: () => {
-          setIsCreateModalOpen(false)
-          setNewListTitle("")
-        }
+    createList.mutate({ title: newListTitle, color_theme: "indigo" }, {
+      onSuccess: () => {
+        setIsCreateModalOpen(false)
+        setNewListTitle("")
       }
-    )
+    })
   }
 
   const handleRename = (listId: string, currentTitle: string) => {
@@ -186,11 +178,7 @@ export default function Dashboard() {
       setEditingListId(null)
       return
     }
-    
-    updateList.mutate({
-      listId,
-      updates: { title: editTitle }
-    }, {
+    updateList.mutate({ listId, updates: { title: editTitle } }, {
       onSuccess: () => setEditingListId(null)
     })
   }
@@ -198,7 +186,6 @@ export default function Dashboard() {
   const handleScanSuccess = (decodedText: string) => {
     trigger("success" as any);
     setIsQrScannerOpen(false);
-    
     try {
       if (decodedText.includes('/join/')) {
         const url = new URL(decodedText);
@@ -211,16 +198,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogout = async () => {
-    trigger("heavy")
-    try {
-      await fetch("/api/auth/logout", { method: "POST" })
-      window.location.href = "/"
-    } catch (error) {
-      console.error("Erro ao sair:", error)
-    }
-  }
-
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32">
       <header className="flex flex-col gap-2">
@@ -230,11 +207,24 @@ export default function Dashboard() {
               Minhas Listas
             </h1>
             <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
-              {lists?.length || 0} listas ativas • Gerencie seus itens e colaboradores
+              {lists?.length || 0} listas ativas • Gerencie seus itens
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <Link 
+              href="/dashboard/notifications"
+              onClick={() => trigger('light')}
+              className="relative p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[1.125rem] h-[1.125rem] bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 px-1">
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+
             {isOffline && (
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
                 <WifiOff className="w-3 h-3" />
@@ -258,9 +248,7 @@ export default function Dashboard() {
             <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
               {createList.isPending ? "Criando..." : "Nova Lista"}
             </span>
-            <span className="text-xs text-zinc-500 font-medium mt-1">
-              Comece um novo projeto de compras
-            </span>
+            <span className="text-xs text-zinc-500 font-medium mt-1">Comece um novo projeto de compras</span>
           </div>
         </button>
 
@@ -282,12 +270,7 @@ export default function Dashboard() {
             <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
               <X className="w-8 h-8 text-red-500" />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Ops! Erro ao carregar listas</h3>
-              <p className="text-zinc-500 text-sm max-w-xs mt-1">
-                {(error as any)?.message || "Verifique sua conexão e tente novamente."}
-              </p>
-            </div>
+            <h3 className="text-lg font-bold text-zinc-900 dark:text-white">Ops! Erro ao carregar listas</h3>
           </div>
         ) : (
           lists?.map((list: any) => {
@@ -299,10 +282,7 @@ export default function Dashboard() {
             return (
               <div 
                 key={list.id} 
-                onClick={() => {
-                  trigger("light");
-                  router.push(`/dashboard/lists/${list.id}`);
-                }}
+                onClick={() => { trigger("light"); router.push(`/dashboard/lists/${list.id}`); }}
                 className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[200px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -327,7 +307,7 @@ export default function Dashboard() {
                         </h3>
                       )}
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isOwner ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-500"}`}>
+                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${isOwner ? "bg-indigo-500/10 text-indigo-600" : "bg-amber-500/10 text-amber-600"}`}>
                           {isOwner ? "Proprietário" : "Colaborador"}
                         </span>
                       </div>
@@ -341,43 +321,28 @@ export default function Dashboard() {
                     <span className="text-zinc-900 dark:text-zinc-100">{completedItems}/{totalItems} itens</span>
                   </div>
                   <div className="w-full h-2.5 bg-zinc-100 dark:bg-zinc-800/50 rounded-full overflow-hidden shadow-inner border border-zinc-200/50 dark:border-white/5">
-                    <div 
-                      className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all duration-700 ease-out"
-                      style={{ width: `${progress}%` }}
-                    />
+                    <div className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition-all duration-700 ease-out" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleRename(list.id, list.title)
-                      }}
-                      className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
-                      title="Renomear"
+                      onClick={(e) => { e.stopPropagation(); handleRename(list.id, list.title); }}
+                      className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    
                     {isOwner && (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (confirm("Mover para a lixeira?")) {
-                            deleteList.mutate(list.id)
-                          }
-                        }}
+                        onClick={(e) => { e.stopPropagation(); if (confirm("Mover para a lixeira?")) deleteList.mutate(list.id); }}
                         className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:text-red-500 hover:bg-white dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-zinc-200 dark:hover:border-white/10"
-                        title="Excluir"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
-
-                  <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95 transition-all">
                     Acessar <ChevronRight className="w-3 h-3 ml-1" />
                   </div>
                 </div>
@@ -390,10 +355,7 @@ export default function Dashboard() {
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-10 relative shadow-2xl border border-zinc-200 dark:border-white/5 animate-in zoom-in-95 duration-200">
-            <button
-              onClick={() => setIsCreateModalOpen(false)}
-              className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2"
-            >
+            <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-8 right-8 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2">
               <X className="w-5 h-5" />
             </button>
 
@@ -402,9 +364,7 @@ export default function Dashboard() {
                  <ShoppingBag className="w-8 h-8 text-indigo-500" />
               </div>
               <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">Nova Lista</h2>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
-                Organize suas compras com amigos e família de forma simples.
-              </p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">Organize suas compras com amigos e família.</p>
             </div>
 
             <form onSubmit={submitCreateList} className="flex flex-col gap-6">
@@ -412,9 +372,8 @@ export default function Dashboard() {
                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">Nome da Lista</label>
                 <input
                   type="text"
-                  placeholder="Ex: Mercado da Semana, Churrasco..."
-                  required
-                  autoFocus
+                  placeholder="Ex: Mercado da Semana..."
+                  required autoFocus
                   value={newListTitle}
                   onChange={(e) => setNewListTitle(e.target.value)}
                   className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner"
@@ -425,7 +384,7 @@ export default function Dashboard() {
                 <button
                   type="submit"
                   disabled={createList.isPending || !newListTitle.trim() || isAiProcessing}
-                  className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {createList.isPending || isAiProcessing ? <Loader2 className="w-6 h-6 animate-spin" /> : "Criar Lista"}
                 </button>
@@ -437,21 +396,14 @@ export default function Dashboard() {
                     disabled={isAiProcessing}
                     className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
                   >
-                    {isRecording ? (
-                      <Square className="w-4 h-4 fill-current" />
-                    ) : (
-                      <Mic className="w-4 h-4 text-indigo-500" />
-                    )}
-                    {isRecording ? "Parar" : "Via Áudio"}
+                    {isAiProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : isRecording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-4 h-4 text-indigo-500" />}
+                    {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      trigger("medium")
-                      setIsOcrScannerOpen(true)
-                    }}
+                    onClick={() => { trigger("medium"); setIsOcrScannerOpen(true); }}
                     disabled={isAiProcessing}
-                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95 disabled:opacity-50"
+                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
                   >
                     <Camera className="w-4 h-4 text-indigo-500" />
                     Via Foto
@@ -460,15 +412,11 @@ export default function Dashboard() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    trigger("medium")
-                    setIsQrScannerOpen(true)
-                  }}
+                  onClick={() => { trigger("medium"); setIsQrScannerOpen(true); }}
                   disabled={isAiProcessing}
-                  className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95 disabled:opacity-50"
+                  className="w-full py-4.5 bg-white dark:bg-zinc-950 text-indigo-500 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all border-2 border-indigo-500/20 shadow-sm active:scale-95"
                 >
-                  <QrCode className="w-4 h-4" />
-                  Entrar via QR CODE
+                  <QrCode className="w-4 h-4" /> Entrar via QR CODE
                 </button>
               </div>
             </form>
@@ -476,18 +424,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      <QRScanner 
-        isOpen={isQrScannerOpen} 
-        onClose={() => setIsQrScannerOpen(false)} 
-        onScanSuccess={handleScanSuccess} 
-      />
-
-      <VisionScanner
-        mode="ocr"
-        isOpen={isOcrScannerOpen}
-        onClose={() => setIsOcrScannerOpen(false)}
-        onScanSuccess={handleOcrSuccess}
-      />
+      <QRScanner isOpen={isQrScannerOpen} onClose={() => setIsQrScannerOpen(false)} onScanSuccess={handleScanSuccess} />
+      <VisionScanner mode="ocr" isOpen={isOcrScannerOpen} onClose={() => setIsOcrScannerOpen(false)} onScanSuccess={handleOcrSuccess} />
     </main>
   )
 }

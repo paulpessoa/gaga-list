@@ -1,37 +1,26 @@
-# 🚀 Visão Futurista: Inteligência e Praticidade (Fase 3)
+# 🚀 Fase 4: Ecossistema de Receitas & Catálogo
 
-Este documento guia a evolução do **Gaga-List** para um assistente de compras inteligente usando **GROQ AI**.
-
----
-
-## 🎨 1. Consistência e Limpeza (Concluído)
-- [x] Remoção de tema manual (foco 100% no sistema/dispositivo).
-- [x] Remoção de biometria (simplificação do core).
-- [x] Auto-save no perfil (`onBlur`).
-- [x] Botões de ação da lista no topo (Chat/Mapa).
-- [x] Redesenho dos Cards do Dashboard (UX Premium).
-- [x] Toggles de Hardware em Configurações.
-
-## 🤖 2. Inteligência Artificial (GROQ AI)
-- [x] **AI Scanner (Menu Inferior):**
-    *   Botão central de scanner no TabBar.
-    *   Foto do produto -> GROQ Vision -> Identificação automática.
-    *   Fluxo: Salvar em "Meus Produtos" ou Adicionar à Lista Aberta.
-    *   Sugestões de IA: Benefícios do produto e usos em receitas.
-- [x] **Criação de Lista por Voz:**
-    *   Botão de microfone no modal "Nova Lista".
-    *   Transcrição -> GROQ -> Extração de itens organizada por categoria.
-- [ ] **Criação por Foto de Papel:**
-    *   Fotografar lista escrita à mão ou folheto -> GROQ Vision -> Nova lista digital.
-
-## 📦 3. Novas Features de Valor
-- [x] **Permissões 2.0:** Qualquer membro da lista pode convidar novos membros (RLS atualizado).
-- [x] **Infra Meus Produtos:** Tabela `my_products` criada e pronta para o scanner.
-- [ ] **Receitas Inteligentes:** Gerar listas completas a partir de uma receita (ex: "Ingredientes para Carbonara").
-- [x] **QR Code Real:** Leitura de QR Code funcional no Dashboard para entrar em listas.
-
-## 💰 4. Estrutura de Monetização
-- [x] Organizar endpoints de IA (`/api/ai/*`) para permitir controle de uso por usuário.
+Este documento guia a transformação do app em um assistente culinário e catálogo pessoal de produtos.
 
 ---
-*Assinado: Staff Engineer & Visionary Founder.*
+
+## 🎨 1. Refatoração & Performance (Sprint de Arrumação)
+- [ ] **Extração de Componentes:** Mover o `ListCard` e modais de IA do Dashboard para arquivos separados em `components/dashboard/`.
+- [ ] **Type Safety:** Rodar o gerador de tipos do Supabase (ou atualizar manual) para garantir consistência total nos novos campos.
+- [ ] **Sentry Integration:** Configurar monitoramento de erros para as rotas de IA.
+
+## 🥘 2. Receitas Inteligentes (GROQ AI)
+- [ ] **Nova Tela de Receitas:** Listar receitas sugeridas pela IA com base em itens frequentes do usuário.
+- [ ] **Gerador de Lista via Receita:** Botão "Transformar em Lista" que cria uma nova lista com todos os ingredientes necessários.
+- [ ] **Busca de Receitas por Voz:** "Sugira uma receita com frango e batata" -> IA gera e oferece criar a lista.
+
+## 🛍️ 3. Catálogo "Meus Produtos"
+- [ ] **Tela de Meus Produtos:** Visualizar todos os itens escaneados via AI Vision.
+- [ ] **Busca & Filtros:** Organizar produtos por categoria e marca.
+- [ ] **Histórico de Preços:** (Opcional) Guardar o último preço informado/lido para comparação.
+
+## 💰 4. Estrutura Pro (Pre-Monetização)
+- [ ] **Limites de IA:** Implementar contador de uso no banco para limitar o número de scans/áudios gratuitos por dia.
+
+---
+*Assinado: Staff Engineer & Product Owner.*
