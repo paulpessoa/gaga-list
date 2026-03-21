@@ -109,6 +109,33 @@ export default function RecipesPage() {
     }
   }
 
+  const saveRecipe = async (recipe: any) => {
+    trigger("medium")
+    try {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) return
+
+      const { error } = await supabase
+        .from('recipes')
+        .insert({
+          user_id: userData.user.id,
+          title: recipe.title,
+          description: recipe.description,
+          ingredients: recipe.ingredients,
+          instructions: recipe.instructions,
+          prep_time: recipe.prep_time,
+          difficulty: recipe.difficulty,
+          ai_metadata: { saved_at: new Date().toISOString() }
+        })
+
+      if (error) throw error
+      trigger("success" as any)
+      fetchSavedRecipes()
+    } catch (err) {
+      alert("Erro ao salvar receita.")
+    }
+  }
+
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex flex-col gap-1">
@@ -206,10 +233,14 @@ export default function RecipesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="md:w-48">
+                <div className="md:w-48 flex flex-col gap-2">
                   <button onClick={() => createListFromRecipe(recipe)} className="w-full py-6 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-3xl flex flex-col items-center justify-center gap-2 shadow-2xl active:scale-95 transition-all group">
                     <Wand2 className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Criar Lista</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-center">Criar Lista</span>
+                  </button>
+                  <button onClick={() => saveRecipe(recipe)} className="w-full py-3 bg-indigo-500/10 hover:bg-indigo-500 hover:text-white text-indigo-500 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Salvar</span>
                   </button>
                 </div>
               </div>
