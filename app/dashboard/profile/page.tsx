@@ -115,8 +115,29 @@ export default function ProfilePage() {
     }
   }, [user, supabase])
 
-  const toggleHardware = (key: string, current: boolean, setter: (v: boolean) => void) => {
+  const toggleHardware = async (key: string, current: boolean, setter: (v: boolean) => void) => {
     const newValue = !current
+    
+    // Se o usuário está tentando ATIVAR, pedir permissão real ao browser
+    if (newValue) {
+      try {
+        if (key === "hw_location") {
+          await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject)
+          })
+        } else if (key === "hw_camera") {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true })
+          stream.getTracks().forEach(t => t.stop())
+        } else if (key === "hw_mic") {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          stream.getTracks().forEach(t => t.stop())
+        }
+      } catch (err) {
+        alert("Para ativar esta função, você também precisa permitir o acesso nas configurações do seu navegador/celular.")
+        return // Não muda o toggle se o browser negou
+      }
+    }
+
     setter(newValue)
     localStorage.setItem(key, String(newValue))
     trigger("light")
