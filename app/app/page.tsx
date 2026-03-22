@@ -40,11 +40,13 @@ import { QRScanner } from "@/components/ui/qr-scanner"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
+import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 
 export default function AppPage() {
   const router = useRouter()
   const { data: lists, isLoading, isError, error } = useLists()
   const { data: user } = useUser()
+  const { checkAndAct } = useAICreditCheck()
   const { unreadCount } = useNotifications()
   const createList = useCreateList()
   const deleteList = useDeleteList()
@@ -363,10 +365,10 @@ export default function AppPage() {
         isAiProcessing={isAiProcessing}
         submitCreateList={submitCreateList}
         isRecording={isRecording}
-        startRecording={startRecording}
+        startRecording={() => checkAndAct(1, startRecording)}
         stopRecording={stopRecording}
         trigger={trigger}
-        setIsOcrScannerOpen={setIsOcrScannerOpen}
+        setIsOcrScannerOpen={(val) => val ? checkAndAct(2, () => setIsOcrScannerOpen(true)) : setIsOcrScannerOpen(false)}
         voiceTranscription={voiceTranscription}
         setVoiceTranscription={setVoiceTranscription}
         voiceItems={voiceItems}

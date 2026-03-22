@@ -2,9 +2,8 @@
 *Prioridade: P0 (Crítico) > P1 (Refinamento) > P2 (Delight)*
 
 ## 🎨 P0: UX & UI Refactor (Apple Standard)
-- [ ] **Clean ListCards:** Refatorar o `ListCard` no dashboard. Remover avatares desnecessários, unificar barra de progresso e botão acessar (Clean UI).
-- [ ] **Navigation Hierarchy:** Garantir que Telas Raiz não tenham botão voltar e Subtelas tenham botão voltar consistente.
-- [ ] **Sticky Headers:** Implementar headers fixos em listas longas.
+- [x] **Clean Navigation:** Hierarquia de navegação ajustada. Telas Raiz sem botão voltar, Subtelas com botão voltar consistente. (Concluído ✅)
+- [ ] **Mascara de Preços:** Melhorar a UX da máscara de preços nos itens da lista.
 
 ## 🤖 P1: Inteligência Artificial & Novos Fluxos
 - [ ] **Nova Central de Itens (V2):** Repensar como o usuário gerencia produtos sem a bagunça da V1. 

@@ -34,7 +34,8 @@ import {
   LogOut,
   Mic,
   Camera,
-  Loader2
+  Loader2,
+  Filter
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -47,9 +48,10 @@ import Image from "next/image"
 import { COMMON_GROCERY_ITEMS } from "@/lib/constants/grocery-items"
 import { useRouter } from "next/navigation"
 
-import { AICreditLock } from "@/components/ui/ai-credit-lock"
+import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
+import { CreateItemModal } from "@/components/lists/create-item-modal"
 
 export default function ListDetail({
   params
@@ -62,6 +64,7 @@ export default function ListDetail({
   const { data: lists } = useLists()
   const list = lists?.find((l) => l.id === listId)
   const { data: user } = useUser()
+  const { checkAndAct } = useAICreditCheck()
 
   const { data: items, isLoading } = useItems(listId)
   const createItem = useCreateItem(listId)
@@ -72,13 +75,13 @@ export default function ListDetail({
 
   // Estados da Interface
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [chatTarget, setChatTarget] = useState<
     | { id: string; full_name: string | null; avatar_url: string | null }
     | undefined
   >(undefined)
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState("")
 
@@ -198,6 +201,7 @@ export default function ListDetail({
     })
     setShowAiPreview(false)
     setVoiceItems([])
+    setIsCreateItemModalOpen(false)
   }
 
   const handleAddItem = (name: string, category?: string, unit?: string) => {
@@ -208,8 +212,7 @@ export default function ListDetail({
       category: category || null,
       unit: unit || null
     })
-    setNewItemName("")
-    setShowSuggestions(false)
+    setIsCreateItemModalOpen(false)
   }
 
   const handleToggleItem = (item: any) => {
@@ -236,14 +239,6 @@ export default function ListDetail({
       updates: { [field]: value } as any
     })
   }
-
-  const [newItemName, setNewItemName] = useState("")
-  const suggestions = useMemo(() => {
-    if (!newItemName.trim()) return []
-    return COMMON_GROCERY_ITEMS.filter((item) =>
-      item.name.toLowerCase().includes(newItemName.toLowerCase())
-    ).slice(0, 5)
-  }, [newItemName])
 
   const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
   const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
@@ -404,7 +399,7 @@ export default function ListDetail({
               className="flex items-center -space-x-2 cursor-pointer group shrink-0"
               onClick={() => setIsShareModalOpen(true)}
             >
-              {otherCollaborators.slice(0, 2).map((collab, i) => (
+              {otherCollaborators.slice(0, 4).map((collab, i) => (
                 <div
                   key={collab.user_id || `collab-${i}`}
                   className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm"
@@ -427,387 +422,265 @@ export default function ListDetail({
               </div>
             </div>
           </div>
+
+          {/* FILTROS E ORDENAÇÃO COMPACTOS */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1">
+            <button
+              onClick={() =>
+                setFilter(filter === "pending" ? "all" : "pending")
+              }
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+            >
+              Faltando
+            </button>
+            <button
+              onClick={() =>
+                setFilter(filter === "purchased" ? "all" : "purchased")
+              }
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+            >
+              Comprado
+            </button>
+            <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800 shrink-0 mx-1" />
+            <button
+              onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+            >
+              A-Z
+            </button>
+
+            <button
+              onClick={handleClearFilters}
+              className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500 hover:text-indigo-500"
+            >
+              Limpar
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto w-full p-6 flex flex-col gap-8">
-        {/* INPUT HÍBRIDO */}
-        <div className="relative">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleAddItem(newItemName)
-            }}
-            className="flex gap-3"
-          >
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Adicionar item..."
-                value={newItemName}
-                onFocus={() => setShowSuggestions(true)}
-                onChange={(e) => {
-                  setNewItemName(e.target.value)
-                  setShowSuggestions(true)
-                }}
-                className="w-full bg-zinc-50 dark:bg-zinc-900/40 border-2 border-transparent focus:border-indigo-500 rounded-[1.5rem] py-5 px-6 pr-24 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-base"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                <AICreditLock variant="overlay">
+      {/* LISTA DE ITENS */}
+      <div className="flex flex-col gap-4">
+        {isLoading ? (
+          [1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="glass-panel rounded-[2rem] p-8 h-20 animate-pulse bg-zinc-50/50 dark:bg-zinc-900/20 border-zinc-100 dark:border-white/5"
+            />
+          ))
+        ) : filteredAndSortedItems?.length === 0 ? (
+          <div className="py-24 flex flex-col items-center justify-center gap-6 text-center glass-panel rounded-[3rem] border-dashed border-2">
+            <div className="w-24 h-24 rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center mb-2">
+              <ShoppingCart className="w-10 h-10 text-zinc-200 dark:text-zinc-800" />
+            </div>
+            <div>
+              <p className="text-zinc-400 font-black uppercase tracking-[0.2em] text-[10px]">
+                Nenhum item encontrado
+              </p>
+              <p className="text-zinc-500 text-sm mt-1 font-medium">
+                Toque no botão &quot;+&quot; abaixo para começar.
+              </p>
+            </div>
+          </div>
+        ) : (
+          filteredAndSortedItems?.map((item: any) => (
+            <div
+              key={item.id}
+              className={`flex flex-col rounded-3xl transition-all duration-300 border ${expandedItemId === item.id ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg" : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
+            >
+              {/* Linha Principal do Item */}
+              <div className="flex items-center justify-between p-4 px-5">
+                <div className="flex items-center gap-4 flex-1">
                   <button
-                    type="button"
-                    onClick={() =>
-                      isRecording ? stopRecording() : startRecording()
-                    }
-                    className={`p-2.5 rounded-xl transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800"}`}
+                    onClick={() => handleToggleItem(item)}
+                    className="transition-transform active:scale-90"
                   >
-                    {isAiProcessing ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                    {item.is_purchased ? (
+                      <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-in zoom-in-50 duration-200">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      </div>
                     ) : (
-                      <Mic className="w-5 h-5" />
+                      <Circle className="w-7 h-7 text-zinc-200 dark:text-zinc-800 group-hover:text-indigo-500 transition-colors" />
                     )}
                   </button>
-                </AICreditLock>
-                <AICreditLock variant="overlay">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trigger("medium")
-                      setIsOcrScannerOpen(true)
-                    }}
-                    className="p-2.5 rounded-xl text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800 transition-all"
+
+                  <div
+                    className="flex flex-col flex-1 cursor-pointer min-w-0"
+                    onClick={() =>
+                      setExpandedItemId(
+                        expandedItemId === item.id ? null : item.id
+                      )
+                    }
                   >
-                    <Camera className="w-5 h-5" />
-                  </button>
-                </AICreditLock>
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={createItem.isPending || !newItemName.trim()}
-              className="w-16 h-16 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-2xl active:scale-95 group"
-            >
-              <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
-            </button>
-          </form>
-
-          {/* AI PREVIEW MODAL */}
-          {showAiPreview && (
-            <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
-                <div className="mb-6 text-center">
-                  <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
-                    Itens Identificados
-                  </h2>
-                  <p className="text-zinc-500 text-sm font-medium">
-                    A IA encontrou estes itens. Deseja adicionar à lista?
-                  </p>
-                </div>
-
-                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl p-4 mb-6 max-h-60 overflow-y-auto border border-zinc-100 dark:border-white/5 shadow-inner">
-                  <ul className="space-y-2">
-                    {voiceItems.map((item, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-3 p-3 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-white/5 text-sm font-bold text-zinc-700 dark:text-zinc-300"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        <span className="flex-1">{item.name}</span>
-                        {item.quantity && (
-                          <span className="text-[10px] opacity-50">
-                            {item.quantity}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={confirmAiItems}
-                    className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
-                  >
-                    Confirmar e Adicionar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAiPreview(false)
-                      setVoiceItems([])
-                    }}
-                    className="w-full py-4 text-zinc-400 font-black uppercase tracking-widest text-[10px] hover:text-rose-500 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Sugestões de Autocomplete */}
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-20 mt-3 z-30 bg-white dark:bg-zinc-900 rounded-[1.5rem] shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-              {suggestions.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleAddItem(s.name, s.category, s.unit)}
-                  className="w-full flex items-center justify-between p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center text-lg">
-                      🛒
-                    </div>
-                    <div>
-                      <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">
-                        {s.name}
-                      </p>
-                      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">
-                        {s.category}
-                      </p>
-                    </div>
-                  </div>
-                  <Plus className="w-5 h-5 text-indigo-500/30" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* FILTROS E ORDENAÇÃO */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
-          <button
-            onClick={() => setFilter(filter === "pending" ? "all" : "pending")}
-            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
-          >
-            Faltando
-          </button>
-          <button
-            onClick={() =>
-              setFilter(filter === "purchased" ? "all" : "purchased")
-            }
-            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
-          >
-            Comprado
-          </button>
-          <div className="w-px h-8 bg-zinc-100 dark:bg-zinc-800 shrink-0 mx-1" />
-          <button
-            onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
-            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
-          >
-            A-Z
-          </button>
-          <button
-            onClick={() => setSortBy(sortBy === "recent" ? "none" : "recent")}
-            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "recent" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
-          >
-            Mais Recentes
-          </button>
-          <button
-            onClick={handleClearFilters}
-            className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500 hover:text-indigo-500"
-          >
-            Limpar
-          </button>
-        </div>
-
-        {/* LISTA DE ITENS */}
-        <div className="flex flex-col gap-4">
-          {isLoading ? (
-            [1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="glass-panel rounded-[2rem] p-8 h-20 animate-pulse bg-zinc-50/50 dark:bg-zinc-900/20 border-zinc-100 dark:border-white/5"
-              />
-            ))
-          ) : filteredAndSortedItems?.length === 0 ? (
-            <div className="py-24 flex flex-col items-center justify-center gap-6 text-center glass-panel rounded-[3rem] border-dashed border-2">
-              <div className="w-24 h-24 rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center mb-2">
-                <ShoppingCart className="w-10 h-10 text-zinc-200 dark:text-zinc-800" />
-              </div>
-              <div>
-                <p className="text-zinc-400 font-black uppercase tracking-[0.2em] text-[10px]">
-                  Nenhum item encontrado
-                </p>
-                <p className="text-zinc-500 text-sm mt-1 font-medium">
-                  Use os filtros acima ou adicione novos itens.
-                </p>
-              </div>
-            </div>
-          ) : (
-            filteredAndSortedItems?.map((item: any) => (
-              <div
-                key={item.id}
-                className={`flex flex-col rounded-3xl transition-all duration-300 border ${expandedItemId === item.id ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg" : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
-              >
-                {/* Linha Principal do Item */}
-                <div className="flex items-center justify-between p-4 px-5">
-                  <div className="flex items-center gap-4 flex-1">
-                    <button
-                      onClick={() => handleToggleItem(item)}
-                      className="transition-transform active:scale-90"
+                    <span
+                      className={`font-bold text-sm truncate ${item.is_purchased ? "line-through text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-zinc-100"}`}
                     >
-                      {item.is_purchased ? (
-                        <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-in zoom-in-50 duration-200">
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        </div>
-                      ) : (
-                        <Circle className="w-7 h-7 text-zinc-200 dark:text-zinc-800 group-hover:text-indigo-500 transition-colors" />
-                      )}
-                    </button>
-
-                    <div
-                      className="flex flex-col flex-1 cursor-pointer min-w-0"
-                      onClick={() =>
-                        setExpandedItemId(
-                          expandedItemId === item.id ? null : item.id
-                        )
-                      }
-                    >
-                      <span
-                        className={`font-bold text-sm truncate ${item.is_purchased ? "line-through text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-zinc-100"}`}
-                      >
-                        {item.name}
+                      {item.name}
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">
+                        {item.quantity} {item.unit || "un"}
                       </span>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">
-                          {item.quantity} {item.unit || "un"}
+                      {item.price > 0 && (
+                        <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tighter">
+                          • R$ {(item.price * item.quantity).toFixed(2)}
                         </span>
-                        {item.price > 0 && (
-                          <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tighter">
-                            • R$ {(item.price * item.quantity).toFixed(2)}
-                          </span>
-                        )}
-                        {item.is_purchased && item.checked_by_profile && (
-                          <div className="flex items-center gap-1.5 ml-2">
-                            <div className="w-3.5 h-3.5 rounded-full bg-zinc-200 overflow-hidden">
-                              <Image
-                                src={
-                                  item.checked_by_profile.avatar_url ||
-                                  `https://ui-avatars.com/api/?name=${item.checked_by_profile.full_name}&background=6366f1&color=fff`
-                                }
-                                width={14}
-                                height={14}
-                                alt="Avatar"
-                              />
-                            </div>
-                            <span className="text-[9px] font-bold text-zinc-500">
-                              Pego por{" "}
-                              {item.checked_by_profile.full_name?.split(" ")[0]}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() =>
-                        setExpandedItemId(
-                          expandedItemId === item.id ? null : item.id
-                        )
-                      }
-                      className={`p-2 rounded-xl transition-all ${expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"}`}
-                    >
-                      {expandedItemId === item.id ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
                       )}
-                    </button>
+                    </div>
                   </div>
                 </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() =>
+                      setExpandedItemId(
+                        expandedItemId === item.id ? null : item.id
+                      )
+                    }
+                    className={`p-2 rounded-xl transition-all ${expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"}`}
+                  >
+                    {expandedItemId === item.id ? (
+                      <ChevronUp className="w-4 h-4" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
 
-                {/* Área de Detalhes (Expandida) */}
-                {expandedItemId === item.id && (
-                  <div className="px-5 pb-6 pt-2 flex flex-col gap-5 border-t border-zinc-100 dark:border-zinc-900/50 animate-in slide-in-from-top-2 duration-300">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
-                          Qtd / Medida
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              handleUpdateRichData(
-                                item.id,
-                                "quantity",
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className="w-16 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                          />
-                          <input
-                            type="text"
-                            placeholder="un, kg, L..."
-                            value={item.unit || ""}
-                            onChange={(e) =>
-                              handleUpdateRichData(
-                                item.id,
-                                "unit",
-                                e.target.value
-                              )
-                            }
-                            className="flex-1 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
-                          Preço Unitário
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step="0.01"
-                            placeholder="0,00"
-                            value={item.price || ""}
-                            onChange={(e) =>
-                              handleUpdateRichData(
-                                item.id,
-                                "price",
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
-                          />
-                          <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                        </div>
-                      </div>
-                    </div>
-
+              {/* Área de Detalhes (Expandida) */}
+              {expandedItemId === item.id && (
+                <div className="px-5 pb-6 pt-2 flex flex-col gap-5 border-t border-zinc-100 dark:border-zinc-900/50 animate-in slide-in-from-top-2 duration-300">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
-                        Observações
+                        Qtd / Medida
                       </label>
-                      <textarea
-                        placeholder="Ex: Marca preferida, ponto da carne..."
-                        value={item.notes || ""}
-                        onChange={(e) =>
-                          handleUpdateRichData(item.id, "notes", e.target.value)
-                        }
-                        className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none h-20 resize-none"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleUpdateRichData(
+                              item.id,
+                              "quantity",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="w-16 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                        />
+                        <input
+                          type="text"
+                          placeholder="un, kg, L..."
+                          value={item.unit || ""}
+                          onChange={(e) =>
+                            handleUpdateRichData(
+                              item.id,
+                              "unit",
+                              e.target.value
+                            )
+                          }
+                          className="flex-1 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                        />
+                      </div>
                     </div>
-
-                    <div className="flex items-center justify-end pt-2">
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="p-3 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-500/10 transition-all active:scale-90"
-                        title="Remover Item"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
+                        Preço Unitário
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="0,00"
+                          value={item.price || ""}
+                          onChange={(e) =>
+                            handleUpdateRichData(
+                              item.id,
+                              "price",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                        />
+                        <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                      Observações
+                    </label>
+                    <textarea
+                      placeholder="Ex: Marca preferida, ponto da carne..."
+                      value={item.notes || ""}
+                      onChange={(e) =>
+                        handleUpdateRichData(item.id, "notes", e.target.value)
+                      }
+                      className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3 px-4 text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none h-20 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    {item.is_purchased && item.checked_by_profile && (
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-zinc-100 overflow-hidden">
+                          <Image
+                            src={
+                              item.checked_by_profile.avatar_url ||
+                              `https://ui-avatars.com/api/?name=${item.checked_by_profile.full_name}&background=6366f1&color=fff`
+                            }
+                            width={24}
+                            height={24}
+                            alt="Avatar"
+                          />
+                        </div>
+                        <p className="text-[10px] font-bold text-zinc-500">
+                          Pego por {item.checked_by_profile.full_name}
+                        </p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all active:scale-90 ml-auto"
+                      title="Remover Item"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
       </div>
+
+      {/* FLOATING ACTION BUTTON (FAB) - APPLE STYLE LEFT POSITION */}
+      <button
+        onClick={() => {
+          trigger("heavy")
+          setIsCreateItemModalOpen(true)
+        }}
+        className="fixed bottom-32 left-8 w-16 h-16 bg-indigo-600 dark:bg-white text-white dark:text-indigo-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-black/20 active:scale-95 transition-all z-40 group border-4 border-white dark:border-indigo-900"
+      >
+        <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+      </button>
+
+      <CreateItemModal
+        isOpen={isCreateItemModalOpen}
+        onClose={() => setIsCreateItemModalOpen(false)}
+        onAddManual={handleAddItem}
+        isRecording={isRecording}
+        startRecording={startRecording}
+        stopRecording={stopRecording}
+        isAiProcessing={isAiProcessing}
+        setIsOcrScannerOpen={setIsOcrScannerOpen}
+        voiceItems={voiceItems}
+        showAiPreview={showAiPreview}
+        setShowAiPreview={setShowAiPreview}
+        confirmAiItems={confirmAiItems}
+        trigger={trigger}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}

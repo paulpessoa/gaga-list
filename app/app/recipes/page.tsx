@@ -25,10 +25,12 @@ import {
 import { useRouter, useSearchParams } from "next/navigation"
 import { Drawer } from "vaul"
 import { motion, AnimatePresence } from "framer-motion"
+import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 
 function RecipesContent() {
   const { data: lists } = useLists()
   const { trigger } = useHaptic()
+  const { checkAndAct } = useAICreditCheck()
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -243,7 +245,7 @@ function RecipesContent() {
                   ))}
                 </div>
                 <button
-                  onClick={() => generateRecipes("from_selection")}
+                  onClick={() => checkAndAct(1, () => generateRecipes("from_selection"))}
                   disabled={isLoading}
                   className="w-full py-5 bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
                 >
@@ -254,9 +256,14 @@ function RecipesContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-2 border-indigo-500/10">
-                <div className="flex items-center gap-3 text-indigo-500">
-                  <UtensilsCrossed className="w-5 h-5" />
-                  <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-indigo-500">
+                    <UtensilsCrossed className="w-5 h-5" />
+                    <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
+                  </div>
+                  <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
+                    <span className="text-[8px] font-black text-indigo-500 uppercase">1 Grão</span>
+                  </div>
                 </div>
                 <select
                   value={selectedListId}
@@ -267,7 +274,7 @@ function RecipesContent() {
                   {lists?.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
                 </select>
                 <button 
-                  onClick={() => generateRecipes('from_list')}
+                  onClick={() => checkAndAct(1, () => generateRecipes('from_list'))}
                   disabled={!selectedListId || isLoading}
                   className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
                 >
@@ -276,9 +283,14 @@ function RecipesContent() {
               </div>
 
               <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-rose-500/5 border-2 border-rose-500/10">
-                <div className="flex items-center gap-3 text-rose-500">
-                  <ChefHat className="w-5 h-5" />
-                  <h2 className="font-black uppercase tracking-widest text-[10px]">Busca Criativa</h2>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-rose-500">
+                    <ChefHat className="w-5 h-5" />
+                    <h2 className="font-black uppercase tracking-widest text-[10px]">Busca Criativa</h2>
+                  </div>
+                  <div className="px-2 py-1 bg-rose-500/10 rounded-lg">
+                    <span className="text-[8px] font-black text-rose-500 uppercase">1 Grão</span>
+                  </div>
                 </div>
                 <input
                   type="text"
@@ -288,7 +300,7 @@ function RecipesContent() {
                   className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none shadow-inner"
                 />
                 <button
-                  onClick={() => generateRecipes("custom")}
+                  onClick={() => checkAndAct(1, () => generateRecipes("custom"))}
                   disabled={!customQuery || isLoading}
                   className="w-full py-4.5 bg-rose-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
                 >
