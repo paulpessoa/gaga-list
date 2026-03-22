@@ -1,6 +1,6 @@
 "use client"
 
-import { use, useState, useMemo, useEffect, useRef } from "react"
+import { use, useState, useMemo, useEffect, useRef, useCallback } from "react"
 import {
   useItems,
   useCreateItem,
@@ -33,7 +33,8 @@ import {
   Edit2,
   LogOut,
   Mic,
-  Camera
+  Camera,
+  Loader2
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -43,10 +44,11 @@ import { ShareModal } from "@/components/lists/share-modal"
 import { ListChat } from "@/components/lists/list-chat"
 import { Collaborator } from "@/types"
 import Image from "next/image"
-import {
-  COMMON_GROCERY_ITEMS
-} from "@/lib/constants/grocery-items"
+import { COMMON_GROCERY_ITEMS } from "@/lib/constants/grocery-items"
 import { useRouter } from "next/navigation"
+
+import { VisionScanner } from "@/components/ui/vision-scanner"
+import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 
 export default function ListDetail({
   params
@@ -68,31 +70,25 @@ export default function ListDetail({
   const deleteList = useDeleteList()
   const { trigger } = useHaptic()
 
-  const [newItemName, setNewItemName] = useState("")
-  const [filter, setFilter] = useState<"all" | "pending" | "purchased">("all")
+  // Estados da Interface
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatTarget, setChatTarget] = useState<
-    | { id: string; full_name: string | null; avatar_url: string | null }
-    | undefined
-  >(undefined)
-
+  const [chatTarget, setChatTarget] = useState<{ id: string; full_name: string | null; avatar_url: string | null } | undefined>(undefined)
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState("")
 
+  // Hooks de Colaboradores
   const { data: collaborators } = useCollaborators(listId)
   const addCollaborator = useAddCollaborator(listId)
   const removeCollaborator = useRemoveCollaborator(listId)
   const inviteUser = useInviteUser(listId)
 
   const otherCollaborators = useMemo(() => {
-    return (
-      (collaborators as Collaborator[] | undefined)?.filter(
+    return ((collaborators as Collaborator[] | undefined)?.filter(
         (c) => c.user_id !== user?.id && c.profiles?.id !== user?.id
-      ) || []
-    )
+      ) || [])
   }, [collaborators, user?.id])
 
   useEffect(() => {
@@ -119,21 +115,74 @@ export default function ListDetail({
     }
   }, [searchParams, collaborators, isChatOpen, chatTarget?.id])
 
-  const pendingCount = useMemo(
-    () => items?.filter((i) => !i.is_purchased).length || 0,
-    [items]
+  // Estados para IA (Voz/Foto)
+  const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
+  const [isAiProcessing, setIsAiProcessing] = useState(false)
+  const [voiceItems, setVoiceItems] = useState<any[]>([])
+  const [showAiPreview, setShowAiPreview] = useState(false)
+
+  const {
+    isRecording,
+    startRecording,
+    stopRecording,
+    audioBlob,
+    setAudioBlob
+  } = useAudioRecorder()
+
+  const handleProcessVoice = useCallback(
+    async (blob: Blob) => {
+      setIsAiProcessing(true)
+      const formData = new FormData()
+      formData.append("file", blob, "recording.m4a")
+
+      try {
+        const response = await fetch("/api/ai/voice", {
+          method: "POST",
+          body: formData
+        })
+        const data = await response.json()
+        if (data.items) {
+          setVoiceItems(data.items)
+          setShowAiPreview(true)
+          trigger("success" as any)
+        }
+      } catch (err) {
+        console.error(err)
+        alert("Erro ao processar voz")
+      } finally {
+        setIsAiProcessing(false)
+        setAudioBlob(null)
+      }
+    },
+    [trigger, setAudioBlob]
   )
 
-  const totalPrice = useMemo(() => {
-    return items?.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0) || 0
-  }, [items])
+  useEffect(() => {
+    if (audioBlob && !isRecording) {
+      handleProcessVoice(audioBlob)
+    }
+  }, [audioBlob, isRecording, handleProcessVoice])
 
-  const suggestions = useMemo(() => {
-    if (!newItemName.trim()) return []
-    return COMMON_GROCERY_ITEMS.filter((item) =>
-      item.name.toLowerCase().includes(newItemName.toLowerCase())
-    ).slice(0, 5)
-  }, [newItemName])
+  const handleOcrSuccess = (data: any) => {
+    if (data.items) {
+      setVoiceItems(data.items)
+      setShowAiPreview(true)
+      setIsOcrScannerOpen(false)
+    }
+  }
+
+  const confirmAiItems = () => {
+    trigger("medium")
+    voiceItems.forEach((item) => {
+      createItem.mutate({
+        name: item.name,
+        category: item.category || null,
+        unit: item.unit || item.quantity || null
+      })
+    })
+    setShowAiPreview(false)
+    setVoiceItems([])
+  }
 
   const handleAddItem = (name: string, category?: string, unit?: string) => {
     if (!name.trim()) return
@@ -184,29 +233,84 @@ export default function ListDetail({
     }
   }
 
-  const filteredItems = items?.filter((item) => {
-    if (filter === "all") return true
-    if (filter === "pending") return !item.is_purchased
-    if (filter === "purchased") return item.is_purchased
-    return true
-  })
+  const [newItemName, setNewItemName] = useState("")
+  const suggestions = useMemo(() => {
+    if (!newItemName.trim()) return []
+    return COMMON_GROCERY_ITEMS.filter((item) =>
+      item.name.toLowerCase().includes(newItemName.toLowerCase())
+    ).slice(0, 5)
+  }, [newItemName])
+
+  const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
+  const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
+
+  const pendingItems = useMemo(
+    () => items?.filter((i) => !i.is_purchased) || [],
+    [items]
+  )
+  const purchasedItems = useMemo(
+    () => items?.filter((i) => i.is_purchased) || [],
+    [items]
+  )
+
+  const pendingSum = useMemo(
+    () =>
+      pendingItems.reduce(
+        (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
+        0
+      ),
+    [pendingItems]
+  )
+
+  const purchasedSum = useMemo(
+    () =>
+      purchasedItems.reduce(
+        (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
+        0
+      ),
+    [purchasedItems]
+  )
+
+  const filteredAndSortedItems = useMemo(() => {
+    let result = [...(items || [])]
+
+    if (filter === "pending") result = result.filter((i) => !i.is_purchased)
+    if (filter === "purchased") result = result.filter((i) => i.is_purchased)
+
+    if (sortBy === "name") {
+      result.sort((a, b) => a.name.localeCompare(b.name))
+    } else if (sortBy === "recent") {
+      result.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+    }
+
+    return result
+  }, [items, filter, sortBy])
+
+  const handleClearFilters = () => {
+    setFilter("all")
+    setSortBy("none")
+    trigger("light")
+  }
 
   const isOwner = list?.owner_id === user?.id
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col pb-32 transition-colors duration-300">
-      {/* HEADER PREMIUM UX/UI */}
+      {/* HEADER FUNCIONAL STAFF LEVEL */}
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-900 px-6 py-4">
-        <div className="max-w-4xl mx-auto flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="max-w-4xl mx-auto flex flex-col gap-5">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
               <Link
                 href="/app"
-                className="p-2 -ml-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                className="p-2 -ml-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white shrink-0"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 {isEditingTitle ? (
                   <input
                     autoFocus
@@ -233,19 +337,19 @@ export default function ListDetail({
                       }
                       if (e.key === "Escape") setIsEditingTitle(false)
                     }}
-                    className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500"
+                    className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500 w-full"
                   />
                 ) : (
                   <>
-                    <h1 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight">
+                    <h1 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight truncate">
                       {list?.title || "Carregando..."}
                     </h1>
-                    <button 
+                    <button
                       onClick={() => {
                         setEditTitle(list?.title || "")
                         setIsEditingTitle(true)
                       }}
-                      className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors"
+                      className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors shrink-0"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
@@ -254,36 +358,73 @@ export default function ListDetail({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => {
                   trigger("light")
                   setIsChatOpen(true)
                 }}
-                className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-sm border border-indigo-500/20"
+                className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 border border-indigo-500/10"
               >
                 <MessageCircle className="w-5 h-5" />
               </button>
-              
+              <button
+                onClick={() => {
+                  trigger("light")
+                  alert("Funcionalidade de Mapa em breve!")
+                }}
+                className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all active:scale-95 border border-emerald-500/10"
+              >
+                <MapIcon className="w-5 h-5" />
+              </button>
               <button
                 onClick={handleLeaveList}
-                className="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm border border-rose-500/20"
+                className="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/10"
                 title={isOwner ? "Excluir Lista" : "Sair da Lista"}
               >
                 <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                  Itens
+                </span>
+                <span className="text-sm font-black text-indigo-500 leading-none mt-1">
+                  {items?.length || 0}
+                </span>
+              </div>
+              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                  Faltando
+                </span>
+                <span className="text-sm font-black text-rose-500 leading-none mt-1">
+                  R$ {pendingSum.toFixed(2)}
+                </span>
+              </div>
+              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                  Comprado
+                </span>
+                <span className="text-sm font-black text-emerald-500 leading-none mt-1">
+                  R$ {purchasedSum.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
             <div
-              className="flex items-center -space-x-2 cursor-pointer group"
+              className="flex items-center -space-x-2 cursor-pointer group shrink-0"
               onClick={() => setIsShareModalOpen(true)}
             >
-              {otherCollaborators.slice(0, 3).map((collab, i) => (
+              {otherCollaborators.slice(0, 2).map((collab, i) => (
                 <div
                   key={collab.user_id || `collab-${i}`}
-                  className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
+                  className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm"
                   style={{ zIndex: 10 - i }}
                 >
                   <Image
@@ -291,43 +432,30 @@ export default function ListDetail({
                       collab.profiles?.avatar_url ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
                     }
-                    width={32}
-                    height={32}
+                    width={28}
+                    height={28}
                     className="object-cover"
                     alt="Avatar"
                   />
                 </div>
               ))}
-              <div className="w-8 h-8 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-2 shadow-inner">
-                <UserPlus className="w-3.5 h-3.5" />
+              <div className="w-7 h-7 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-1 shadow-inner">
+                <UserPlus className="w-3 h-3" />
               </div>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">
-                {isOwner ? "Sua Lista" : "Colaborando"}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                {pendingCount} {pendingCount === 1 ? "item" : "itens"}
-              </span>
-              <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800" />
-              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                R$ {totalPrice.toFixed(2)}
-              </span>
             </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto w-full p-6 flex flex-col gap-8">
-        {/* ADD ITEM FORM COM AUTOCOMPLETE */}
+        {/* INPUT HÍBRIDO */}
         <div className="relative">
           <form
             onSubmit={(e) => {
               e.preventDefault()
               handleAddItem(newItemName)
             }}
-            className="flex gap-2"
+            className="flex gap-3"
           >
             <div className="relative flex-1">
               <input
@@ -339,20 +467,29 @@ export default function ListDetail({
                   setNewItemName(e.target.value)
                   setShowSuggestions(true)
                 }}
-                className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 pr-24 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
+                className="w-full bg-zinc-50 dark:bg-zinc-900/40 border-2 border-transparent focus:border-indigo-500 rounded-[1.5rem] py-5 px-6 pr-24 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-base"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                <button 
-                  type="button" 
-                  onClick={() => trigger("medium")}
-                  className="p-2 text-zinc-400 hover:text-indigo-500 transition-colors"
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    isRecording ? stopRecording() : startRecording()
+                  }
+                  className={`p-2.5 rounded-xl transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800"}`}
                 >
-                  <Mic className="w-5 h-5" />
+                  {isAiProcessing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Mic className="w-5 h-5" />
+                  )}
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => trigger("medium")}
-                  className="p-2 text-zinc-400 hover:text-indigo-500 transition-colors"
+                <button
+                  type="button"
+                  onClick={() => {
+                    trigger("medium")
+                    setIsOcrScannerOpen(true)
+                  }}
+                  className="p-2.5 rounded-xl text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800 transition-all"
                 >
                   <Camera className="w-5 h-5" />
                 </button>
@@ -361,77 +498,156 @@ export default function ListDetail({
             <button
               type="submit"
               disabled={createItem.isPending || !newItemName.trim()}
-              className="w-14 h-14 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-xl active:scale-95"
+              className="w-16 h-16 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-2xl active:scale-95 group"
             >
-              <Plus className="w-7 h-7" />
+              <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
             </button>
           </form>
 
+          {/* AI PREVIEW MODAL */}
+          {showAiPreview && (
+            <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+              <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+                <div className="mb-6 text-center">
+                  <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                    Itens Identificados
+                  </h2>
+                  <p className="text-zinc-500 text-sm font-medium">
+                    A IA encontrou estes itens. Deseja adicionar à lista?
+                  </p>
+                </div>
+
+                <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-3xl p-4 mb-6 max-h-60 overflow-y-auto border border-zinc-100 dark:border-white/5 shadow-inner">
+                  <ul className="space-y-2">
+                    {voiceItems.map((item, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 p-3 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-white/5 text-sm font-bold text-zinc-700 dark:text-zinc-300"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                        <span className="flex-1">{item.name}</span>
+                        {item.quantity && (
+                          <span className="text-[10px] opacity-50">
+                            {item.quantity}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={confirmAiItems}
+                    className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all"
+                  >
+                    Confirmar e Adicionar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAiPreview(false)
+                      setVoiceItems([])
+                    }}
+                    className="w-full py-4 text-zinc-400 font-black uppercase tracking-widest text-[10px] hover:text-rose-500 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Sugestões de Autocomplete */}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-16 mt-2 z-30 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute top-full left-0 right-20 mt-3 z-30 bg-white dark:bg-zinc-900 rounded-[1.5rem] shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
               {suggestions.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => handleAddItem(s.name, s.category, s.unit)}
-                  className="w-full flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
+                  className="w-full flex items-center justify-between p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg">🛒</span>
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/5 flex items-center justify-center text-lg">
+                      🛒
+                    </div>
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-white text-sm">
+                      <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">
                         {s.name}
                       </p>
-                      <p className="text-[10px] text-zinc-500 uppercase font-black">
+                      <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">
                         {s.category}
                       </p>
                     </div>
                   </div>
-                  <Plus className="w-4 h-4 text-zinc-300" />
+                  <Plus className="w-5 h-5 text-indigo-500/30" />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* FILTROS */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {(["all", "pending", "purchased"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${filter === f ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-lg" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"}`}
-            >
-              {f === "all" ? "Tudo" : f === "pending" ? "Faltando" : "Comprado"}
-            </button>
-          ))}
+        {/* FILTROS E ORDENAÇÃO */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-2 px-2">
+          <button
+            onClick={() => setFilter(filter === "pending" ? "all" : "pending")}
+            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+          >
+            Faltando
+          </button>
+          <button
+            onClick={() =>
+              setFilter(filter === "purchased" ? "all" : "purchased")
+            }
+            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+          >
+            Comprado
+          </button>
+          <div className="w-px h-8 bg-zinc-100 dark:bg-zinc-800 shrink-0 mx-1" />
+          <button
+            onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
+            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+          >
+            A-Z
+          </button>
+          <button
+            onClick={() => setSortBy(sortBy === "recent" ? "none" : "recent")}
+            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "recent" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+          >
+            Mais Recentes
+          </button>
+          <button
+            onClick={handleClearFilters}
+            className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500 hover:text-indigo-500"
+          >
+            Limpar
+          </button>
         </div>
 
         {/* LISTA DE ITENS */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {isLoading ? (
             [1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="glass-panel rounded-2xl p-6 h-16 animate-pulse"
+                className="glass-panel rounded-[2rem] p-8 h-20 animate-pulse bg-zinc-50/50 dark:bg-zinc-900/20 border-zinc-100 dark:border-white/5"
               />
             ))
-          ) : filteredItems?.length === 0 ? (
-            <div className="py-20 flex flex-col items-center justify-center gap-4 text-center">
-              <div className="w-20 h-20 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center mb-2">
+          ) : filteredAndSortedItems?.length === 0 ? (
+            <div className="py-24 flex flex-col items-center justify-center gap-6 text-center glass-panel rounded-[3rem] border-dashed border-2">
+              <div className="w-24 h-24 rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center mb-2">
                 <ShoppingCart className="w-10 h-10 text-zinc-200 dark:text-zinc-800" />
               </div>
               <div>
-                <p className="text-zinc-400 font-bold">
+                <p className="text-zinc-400 font-black uppercase tracking-[0.2em] text-[10px]">
                   Nenhum item encontrado
                 </p>
-                <p className="text-zinc-500 text-xs">
-                  Comece a preencher sua lista!
+                <p className="text-zinc-500 text-sm mt-1 font-medium">
+                  Use os filtros acima ou adicione novos itens.
                 </p>
               </div>
             </div>
           ) : (
-            filteredItems?.map((item: any) => (
+            filteredAndSortedItems?.map((item: any) => (
               <div
                 key={item.id}
                 className={`flex flex-col rounded-3xl transition-all duration-300 border ${expandedItemId === item.id ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg" : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
@@ -589,13 +805,13 @@ export default function ListDetail({
                       />
                     </div>
 
-                    <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center justify-end pt-2">
                       <button
                         onClick={() => handleDeleteItem(item.id)}
-                        className="flex items-center gap-2 py-2.5 px-4 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors text-[10px] font-black uppercase tracking-widest"
+                        className="p-3 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-500/10 transition-all active:scale-90"
+                        title="Remover Item"
                       >
-                        <Trash2 className="w-4 h-4" />
-                        Remover Item
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
@@ -641,6 +857,13 @@ export default function ListDetail({
           setChatTarget(undefined)
         }}
         targetUser={chatTarget}
+      />
+
+      <VisionScanner
+        mode="ocr"
+        isOpen={isOcrScannerOpen}
+        onClose={() => setIsOcrScannerOpen(false)}
+        onScanSuccess={handleOcrSuccess}
       />
     </main>
   )

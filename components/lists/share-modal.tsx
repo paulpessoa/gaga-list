@@ -159,19 +159,6 @@ export function ShareModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white dark:bg-zinc-950 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
           <div className="absolute top-8 right-8 flex items-center gap-2">
-            {!isOwner && (
-              <button
-                onClick={() => {
-                  if (confirm("Tem certeza que deseja sair desta lista?")) {
-                    onRemoveCollaborator(currentUser.id)
-                  }
-                }}
-                className="p-2 bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-95 border border-red-500/20"
-                title="Sair da Lista"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            )}
             <button
               onClick={onClose}
               className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-white/5"

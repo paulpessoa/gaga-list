@@ -241,20 +241,11 @@ export default function RecipesPage() {
 
   return (
     <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="flex items-center gap-4">
-        <Link 
-          href="/app" 
-          onClick={() => trigger('light')}
-          className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
-            Receitas Inteligentes
-          </h1>
-          <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest opacity-70">Cozinha com IA</p>
-        </div>
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+          Receitas Inteligentes
+        </h1>
+        <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">Cozinha com IA</p>
       </header>
 
       {/* Grid de Ferramentas IA */}

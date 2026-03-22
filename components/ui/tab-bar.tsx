@@ -53,9 +53,12 @@ export function TabBar({ onScanClick }: TabBarProps) {
       <Link
         href="/app"
         onClick={() => trigger("medium")}
-        className={`relative -top-6 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl active:scale-90 transition-all group border-4 border-white dark:border-zinc-950 ${isActive("/app") ? "bg-indigo-500 text-white shadow-indigo-500/40" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-400 dark:text-zinc-500"}`}
+        className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive("/app") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
       >
-        <LayoutGrid className="w-7 h-7 group-hover:scale-110 transition-transform" />
+        <LayoutGrid className="w-6 h-6" />
+        <span className="text-[9px] font-bold uppercase tracking-tighter">
+          Listas
+        </span>
       </Link>
 
       <Link

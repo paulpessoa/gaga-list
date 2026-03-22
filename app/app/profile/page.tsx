@@ -90,17 +90,13 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="flex items-center gap-4">
-        <Link 
-          href="/app" 
-          onClick={() => trigger('light')}
-          className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
           Ajustes
         </h1>
+        <p className="text-sm text-zinc-500 font-medium">
+          Gerencie seu perfil e preferências do app
+        </p>
       </header>
 
       {/* Identidade / Card de Perfil */}

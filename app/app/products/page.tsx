@@ -68,12 +68,6 @@ export default function MyProductsPage() {
       <header className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link
-              href="/app"
-              className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
             <div>
               <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
                 Meus Produtos

@@ -83,28 +83,31 @@ export function CreateListModal({
                       Organize suas compras com amigos e família.
                     </Drawer.Description>
                   </div>
-                  <div className="flex flex-col gap-6">
-                    <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-8">
+                    <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
                         onClick={() => (isRecording ? stopRecording() : startRecording())}
                         disabled={isAiProcessing}
-                        className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 transition-all border active:scale-95 relative overflow-hidden ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
+                        className={`p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 hover:border-indigo-500/20 shadow-inner"}`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-indigo-500/10 dark:bg-indigo-500/20'}`}>
                           {isAiProcessing ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="w-6 h-6 animate-spin" />
                           ) : isRecording ? (
-                            <Square className="w-4 h-4 fill-current" />
+                            <Square className="w-5 h-5 fill-current text-white" />
                           ) : (
-                            <Mic className="w-4 h-4 text-indigo-500" />
+                            <Mic className="w-6 h-6 text-indigo-500" />
                           )}
-                          {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
                         </div>
-                        {!isAiProcessing && !isRecording && (
-                          <span className="text-[8px] opacity-60 tracking-tighter">1 grão</span>
-                        )}
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-black">{isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}</span>
+                          {!isAiProcessing && !isRecording && (
+                            <span className="text-[8px] opacity-40 font-bold">Consome 1 grão</span>
+                          )}
+                        </div>
                       </button>
+                      
                       <button
                         type="button"
                         onClick={() => {
@@ -112,41 +115,48 @@ export function CreateListModal({
                           setIsOcrScannerOpen(true)
                         }}
                         disabled={isAiProcessing}
-                        className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
+                        className="p-6 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 hover:border-indigo-500/20 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
-                        <div className="flex items-center gap-2">
-                          <Camera className="w-4 h-4 text-indigo-500" />
-                          <span>Via Foto</span>
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-indigo-500" />
                         </div>
-                        <span className="text-[8px] opacity-60 tracking-tighter">2 grãos</span>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-black">Via Foto</span>
+                          <span className="text-[8px] opacity-40 font-bold">Consome 2 grãos</span>
+                        </div>
                       </button>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
-                        Ou digite um nome
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Ex: Mercado da Semana..."
-                        required
-                        value={newListTitle}
-                        onChange={(e) => setNewListTitle(e.target.value)}
-                        className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner font-bold"
-                      />
-                    </div>
+                    <form onSubmit={submitCreateList} className="space-y-6">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
+                          Ou crie manualmente
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Digite o nome da lista..."
+                          required
+                          value={newListTitle}
+                          onChange={(e) => setNewListTitle(e.target.value)}
+                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
+                        />
+                      </div>
 
-                    <button
-                      type="submit"
-                      disabled={createListPending || !newListTitle.trim() || isAiProcessing}
-                      className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {createListPending || isAiProcessing ? (
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                      ) : (
-                        "Criar Lista Manual"
-                      )}
-                    </button>
+                      <button
+                        type="submit"
+                        disabled={createListPending || !newListTitle.trim() || isAiProcessing}
+                        className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                      >
+                        {createListPending || isAiProcessing ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4" />
+                            Criar Lista Manual
+                          </>
+                        )}
+                      </button>
+                    </form>
                   </div>
                 </>
               ) : (

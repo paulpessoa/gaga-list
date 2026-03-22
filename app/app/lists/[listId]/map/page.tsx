@@ -177,11 +177,11 @@ export default function CadeTuPage() {
             <div className="w-24 h-24 rounded-[2rem] bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 shadow-2xl">
               <Lock className="w-10 h-10" />
             </div>
-            <div className="space-y-2 max-w-xs">
-              <h2 className="text-xl font-black">Acesso Bloqueado</h2>
-              <p className="text-zinc-500 text-sm font-medium">
-                O radar precisa do seu GPS para mostrar onde estão os outros
-                membros.
+            <div className="space-y-2 max-w-xs px-4">
+              <h2 className="text-2xl font-black tracking-tight text-zinc-100">Opa! Precisamos da sua bússola 🧭</h2>
+              <p className="text-zinc-400 text-sm font-medium leading-relaxed">
+                Para mostrar onde sua família e amigos estão no mercado, 
+                você precisa ativar a localização (GPS) do seu celular e autorizar o navegador.
               </p>
             </div>
             <button
