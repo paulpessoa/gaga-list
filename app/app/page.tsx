@@ -214,7 +214,7 @@ export default function AppPage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-start justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
