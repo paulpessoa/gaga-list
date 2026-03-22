@@ -234,7 +234,7 @@ function LandingContent() {
   const [rememberMe, setRememberMe] = useState(true)
   const [authMode, setAuthMode] = useState<
     "magic_link" | "password_login" | "password_signup" | "password_reset"
-  >("magic_link")
+  >("password_login")
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState("")
   const [inviteContext, setInviteContext] = useState(false)

@@ -10,8 +10,6 @@ coverage/
 .env.*
 *.local
 .gemini/
-.geminirc
-GEMINI.md
 
 # Production build
 build/
