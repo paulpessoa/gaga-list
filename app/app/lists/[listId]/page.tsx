@@ -67,7 +67,6 @@ export default function ListDetail({
   const updateItem = useUpdateItem(listId)
   const deleteItem = useDeleteItem(listId)
   const updateList = useUpdateList()
-  const deleteList = useDeleteList()
   const { trigger } = useHaptic()
 
   // Estados da Interface
@@ -221,18 +220,6 @@ export default function ListDetail({
     })
   }
 
-  const handleLeaveList = () => {
-    const msg = isOwner ? "Excluir esta lista permanentemente?" : "Sair desta lista?"
-    if (confirm(msg)) {
-      if (isOwner) {
-        // @ts-ignore
-        deleteList.mutate(listId, { onSuccess: () => router.push("/app") })
-      } else if (user?.id) {
-        removeCollaborator.mutate(user.id, { onSuccess: () => router.push("/app") })
-      }
-    }
-  }
-
   const [newItemName, setNewItemName] = useState("")
   const suggestions = useMemo(() => {
     if (!newItemName.trim()) return []
@@ -376,13 +363,6 @@ export default function ListDetail({
                 className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all active:scale-95 border border-emerald-500/10"
               >
                 <MapIcon className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleLeaveList}
-                className="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 border border-rose-500/10"
-                title={isOwner ? "Excluir Lista" : "Sair da Lista"}
-              >
-                <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
