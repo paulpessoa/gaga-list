@@ -78,6 +78,17 @@ export default function ListDetail({
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState("")
 
+  const handleUpdateTitle = useCallback(() => {
+    if (editTitle.trim() && editTitle !== list?.title) {
+      updateList.mutate({
+        listId,
+        updates: { title: editTitle.trim() }
+      })
+      trigger("success")
+    }
+    setIsEditingTitle(false)
+  }, [editTitle, list?.title, listId, updateList, trigger])
+
   // Hooks de Colaboradores
   const { data: collaborators } = useCollaborators(listId)
   const addCollaborator = useAddCollaborator(listId)
@@ -303,25 +314,9 @@ export default function ListDetail({
                     autoFocus
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={() => {
-                      if (editTitle.trim() && editTitle !== list?.title) {
-                        updateList.mutate({
-                          listId,
-                          updates: { title: editTitle }
-                        })
-                      }
-                      setIsEditingTitle(false)
-                    }}
+                    onBlur={handleUpdateTitle}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (editTitle.trim() && editTitle !== list?.title) {
-                          updateList.mutate({
-                            listId,
-                            updates: { title: editTitle }
-                          })
-                        }
-                        setIsEditingTitle(false)
-                      }
+                      if (e.key === "Enter") handleUpdateTitle()
                       if (e.key === "Escape") setIsEditingTitle(false)
                     }}
                     className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500 w-full"
