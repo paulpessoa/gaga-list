@@ -2,7 +2,7 @@
 
 ## 🔴 PRIORIDADE CRÍTICA (FAZER AGORA)
 
-- [ ] **Limpar Dados de Teste:** 
+- [x] **Limpar Dados de Teste:** 
   - Remover "CALDEIRA DE CALOR" do DB.
   - Corrigir valores absurdos em Higiene (Cotonete R$ 434.342,54 -> Realista ~R$ 5-10).
 - [x] **Correção de Typo em Avisos:** `/app/notifications` - "Clique para abrir a conversa ou fixeira" -> "fixá-la".

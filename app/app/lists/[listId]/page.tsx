@@ -371,7 +371,7 @@ export default function ListDetail({
               <button
                 onClick={() => {
                   trigger("light")
-                  alert("Funcionalidade de Mapa em breve!")
+                  router.push(`/app/lists/${listId}/map`)
                 }}
                 className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all active:scale-95 border border-emerald-500/10"
               >
