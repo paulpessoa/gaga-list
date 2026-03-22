@@ -23,12 +23,12 @@
 
 - [x] **Reorganização de Receitas:**
   - Dividir em abas ou sub-páginas para reduzir scroll e loadtime.
-- [ ] **Interface Interna da Lista:**
+- [x] **Interface Interna da Lista:**
   - Header: Botão Voltar + Título + Ícone Edição.
   - Subtítulo: Contador + Somatório dinâmico.
   - Input: Ícones de Câmera e Áudio integrados.
   - Filtros: Faltando | Comprado | A-Z | Recentes.
-- [ ] **Página de Avisos:**
+- [x] **Página de Avisos:**
   - Melhorar estado vazio (Ícone amigável + CTA para convidar amigos).
 
 ## 🟢 LONGO PRAZO & GAMIFICAÇÃO
