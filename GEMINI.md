@@ -46,6 +46,17 @@ Sempre que solicitado com: **"Explique essa implementação do Supabase como se 
 - **Performance:** Lower latency (Edge), Query optimization.
 - **Trade-offs:** Justifique escolhas (Ex: "Escolhemos Drizzle sobre Prisma por causa do footprint menor e performance de edge").
 
+## 💾 Estratégia de Documentação & Resiliência (Black Box Recovery)
+
+Para garantir que o projeto possa ser retomado de qualquer ponto (idempotência), seguimos a estrutura de documentação inspirada nos padrões Google/Spotify:
+
+1. **`docs/HEARTBEAT.md` (O Checkpoint):** Single Source of Truth para o estado atual. Deve ser lido em cada nova sessão para entender "Onde paramos".
+2. **`docs/BACKLOG.md` (Priorização):** O que falta fazer, organizado por P0 a P3. Nada de rascunhos em arquivos aleatórios.
+3. **`docs/JOURNAL.md` (Audit Trail):** Registro histórico de marcos e decisões técnicas.
+4. **`docs/product/VISION.md`:** A essência e o "Porquê" do negócio.
+
+---
+
 ## 🛡️ Protocolo de Qualidade e Build
 
 - **Build First:** Antes de validar qualquer feature, simule ou peça para rodar o build do Next.js.

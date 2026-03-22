@@ -6,9 +6,8 @@ Este diagrama representa a arquitetura de informação e os fluxos de navegaçã
 graph TD
     %% TabBar Principais
     Root[Landing Page / Login] --> AppRoot((/app))
-    
+
     subgraph TabBar [Menu Inferior]
-        Items[Items / Inventário]
         Lists[Listas - Destaque]
         Recipes[Receitas]
         People[Pessoas / Colaboradores]
@@ -16,24 +15,18 @@ graph TD
     end
 
     AppRoot --> Lists
-    
+
     %% Fluxo de Listas
     Lists --> NewList[Nova Lista Bottom Sheet]
     NewList --> AudioFlow[Captura de Áudio]
     NewList --> PhotoFlow[Captura de Foto OCR]
     NewList --> ManualFlow[Input Manual]
-    
+
     Lists --> ListDetails[Detalhes da Lista]
     ListDetails --> Chat[Chat da Lista]
     ListDetails --> Map[Mapa/Radar]
     ListDetails --> EditList[Editar Título/Config]
     ListDetails --> AddItemIA[Adicionar via Voz/Foto]
-
-    %% Fluxo de Items (Inventário)
-    Items --> SelectItems[Selecionar múltiplos]
-    SelectItems --> GenerateRecipe[Gerar 3x Receitas]
-    SelectItems --> AddToList[Adicionar a uma Lista]
-    Items --> ScanProduct[Escanear Produto Barcode/Vision]
 
     %% Fluxo de Receitas
     Recipes --> CreativeSearch[Busca Criativa / Chef IA]
@@ -45,7 +38,7 @@ graph TD
     Profile --> Settings[Configurações do App]
     Profile --> Credits[Energia IA / Grãos]
     Credits --> Stripe[Checkout Stripe]
-    
+
     %% Notificações (Transversal)
     Avisos[Avisos / Notificações] -.-> Lists
     Avisos -.-> Items
@@ -56,7 +49,5 @@ graph TD
 ## Próximos Passos de Revisão:
 
 1.  **[ ] Tela de Listas:** Organização do Box, Cards e Drawer de Nova Lista.
-2.  **[ ] Tela de Itens (Inventário):** Implementação da nova aba e seleção múltipla.
-3.  **[ ] Tela de Receitas:** Novo layout e integração com Inventário.
-4.  **[ ] Tela de Pessoas:** Gerenciamento de convites e amigos.
-5.  **[ ] Tela de Perfil & Configurações:** Separação das áreas.
+2.  **[ ] Tela de Pessoas:** Gerenciamento de convites e amigos.
+3.  **[ ] Tela de Perfil & Configurações:** Separação das áreas.

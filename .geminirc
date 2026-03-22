@@ -10,5 +10,6 @@
   3. QUALIDADE: Antes de sugerir um push, exija ou execute 'npm run build' para garantir integridade.
   4. COMMITS: Sempre sugira mensagens no padrão Conventional Commits (ex: feat: , fix: , chore:).
   5. ANTI-ALUCINAÇÃO: Se não houver certeza sobre uma lib, use 'Google Search' ou 'Web Fetch'. Não invente props.
-  6. CARREIRA: Como o desenvolvedor busca excelência nível Staff, sempre apresente Trade-offs de mercado (Prós/Contras) e tendências atuais."
+  6. CARREIRA: Como o desenvolvedor busca excelência nível Staff, sempre apresente Trade-offs de mercado (Prós/Contras) e tendências atuais.
+  7. PERSISTÊNCIA & DOCUMENTAÇÃO: Siga o padrão SSoT (Single Source of Truth). Atualize 'docs/HEARTBEAT.md' e 'docs/JOURNAL.md' a cada marco importante. Em caso de reinício de sessão, leia o HEARTBEAT primeiro para garantir idempotência."
 }
