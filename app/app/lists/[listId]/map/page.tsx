@@ -12,7 +12,8 @@ import {
   ChevronUp,
   MessageCircleMore,
   Lock,
-  RefreshCw
+  RefreshCw,
+  Bell
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useMemo } from "react"
@@ -80,7 +81,7 @@ function getBearing(lat1: number, lon1: number, lat2: number, lon2: number) {
 export default function CadeTuPage() {
   const { listId } = useParams() as { listId: string }
   const { data: user } = useUser()
-  const { onlineUsers, myLocation } = usePresence(listId, user)
+  const { onlineUsers, myLocation, sendNudge } = usePresence(listId, user)
   const { trigger } = useHaptic()
 
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null)
@@ -261,7 +262,7 @@ export default function CadeTuPage() {
         )}
       </div>
 
-      <div className="h-[28vh] bg-zinc-950 border-t border-white/10 z-[1001] flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+      <div className="h-[35vh] bg-zinc-950 border-t border-white/10 z-[1001] flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
         <div className="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mt-3 mb-2" />
         <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-hide">
           <div className="flex flex-col gap-3">
@@ -278,79 +279,100 @@ export default function CadeTuPage() {
               colleagues.map((u) => (
                 <div
                   key={u.user_id}
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 shadow-sm active:scale-[0.98] transition-all"
+                  className="flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white/5 border border-white/5 shadow-sm active:scale-[0.98] transition-all"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <div className="w-12 h-12 rounded-full bg-zinc-800 overflow-hidden border border-white/10 relative">
-                        {u.avatar_url ? (
-                          <Image
-                            src={u.avatar_url}
-                            fill
-                            className="object-cover"
-                            alt={u.full_name}
-                            sizes="48px"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-zinc-500 font-bold text-xs uppercase">
-                            {u.full_name.charAt(0)}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-zinc-800 overflow-hidden border border-white/10 relative">
+                          {u.avatar_url ? (
+                            <Image
+                              src={u.avatar_url}
+                              fill
+                              className="object-cover"
+                              alt={u.full_name}
+                              sizes="48px"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-zinc-500 font-bold text-xs uppercase">
+                              {u.full_name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        {u.bearing !== null && (
+                          <div
+                            className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg border-2 border-zinc-950 transition-transform duration-500"
+                            style={{ transform: `rotate(${u.bearing}deg)` }}
+                          >
+                            <ChevronUp className="w-3 h-3 text-white" />
                           </div>
                         )}
                       </div>
-                      {u.bearing !== null && (
-                        <div
-                          className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg border-2 border-zinc-950 transition-transform duration-500"
-                          style={{ transform: `rotate(${u.bearing}deg)` }}
-                        >
-                          <ChevronUp className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-zinc-100">
-                        {u.full_name}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${u.distance && u.distance < 10 ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}
-                        >
-                          {u.distance
-                            ? `${Math.round(u.distance)}m`
-                            : "Localizando..."}
-                        </span>
-                        {u.distance && u.distance < 10 && (
-                          <span className="text-[10px] text-emerald-500 animate-pulse font-bold uppercase tracking-widest">
-                            Perto!
+                      <div>
+                        <h3 className="text-sm font-bold text-zinc-100">
+                          {u.full_name}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${u.distance && u.distance < 10 ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}
+                          >
+                            {u.distance
+                              ? `${Math.round(u.distance)}m`
+                              : "Localizando..."}
                           </span>
-                        )}
+                          {u.distance && u.distance < 10 && (
+                            <span className="text-[10px] text-emerald-500 animate-pulse font-bold uppercase tracking-widest">
+                              Perto!
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="grid grid-cols-4 gap-2">
+                    <button
+                      onClick={() => {
+                        if (u.user_id) {
+                          trigger("medium")
+                          sendNudge(u.user_id)
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-500 hover:text-white transition-all active:scale-95 shadow-lg"
+                    >
+                      <Bell className="w-4 h-4 animate-shake" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">
+                        Sino
+                      </span>
+                    </button>
+
                     <button
                       onClick={() => u.lat && u.lng && focusUser(u.lat, u.lng)}
-                      className="p-3 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white shadow-lg"
+                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-zinc-800 border border-white/5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-950 shadow-lg transition-all active:scale-95"
                     >
                       <MapIcon className="w-4 h-4" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">
+                        Mapa
+                      </span>
                     </button>
-                    {u.phone ? (
-                      <a
-                        href={`https://wa.me/${formatPhoneForWhatsApp(u.phone)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 shadow-lg hover:bg-emerald-500 hover:text-white transition-all"
-                        onClick={() => trigger("light")}
-                      >
-                        <MessageCircleMore className="w-4 h-4" />
-                      </a>
-                    ) : (
-                      <button
-                        disabled
-                        className="p-3 rounded-xl bg-zinc-900/50 text-zinc-800 cursor-not-allowed"
-                      >
-                        <MessageCircleMore className="w-4 h-4 opacity-20" />
-                      </button>
-                    )}
+
+                    <a
+                      href={
+                        u.phone
+                          ? `https://wa.me/${formatPhoneForWhatsApp(u.phone)}`
+                          : "#"
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border shadow-lg ${u.phone ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white" : "bg-zinc-900/50 border-transparent text-zinc-800 cursor-not-allowed opacity-40"}`}
+                      onClick={() => u.phone && trigger("light")}
+                    >
+                      <MessageCircleMore className="w-4 h-4" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">
+                        Zap
+                      </span>
+                    </a>
+
                     <button
                       onClick={() => {
                         trigger("light")
@@ -361,9 +383,12 @@ export default function CadeTuPage() {
                         })
                         setIsChatOpen(true)
                       }}
-                      className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 shadow-lg"
+                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-lg"
                     >
                       <MessageSquare className="w-4 h-4" />
+                      <span className="text-[8px] font-black uppercase tracking-tighter">
+                        Chat
+                      </span>
                     </button>
                   </div>
                 </div>
