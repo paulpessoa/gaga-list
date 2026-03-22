@@ -257,6 +257,35 @@ export default function AppPage() {
         </div>
       </header>
 
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => {
+            trigger("medium")
+            setIsCreateModalOpen(true)
+          }}
+          className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex flex-col items-center justify-center gap-2 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 group relative overflow-hidden border border-zinc-200 dark:border-white/5"
+        >
+          <div className="absolute top-2 right-3 px-2 py-0.5 bg-indigo-500/10 group-hover:bg-white/20 rounded-md transition-colors">
+            <span className="text-[8px] font-black uppercase tracking-tighter">1 grão</span>
+          </div>
+          <Mic className="w-6 h-6 text-indigo-500 group-hover:text-white transition-colors" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Voz</span>
+        </button>
+        <button
+          onClick={() => {
+            trigger("medium")
+            setIsOcrScannerOpen(true)
+          }}
+          className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex flex-col items-center justify-center gap-2 hover:bg-rose-500 hover:text-white transition-all active:scale-95 group relative overflow-hidden border border-zinc-200 dark:border-white/5"
+        >
+          <div className="absolute top-2 right-3 px-2 py-0.5 bg-rose-500/10 group-hover:bg-white/20 rounded-md transition-colors">
+            <span className="text-[8px] font-black uppercase tracking-tighter">2 grãos</span>
+          </div>
+          <Camera className="w-6 h-6 text-rose-500 group-hover:text-white transition-colors" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Foto</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <button
           onClick={handleCreateList}
@@ -277,19 +306,19 @@ export default function AppPage() {
         </button>
 
         {isLoading ? (
-          [1, 2].map((i) => (
+          [1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="glass-panel rounded-[2rem] p-8 min-h-[200px] animate-pulse"
+              className="glass-panel rounded-[2.5rem] p-8 min-h-[180px] flex flex-col gap-4 animate-pulse bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-white/5"
             >
-              <div className="flex gap-4 mb-6">
-                <div className="w-12 h-12 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-5 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
-                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
+                <div className="flex-1 space-y-3">
+                  <div className="h-5 bg-zinc-200 dark:bg-zinc-800 rounded-full w-3/4" />
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full w-1/2" />
                 </div>
               </div>
-              <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-full mt-auto" />
+              <div className="mt-auto h-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl w-full" />
             </div>
           ))
         ) : isError ? (
