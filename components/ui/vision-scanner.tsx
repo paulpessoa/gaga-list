@@ -154,15 +154,31 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
              <p className="text-zinc-400 text-xs font-medium leading-relaxed">
                A IA retornou um formato inesperado. Você pode copiar o texto abaixo:
              </p>
-             <div className="bg-zinc-900 rounded-2xl p-6 border border-white/5 font-mono text-[10px] text-zinc-300 whitespace-pre-wrap break-words shadow-inner">
+             <div className="bg-zinc-900 rounded-2xl p-6 border border-white/5 font-mono text-[10px] text-zinc-300 whitespace-pre-wrap break-words shadow-inner max-h-48 overflow-y-auto">
                 {rawAiResponse}
              </div>
-             <button 
-               onClick={() => { setRawAiResponse(null); setCapturedImage(null); startCamera(); }}
-               className="w-full py-4.5 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
-             >
-               Tentar Novamente
-             </button>
+             
+             <div className="flex flex-col gap-3">
+               <button 
+                 onClick={() => {
+                   trigger('success' as any);
+                   onScanSuccess({ 
+                     items: [{ name: rawAiResponse.substring(0, 100) + (rawAiResponse.length > 100 ? '...' : '') }],
+                     isRaw: true 
+                   });
+                   setRawAiResponse(null);
+                 }}
+                 className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
+               >
+                 Usar como Item Solto
+               </button>
+               <button 
+                 onClick={() => { setRawAiResponse(null); setCapturedImage(null); startCamera(); }}
+                 className="w-full py-4.5 bg-zinc-800 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
+               >
+                 Tentar Novamente
+               </button>
+             </div>
           </div>
         ) : capturedImage ? (
           <img src={capturedImage} className="w-full h-full object-cover" alt="Capturado" />

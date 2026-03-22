@@ -38,7 +38,10 @@ export async function POST(request: Request) {
         {
           role: "user",
           content: [
-            { type: "text", text: "Identifique este produto de supermercado. Retorne um JSON com: \"name\", \"brand\", \"category\", \"benefits\" (breve texto), \"suggested_uses\" (array de ideias). Retorne APENAS o JSON." },
+            { 
+              type: "text", 
+              text: "Identifique este produto de supermercado. Retorne estritamente um objeto JSON com a chave 'data' contendo: 'name', 'brand', 'category', 'benefits' (breve texto), 'suggested_uses' (array de strings). Não inclua explicações ou blocos de código markdown. Retorne APENAS o JSON puro." 
+            },
             {
               type: "image_url",
               image_url: {
@@ -51,7 +54,9 @@ export async function POST(request: Request) {
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
+    const content = response.choices[0]?.message?.content || '{}';
+    const result = JSON.parse(content);
+    const finalData = result.data || result;
     
     // Deduzir créditos e logar
     await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
@@ -62,7 +67,7 @@ export async function POST(request: Request) {
       model_used: 'gpt-4o-mini'
     });
 
-    return NextResponse.json({ data: result });
+    return NextResponse.json({ data: finalData });
 
   } catch (error: any) {
     console.error('Erro na visão AI:', error);
