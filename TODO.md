@@ -16,7 +16,7 @@
   - Tooltips/Feedback para botões `disabled` (Ex: Criar Lista).
   - Feedback antes de consumir Grãos (Modal de confirmação).
   - Validação em tempo real no formulário de Nova Lista (Campo obrigatório *).
-- [ ] **Clareza Grãos Mágicos:**
+- [x] **Clareza Grãos Mágicos:**
   - Modal explicativo: O que são? Quanto cada feature consome? Como ganhar mais?
 
 ## 🟡 MÉDIA PRIORIDADE (PRÓXIMAS 4 SEMANAS)

@@ -110,6 +110,50 @@ export default function CreditsPage() {
         </div>
       </div>
 
+      {/* O que são Grãos? */}
+      <section className="glass-panel p-8 rounded-[2.5rem] bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-indigo-500/10 flex flex-col gap-6 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 opacity-10 group-hover:rotate-12 transition-transform duration-500">
+          <Sparkles className="w-32 h-32 text-indigo-500" />
+        </div>
+        
+        <div className="relative z-10 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">O que são Grãos Mágicos?</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
+              Os **Grãos Mágicos** são a energia que alimenta a Inteligência Artificial do Lista Pronta. Eles permitem que você use recursos avançados de automação.
+            </p>
+            
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
+                <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <Check className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">Economize Tempo</p>
+                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">Crie listas inteiras falando ou tirando uma foto do papel.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
+                <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 mt-0.5">
+                  <Check className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">Como ganhar?</p>
+                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">Você ganha grãos ao se cadastrar, convidar amigos ou assinando um plano.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Como usar */}
       <div className="space-y-5">
         <div className="flex items-center gap-2 ml-2">
