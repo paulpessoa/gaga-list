@@ -1,22 +1,22 @@
-'use client';
+"use client"
 
-import { useAICreditModal } from '@/hooks/use-ai-credit-modal';
-import { useHaptic } from '@/hooks/use-haptic';
-import { Zap, X, ShoppingBag, ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useAICreditModal } from "@/hooks/use-ai-credit-modal"
+import { useHaptic } from "@/hooks/use-haptic"
+import { Zap, X, ShoppingBag, ArrowRight, Sparkles } from "lucide-react"
+import Link from "next/link"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function AICreditModal() {
-  const { isOpen, close } = useAICreditModal();
-  const { trigger } = useHaptic();
+  const { isOpen, close } = useAICreditModal()
+  const { trigger } = useHaptic()
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
         {/* Overlay */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -25,7 +25,7 @@ export function AICreditModal() {
         />
 
         {/* Modal Card */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -36,7 +36,7 @@ export function AICreditModal() {
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-[50px] -ml-16 -mb-16 pointer-events-none" />
 
           {/* Close Button */}
-          <button 
+          <button
             onClick={close}
             className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
           >
@@ -54,21 +54,25 @@ export function AICreditModal() {
           <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-4 tracking-tight">
             Sua Energia IA Acabou!
           </h2>
-          
+
           <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium leading-relaxed mb-10 px-2">
-            Você utilizou todos os seus **Grãos Mágicos**. Recarregue sua energia agora para continuar usando o Scanner e o Chef IA!
+            Você utilizou todos os seus **Grãos Mágicos**. Recarregue para
+            continuar usando o Scanner e o Chef IA!
           </p>
 
           <div className="flex flex-col gap-3">
-            <Link 
+            <Link
               href="/app/credits"
-              onClick={() => { trigger('medium'); close(); }}
+              onClick={() => {
+                trigger("medium")
+                close()
+              }}
               className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 shadow-xl shadow-indigo-500/20 active:scale-95 transition-all"
             >
               <ShoppingBag className="w-4 h-4" /> Recarregar Agora
             </Link>
-            
-            <button 
+
+            <button
               onClick={close}
               className="w-full py-4 text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-widest text-[9px] hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
             >
@@ -84,5 +88,5 @@ export function AICreditModal() {
         </motion.div>
       </div>
     </AnimatePresence>
-  );
+  )
 }

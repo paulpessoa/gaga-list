@@ -17,6 +17,7 @@ import {
 import { Drawer } from "vaul"
 import { useState, useMemo } from "react"
 import { COMMON_GROCERY_ITEMS } from "@/lib/constants/grocery-items"
+import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 
 interface CreateItemModalProps {
   isOpen: boolean
@@ -50,6 +51,7 @@ export function CreateItemModal({
   trigger
 }: CreateItemModalProps) {
   const [itemName, setItemName] = useState("")
+  const { checkAndAct } = useAICreditCheck()
   
   const suggestions = useMemo(() => {
     if (!itemName.trim()) return []
@@ -101,7 +103,7 @@ export function CreateItemModal({
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => (isRecording ? stopRecording() : startRecording())}
+                        onClick={() => checkAndAct(1, () => (isRecording ? stopRecording() : startRecording()))}
                         className={`p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-indigo-500/10 dark:bg-indigo-500/20'}`}>
@@ -118,7 +120,7 @@ export function CreateItemModal({
                       
                       <button
                         type="button"
-                        onClick={() => { trigger("medium"); setIsOcrScannerOpen(true); }}
+                        onClick={() => checkAndAct(2, () => { trigger("medium"); setIsOcrScannerOpen(true); })}
                         className="p-6 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
