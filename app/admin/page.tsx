@@ -6,43 +6,55 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { 
   ShieldAlert, 
-  Activity, 
   Users, 
-  Sparkles, 
+  CreditCard, 
   ArrowLeft,
-  BarChart3,
-  BrainCircuit
+  Loader2,
+  TrendingUp,
+  History,
+  Zap,
+  DollarSign,
+  Cpu,
+  RefreshCw,
+  Search,
+  ChevronRight,
+  ExternalLink
 } from "lucide-react"
 import Link from "next/link"
 
-export default function AdminDashboard() {
-  const { data: user, isLoading: isUserLoading } = useUser()
-  const router = useRouter()
+// Configuração de custos das APIs (Staff Insight: Monitoramento de margem)
+const API_COSTS: Record<string, { model: string; estimated_brl: number }> = {
+  recipe: { model: 'Gemini 1.5 Flash', estimated_brl: 0.005 }, // Quase zero
+  ocr: { model: 'GPT-4o-mini', estimated_brl: 0.02 },
+  vision: { model: 'GPT-4o-mini', estimated_brl: 0.03 },
+  voice: { model: 'Whisper + Gemini', estimated_brl: 0.015 },
+  suggestion: { model: 'Llama 3.3', estimated_brl: 0.002 }
+}
+
+export default function AdminPage() {
+  const { data: user } = useUser()
   const supabase = createClient()
+  const router = useRouter()
 
   const [isAdmin, setIsAdmin] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
     totalUsers: 0,
-    totalLogs: 0,
-    totalCreditsSpent: 0,
-    featuresCount: { recipe: 0, ocr: 0, vision: 0 }
+    totalGrainsUsed: 0,
+    totalRevenue: 0,
+    estimatedApiCost: 0
   })
-  const [recentLogs, setRecentLogs] = useState<any[]>([])
+  const [recentLogs, setRecentRecentLogs] = useState<any[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    const verifyAdminAndFetchData = async () => {
-      if (isUserLoading) return
-      
-      if (!user) {
-        router.push("/")
-        return
-      }
+    async function checkAdminAndFetch() {
+      if (!user) return
 
-      // 1. Verificar se é admin
-      const { data: profile } = await supabase.from('profiles')
-        .select('is_admin')
-        .eq('id', user.id)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", user.id)
         .single()
       
       if (!profile?.is_admin) {
@@ -52,152 +64,229 @@ export default function AdminDashboard() {
 
       setIsAdmin(true)
 
-      // 2. Buscar Métricas (Em um app de produção, isso viria de uma RPC no banco para otimização)
-      const { count: usersCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true })
-      const { data: logsData } = await supabase.from('ai_usage_logs').select('feature, cost')
+      // Buscar Estatísticas
+      const { count: usersCount } = await (supabase.from("profiles") as any).select("*", { count: 'exact', head: true })
+      const { data: logsData } = await (supabase.from("ai_usage_logs") as any).select("feature, cost")
       
-      let totalSpent = 0
-      const counts = { recipe: 0, ocr: 0, vision: 0 }
-      
+      let grainsUsed = 0
+      let apiCost = 0
+      let revenue = 0
+
       logsData?.forEach((log: any) => {
-        totalSpent += log.cost
-        if (counts[log.feature as keyof typeof counts] !== undefined) {
-          counts[log.feature as keyof typeof counts]++
+        if (log.cost > 0) {
+          grainsUsed += log.cost
+          const costInfo = API_COSTS[log.feature]
+          if (costInfo) apiCost += costInfo.estimated_brl
+        } else {
+          // Recarga (custo negativo no log)
+          // Estimativa simples baseada nos planos (R$ 10 por 500 grãos aprox)
+          revenue += (Math.abs(log.cost) / 500) * 10 
         }
       })
 
       setStats({
         totalUsers: usersCount || 0,
-        totalLogs: logsData?.length || 0,
-        totalCreditsSpent: totalSpent,
-        featuresCount: counts
+        totalGrainsUsed: grainsUsed,
+        totalRevenue: revenue,
+        estimatedApiCost: apiCost
       })
 
-      // 3. Buscar logs recentes detalhados
-      const { data: recent } = await supabase.from('ai_usage_logs')
-        .select('*, profiles(full_name, email)')
-        .order('created_at', { ascending: false })
-        .limit(10)
-      
-      if (recent) setRecentLogs(recent)
+      // Buscar Logs Recentes com Perfil
+      const { data: recent } = await (supabase.from("ai_usage_logs") as any)
+        .select("*, profiles(full_name, email)")
+        .order("created_at", { ascending: false })
+        .limit(20)
 
-      setIsVerifying(false)
+      setRecentRecentLogs(recent || [])
+      setIsLoading(false)
     }
 
-    verifyAdminAndFetchData()
-  }, [user, isUserLoading, router, supabase])
-
-  if (isVerifying) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
-        <ShieldAlert className="w-12 h-12 text-zinc-800 animate-pulse" />
-        <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Acesso Restrito...</p>
-      </div>
-    )
-  }
+    checkAdminAndFetch()
+  }, [user, supabase, router])
 
   if (!isAdmin) return null
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white p-6 md:p-12 pb-32">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <header className="flex items-center justify-between pb-6 border-b border-white/10">
+      <div className="max-w-6xl mx-auto space-y-10">
+        
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Link href="/app" className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
-                Staff Backoffice
-              </h1>
-              <p className="text-zinc-400 text-sm font-medium flex items-center gap-2 mt-1">
-                <Activity className="w-4 h-4 text-emerald-500" /> Sistema Operacional e Monitorado
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldAlert className="w-5 h-5 text-red-500" />
+                <h1 className="text-2xl font-black uppercase tracking-tighter">Painel Staff</h1>
+              </div>
+              <p className="text-zinc-500 text-sm font-medium">Controle financeiro e operacional do ecossistema</p>
             </div>
           </div>
-          <div className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-widest">
-            Acesso Root
+          <div className="flex items-center gap-3">
+             <button onClick={() => window.location.reload()} className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+               <RefreshCw className="w-4 h-4" /> Atualizar Dados
+             </button>
+             <a href="https://dashboard.stripe.com/" target="_blank" rel="noreferrer" className="p-3 rounded-xl bg-zinc-900 border border-white/5 hover:border-white/20 transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+               <ExternalLink className="w-4 h-4" /> Abrir Stripe
+             </a>
           </div>
         </header>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
-            <div className="flex items-center gap-3 text-zinc-400">
+        {/* Métricas Financeiras */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
               <Users className="w-5 h-5" />
-              <span className="text-xs font-bold uppercase tracking-widest">Usuários Totais</span>
             </div>
-            <div className="text-5xl font-black">{stats.totalUsers}</div>
-          </div>
-          
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
-            <div className="flex items-center gap-3 text-zinc-400">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <span className="text-xs font-bold uppercase tracking-widest">Grãos Queimados</span>
+            <div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Total Usuários</p>
+              <h3 className="text-3xl font-black tracking-tighter">{stats.totalUsers}</h3>
             </div>
-            <div className="text-5xl font-black text-amber-500">{stats.totalCreditsSpent}</div>
-            <p className="text-[10px] text-zinc-500 uppercase font-bold">Consumo de IA Global</p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex flex-col gap-4">
-            <div className="flex items-center gap-3 text-zinc-400">
-              <BrainCircuit className="w-5 h-5 text-indigo-500" />
-              <span className="text-xs font-bold uppercase tracking-widest">Requisições IA</span>
+          <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <Zap className="w-5 h-5" />
             </div>
-            <div className="text-5xl font-black text-indigo-400">{stats.totalLogs}</div>
-            <div className="flex gap-2 text-[10px] uppercase font-bold mt-2">
-              <span className="bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">Receitas: {stats.featuresCount.recipe}</span>
-              <span className="bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">OCR: {stats.featuresCount.ocr}</span>
+            <div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Grãos Consumidos</p>
+              <h3 className="text-3xl font-black tracking-tighter">{stats.totalGrainsUsed}</h3>
+            </div>
+          </div>
+
+          <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4 border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Receita Bruta (Est.)</p>
+              <h3 className="text-3xl font-black tracking-tighter text-emerald-400">
+                R$ {stats.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </h3>
+            </div>
+          </div>
+
+          <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4 border-rose-500/20 shadow-lg shadow-rose-500/5">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+              <Cpu className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Custo APIs (Est.)</p>
+              <h3 className="text-3xl font-black tracking-tighter text-rose-400">
+                R$ {stats.estimatedApiCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </h3>
             </div>
           </div>
         </div>
 
-        {/* Logs Recentes */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <BarChart3 className="w-5 h-5 text-zinc-400" />
-            <h2 className="text-sm font-black uppercase tracking-widest text-zinc-400">Tempo Real: Logs de IA</h2>
+        {/* Financeiro e Logs */}
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <History className="w-5 h-5 text-zinc-500" />
+              <h2 className="text-lg font-black uppercase tracking-widest">Financeiro e Operações</h2>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+              <input 
+                type="text"
+                placeholder="Buscar usuário ou plano..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-zinc-900 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-64"
+              />
+            </div>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-white/10 text-[10px] uppercase tracking-widest text-zinc-500">
-                  <th className="pb-4 font-black">Data/Hora</th>
-                  <th className="pb-4 font-black">Usuário</th>
-                  <th className="pb-4 font-black">Recurso</th>
-                  <th className="pb-4 font-black">Custo</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {recentLogs.length === 0 ? (
-                  <tr><td colSpan={4} className="py-8 text-center text-zinc-600">Nenhum log encontrado.</td></tr>
-                ) : (
-                  recentLogs.map((log) => (
-                    <tr key={log.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                      <td className="py-4 text-zinc-400">
-                        {new Date(log.created_at).toLocaleString('pt-BR')}
-                      </td>
-                      <td className="py-4 font-bold text-zinc-300">
-                        {log.profiles?.full_name || log.profiles?.email?.split('@')[0] || 'Desconhecido'}
-                      </td>
-                      <td className="py-4">
-                        <span className="px-2 py-1 bg-zinc-800 rounded-md text-xs font-bold uppercase tracking-wider text-zinc-300">
-                          {log.feature}
-                        </span>
-                      </td>
-                      <td className="py-4 font-black text-amber-500">
-                        -{log.cost}
+
+          <div className="bg-zinc-900/30 border border-white/5 rounded-[2rem] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-white/5">
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">Usuário</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">Ação / Feature</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">Grãos</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">Custo API (Est.)</th>
+                    <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">Data</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" />
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : recentLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-zinc-500 italic">
+                        Nenhuma transação registrada.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentLogs.map((log) => {
+                      const isRecharge = log.cost < 0
+                      const apiCost = !isRecharge ? (API_COSTS[log.feature]?.estimated_brl || 0) : 0
+
+                      return (
+                        <tr key={log.id} className="hover:bg-white/[0.02] transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold">{log.profiles?.full_name || 'Usuário Anon'}</span>
+                              <span className="text-[10px] text-zinc-500">{log.profiles?.email}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${isRecharge ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                              <span className="text-xs font-bold uppercase tracking-widest">
+                                {isRecharge ? 'Recarga via Stripe' : log.feature}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`text-sm font-black ${isRecharge ? 'text-emerald-400' : 'text-rose-400'}`}>
+                              {isRecharge ? '+' : ''}{Math.abs(log.cost)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-xs font-mono text-zinc-400">
+                              {isRecharge ? '-' : `R$ ${apiCost.toFixed(3)}`}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-zinc-500 font-medium">
+                            {new Date(log.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
+        {/* Tabela de Preços Referência */}
+        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-8">
+           <div className="flex items-center gap-2 mb-6">
+             <TrendingUp className="w-5 h-5 text-indigo-400" />
+             <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400">Referência de Margem Staff</h3>
+           </div>
+           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6">
+              {Object.entries(API_COSTS).map(([key, info]) => (
+                <div key={key} className="space-y-1">
+                  <p className="text-[9px] font-black uppercase text-zinc-500">{key}</p>
+                  <p className="text-xs font-bold">{info.model}</p>
+                  <p className="text-[10px] font-mono text-indigo-400">R$ {info.estimated_brl.toFixed(3)} / req</p>
+                </div>
+              ))}
+           </div>
+        </div>
+
       </div>
     </main>
   )
 }
-

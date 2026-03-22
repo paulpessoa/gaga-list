@@ -267,15 +267,16 @@ export default function RecipesPage() {
               </option>
             ))}
           </select>
-          <button
-            onClick={() => generateRecipes("from_list")}
+          <button 
+            onClick={() => generateRecipes('from_list')}
             disabled={!selectedListId || isLoadingList}
-            className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="w-full py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1"
           >
-            {isLoadingList ? (
-              <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-            ) : (
-              "Gerar 3 Sugestões"
+            {isLoadingList ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (
+              <>
+                <span>Gerar 3 Sugestões</span>
+                <span className="text-[8px] opacity-70 tracking-tighter">1 grão</span>
+              </>
             )}
           </button>
         </div>
@@ -298,12 +299,15 @@ export default function RecipesPage() {
           <button
             onClick={() => generateRecipes("custom")}
             disabled={!customQuery || isLoadingCustom}
-            className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="w-full py-4 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1"
           >
             {isLoadingCustom ? (
               <Loader2 className="w-4 h-4 animate-spin mx-auto" />
             ) : (
-              "Consultar Chef IA"
+              <>
+                <span>Consultar Chef IA</span>
+                <span className="text-[8px] opacity-70 tracking-tighter">1 grão</span>
+              </>
             )}
           </button>
         </div>
@@ -371,12 +375,15 @@ export default function RecipesPage() {
           <button
             onClick={() => generateRecipes("from_products")}
             disabled={selectedProducts.length === 0 || isLoadingProducts}
-            className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+            className="w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50 flex flex-col items-center justify-center gap-1"
           >
             {isLoadingProducts ? (
               <Loader2 className="w-4 h-4 animate-spin mx-auto" />
             ) : (
-              `Criar Receita com ${selectedProducts.length} itens`
+              <>
+                <span>Criar Receita com {selectedProducts.length} itens</span>
+                <span className="text-[8px] opacity-70 tracking-tighter">1 grão</span>
+              </>
             )}
           </button>
         </div>

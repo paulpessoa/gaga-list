@@ -227,11 +227,11 @@ export default function CreditsPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500/5 border border-rose-500/10 rounded-xl">
-                    <span className="text-xs font-black text-rose-500">
-                      -{log.cost}
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${log.cost < 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/5 border border-rose-500/10'}`}>
+                    <span className={`text-xs font-black ${log.cost < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                      {Math.abs(log.cost)}
                     </span>
-                    <Sparkles className="w-3 h-3 text-rose-400" />
+                    <Sparkles className={`w-3 h-3 ${log.cost < 0 ? 'text-emerald-400' : 'text-rose-400'}`} />
                   </div>
                 </div>
               )

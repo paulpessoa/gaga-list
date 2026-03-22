@@ -111,16 +111,21 @@ export function CreateListModal({
                     type="button"
                     onClick={() => (isRecording ? stopRecording() : startRecording())}
                     disabled={isAiProcessing}
-                    className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all border active:scale-95 ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
+                    className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 transition-all border active:scale-95 relative overflow-hidden ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
                   >
-                    {isAiProcessing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : isRecording ? (
-                      <Square className="w-4 h-4 fill-current" />
-                    ) : (
-                      <Mic className="w-4 h-4 text-indigo-500" />
+                    <div className="flex items-center gap-2">
+                      {isAiProcessing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isRecording ? (
+                        <Square className="w-4 h-4 fill-current" />
+                      ) : (
+                        <Mic className="w-4 h-4 text-indigo-500" />
+                      )}
+                      {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
+                    </div>
+                    {!isAiProcessing && !isRecording && (
+                      <span className="text-[8px] opacity-60 tracking-tighter">1 grão</span>
                     )}
-                    {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
                   </button>
                   <button
                     type="button"
@@ -129,10 +134,13 @@ export function CreateListModal({
                       setIsOcrScannerOpen(true)
                     }}
                     disabled={isAiProcessing}
-                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
+                    className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
                   >
-                    <Camera className="w-4 h-4 text-indigo-500" />
-                    Via Foto
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-indigo-500" />
+                      <span>Via Foto</span>
+                    </div>
+                    <span className="text-[8px] opacity-60 tracking-tighter">2 grãos</span>
                   </button>
                 </div>
               </div>
