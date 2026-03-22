@@ -29,7 +29,7 @@ export default function NotificationsPage() {
             Central de Avisos
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
-            Clique para abrir a conversa ou lixeira
+            Clique para abrir a conversa ou fixar
           </p>
         </div>
         {notifications.length > 0 && (
