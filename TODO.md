@@ -21,7 +21,7 @@
 
 ## 🟡 MÉDIA PRIORIDADE (PRÓXIMAS 4 SEMANAS)
 
-- [ ] **Reorganização de Receitas:**
+- [x] **Reorganização de Receitas:**
   - Dividir em abas ou sub-páginas para reduzir scroll e loadtime.
 - [ ] **Interface Interna da Lista:**
   - Header: Botão Voltar + Título + Ícone Edição.

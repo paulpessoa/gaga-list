@@ -39,6 +39,9 @@ export default function RecipesPage() {
   // Refs para scroll
   const resultsRef = useRef<HTMLDivElement>(null)
 
+  // Estados de Navegação
+  const [activeTab, setActiveTab] = useState<"generate" | "book" | "inventory">("generate")
+
   // Estados de Input
   const [selectedListId, setSelectedListId] = useState("")
   const [customQuery, setCustomQuery] = useState("")
@@ -248,128 +251,212 @@ export default function RecipesPage() {
         <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">Cozinha com IA</p>
       </header>
 
-      {/* Grid de Ferramentas IA */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Sugerir da Lista */}
-        <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-2 border-indigo-500/10 hover:border-indigo-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-indigo-500">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                <UtensilsCrossed className="w-5 h-5" />
-              </div>
-              <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
-            </div>
-            <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
-               <span className="text-[8px] font-black text-indigo-500 uppercase">1 Grão</span>
-            </div>
-          </div>
-          <select
-            value={selectedListId}
-            onChange={(e) => setSelectedListId(e.target.value)}
-            className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
-          >
-            <option value="">Escolha uma lista...</option>
-            {lists?.map((l) => (
-              <option key={l.id} value={l.id}>{l.title}</option>
-            ))}
-          </select>
-          <button 
-            onClick={() => generateRecipes('from_list')}
-            disabled={!selectedListId || isLoadingList}
-            className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isLoadingList ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Gerar Sugestões"}
-          </button>
-        </div>
-
-        {/* Buscar Específica */}
-        <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-rose-500/5 border-2 border-rose-500/10 hover:border-rose-500/20 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 text-rose-500">
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 flex items-center justify-center">
-                <ChefHat className="w-5 h-5" />
-              </div>
-              <h2 className="font-black uppercase tracking-widest text-[10px]">Busca Específica</h2>
-            </div>
-            <div className="px-2 py-1 bg-rose-500/10 rounded-lg">
-               <span className="text-[8px] font-black text-rose-500 uppercase">1 Grão</span>
-            </div>
-          </div>
-          <input
-            type="text"
-            placeholder="Ex: Almoço rápido com frango..."
-            value={customQuery}
-            onChange={(e) => setCustomQuery(e.target.value)}
-            className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none shadow-inner"
-          />
-          <button
-            onClick={() => generateRecipes("custom")}
-            disabled={!customQuery || isLoadingCustom}
-            className="w-full py-4.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isLoadingCustom ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Consultar Chef"}
-          </button>
-        </div>
-
-        {/* Meus Produtos Selecionáveis */}
-        <div className="md:col-span-2 glass-panel p-8 rounded-[3rem] flex flex-col gap-6 bg-emerald-500/5 border-2 border-emerald-500/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-            <ShoppingBag className="w-40 h-40 text-emerald-500" />
-          </div>
-
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3 text-emerald-500">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                <Zap className="w-5 h-5" />
-              </div>
-              <h2 className="font-black uppercase tracking-widest text-[10px]">Receita do Meu Inventário</h2>
-            </div>
-            <div className="flex items-center gap-3">
-              {selectedProducts.length > 0 && (
-                <button onClick={() => setSelectedProducts([])} className="text-[9px] font-black uppercase text-zinc-400 hover:text-rose-500">Limpar ({selectedProducts.length})</button>
-              )}
-              <div className="px-2 py-1 bg-emerald-500/10 rounded-lg">
-                 <span className="text-[8px] font-black text-emerald-500 uppercase">1 Grão</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-            <input
-              type="text"
-              placeholder="Pesquisar nos meus produtos salvos..."
-              value={searchProduct}
-              onChange={(e) => setSearchProduct(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none shadow-inner"
-            />
-          </div>
-
-          <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1 custom-scrollbar relative z-10">
-            {filteredProducts.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => toggleProduct(p.id)}
-                className={`flex items-center gap-2 px-4 py-3 rounded-2xl border-2 text-[10px] font-black uppercase transition-all active:scale-95 ${selectedProducts.includes(p.id) ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-emerald-500/30"}`}
-              >
-                {selectedProducts.includes(p.id) ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                {p.name}
-              </button>
-            ))}
-            {myProducts.length === 0 && (
-              <Link href="/app/products" className="text-[10px] font-bold text-zinc-400 py-8 w-full text-center hover:text-emerald-500 underline">Você ainda não tem produtos salvos. Scaneie produtos para começar.</Link>
-            )}
-          </div>
-
-          <button
-            onClick={() => generateRecipes("from_products")}
-            disabled={selectedProducts.length === 0 || isLoadingProducts}
-            className="relative z-10 w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isLoadingProducts ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Criar Receita com ${selectedProducts.length} itens`}
-          </button>
-        </div>
+      {/* Tabs Navigation */}
+      <div className="flex items-center p-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-white/5">
+        <button
+          onClick={() => { setActiveTab("generate"); trigger("light"); }}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "generate" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+        >
+          Gerar
+        </button>
+        <button
+          onClick={() => { setActiveTab("inventory"); trigger("light"); }}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inventory" ? "bg-white dark:bg-zinc-800 text-emerald-500 shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+        >
+          Inventário
+        </button>
+        <button
+          onClick={() => { setActiveTab("book"); trigger("light"); }}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-white dark:bg-zinc-800 text-rose-500 shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+        >
+          Meu Livro
+        </button>
       </div>
+
+      <AnimatePresence mode="wait">
+        {activeTab === "generate" && (
+          <motion.div
+            key="generate"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {/* Sugerir da Lista */}
+            <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-2 border-indigo-500/10 hover:border-indigo-500/20 transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-indigo-500">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                    <UtensilsCrossed className="w-5 h-5" />
+                  </div>
+                  <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
+                </div>
+                <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
+                  <span className="text-[8px] font-black text-indigo-500 uppercase">1 Grão</span>
+                </div>
+              </div>
+              <select
+                value={selectedListId}
+                onChange={(e) => setSelectedListId(e.target.value)}
+                className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
+              >
+                <option value="">Escolha uma lista...</option>
+                {lists?.map((l) => (
+                  <option key={l.id} value={l.id}>{l.title}</option>
+                ))}
+              </select>
+              <button 
+                onClick={() => generateRecipes('from_list')}
+                disabled={!selectedListId || isLoadingList}
+                className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isLoadingList ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Gerar Sugestões"}
+              </button>
+            </div>
+
+            {/* Buscar Específica */}
+            <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-rose-500/5 border-2 border-rose-500/10 hover:border-rose-500/20 transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-rose-500">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                    <ChefHat className="w-5 h-5" />
+                  </div>
+                  <h2 className="font-black uppercase tracking-widest text-[10px]">Busca Específica</h2>
+                </div>
+                <div className="px-2 py-1 bg-rose-500/10 rounded-lg">
+                  <span className="text-[8px] font-black text-rose-500 uppercase">1 Grão</span>
+                </div>
+              </div>
+              <input
+                type="text"
+                placeholder="Ex: Almoço rápido com frango..."
+                value={customQuery}
+                onChange={(e) => setCustomQuery(e.target.value)}
+                className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none shadow-inner"
+              />
+              <button
+                onClick={() => generateRecipes("custom")}
+                disabled={!customQuery || isLoadingCustom}
+                className="w-full py-4.5 bg-rose-500 hover:bg-rose-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-rose-500/20 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isLoadingCustom ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Consultar Chef"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === "inventory" && (
+          <motion.div
+            key="inventory"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="glass-panel p-8 rounded-[3rem] flex flex-col gap-6 bg-emerald-500/5 border-2 border-emerald-500/10 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+              <ShoppingBag className="w-40 h-40 text-emerald-500" />
+            </div>
+
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-3 text-emerald-500">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <h2 className="font-black uppercase tracking-widest text-[10px]">Receita do Meu Inventário</h2>
+              </div>
+              <div className="flex items-center gap-3">
+                {selectedProducts.length > 0 && (
+                  <button onClick={() => setSelectedProducts([])} className="text-[9px] font-black uppercase text-zinc-400 hover:text-rose-500">Limpar ({selectedProducts.length})</button>
+                )}
+                <div className="px-2 py-1 bg-emerald-500/10 rounded-lg">
+                  <span className="text-[8px] font-black text-emerald-500 uppercase">1 Grão</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative z-10">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <input
+                type="text"
+                placeholder="Pesquisar nos meus produtos salvos..."
+                value={searchProduct}
+                onChange={(e) => setSearchProduct(e.target.value)}
+                className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none shadow-inner"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2 max-h-72 overflow-y-auto p-1 custom-scrollbar relative z-10">
+              {filteredProducts.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => toggleProduct(p.id)}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-2xl border-2 text-[10px] font-black uppercase transition-all active:scale-95 ${selectedProducts.includes(p.id) ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-500 hover:border-emerald-500/30"}`}
+                >
+                  {selectedProducts.includes(p.id) ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                  {p.name}
+                </button>
+              ))}
+              {myProducts.length === 0 && (
+                <Link href="/app/products" className="text-[10px] font-bold text-zinc-400 py-8 w-full text-center hover:text-emerald-500 underline">Você ainda não tem produtos salvos. Scaneie produtos para começar.</Link>
+              )}
+            </div>
+
+            <button
+              onClick={() => generateRecipes("from_products")}
+              disabled={selectedProducts.length === 0 || isLoadingProducts}
+              className="relative z-10 w-full py-5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-emerald-500/30 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {isLoadingProducts ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : `Criar Receita com ${selectedProducts.length} itens`}
+            </button>
+          </motion.div>
+        )}
+
+        {activeTab === "book" && (
+          <motion.div
+            key="book"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            className="space-y-6"
+          >
+            {isLoadingSaved ? (
+              <div className="grid grid-cols-1 gap-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-24 bg-zinc-50 dark:bg-zinc-900 rounded-3xl animate-pulse border border-zinc-100 dark:border-white/5" />
+                ))}
+              </div>
+            ) : savedRecipes.length === 0 ? (
+              <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/20 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-white/5">
+                <Sparkles className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
+                <p className="text-zinc-500 text-sm font-medium">Você ainda não salvou nenhuma receita.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {savedRecipes.map(r => (
+                  <div 
+                    key={r.id} 
+                    onClick={() => setViewingRecipe(r)}
+                    className="glass-panel p-6 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:border-indigo-500/30 transition-all bg-white dark:bg-zinc-900/40 border-2 border-transparent shadow-sm"
+                  >
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
+                        <UtensilsCrossed className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-zinc-900 dark:text-zinc-100 text-lg group-hover:text-indigo-500 transition-colors">{r.title}</h4>
+                        <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.2em]">{r.ingredients?.length || 0} Itens • {r.prep_time} • {r.difficulty}</p>
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-zinc-300 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner">
+                      <ChevronRight className="w-5 h-5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Status de Carregamento IA (Feedback Visual) */}
       {loadingStatus && (
@@ -456,50 +543,6 @@ export default function RecipesPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Receitas Salvas / Histórico */}
-      <div className="mt-12 space-y-6">
-        <div className="flex items-center gap-2 px-2">
-          <BookOpen className="w-4 h-4 text-zinc-400" />
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Meu Livro de Receitas</h2>
-        </div>
-        
-        {isLoadingSaved ? (
-          <div className="grid grid-cols-1 gap-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-zinc-50 dark:bg-zinc-900 rounded-3xl animate-pulse border border-zinc-100 dark:border-white/5" />
-            ))}
-          </div>
-        ) : savedRecipes.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/20 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-white/5">
-            <Sparkles className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
-            <p className="text-zinc-500 text-sm font-medium">Você ainda não salvou nenhuma receita.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {savedRecipes.map(r => (
-              <div 
-                key={r.id} 
-                onClick={() => setViewingRecipe(r)}
-                className="glass-panel p-6 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:border-indigo-500/30 transition-all bg-white dark:bg-zinc-900/40 border-2 border-transparent shadow-sm"
-              >
-                <div className="flex items-center gap-5">
-                  <div className="w-14 h-14 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform">
-                    <UtensilsCrossed className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h4 className="font-black text-zinc-900 dark:text-zinc-100 text-lg group-hover:text-indigo-500 transition-colors">{r.title}</h4>
-                    <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.2em]">{r.ingredients?.length || 0} Itens • {r.prep_time} • {r.difficulty}</p>
-                  </div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-zinc-300 group-hover:bg-indigo-500 group-hover:text-white transition-all shadow-inner">
-                  <ChevronRight className="w-5 h-5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Modal de Detalhes da Receita Salva (Agora como Bottom Sheet / Drawer) */}
