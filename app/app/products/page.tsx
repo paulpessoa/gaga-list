@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useUser } from "@/hooks/use-user"
 import { createClient } from "@/lib/supabase/client"
-import { MyProductsService, MyProduct } from "@/services/my-products.service"
+import { MyProductsService, MyProduct, InsertProduct } from "@/services/my-products.service"
 import {
   ShoppingBag,
   Search,
@@ -14,11 +14,14 @@ import {
   Zap,
   Tag,
   ArrowLeft,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Filter,
+  User
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useHaptic } from "@/hooks/use-haptic"
+import { CreateProductModal } from "@/components/lists/create-product-modal"
 
 export default function MyProductsPage() {
   const { data: user } = useUser()
@@ -27,23 +30,46 @@ export default function MyProductsPage() {
   const [products, setProducts] = useState<MyProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [viewMode, setViewMode] = useState<"all" | "mine">("all")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const fetchProducts = useCallback(async () => {
+    setIsLoading(true)
     try {
-      const data = await MyProductsService.getProducts(supabase)
+      const data = viewMode === "all" 
+        ? await MyProductsService.getProducts(supabase)
+        : await MyProductsService.getMyRegisteredProducts(supabase)
       setProducts(data)
     } catch (err) {
       console.error(err)
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [supabase, viewMode])
 
   useEffect(() => {
     if (user) {
       fetchProducts()
     }
   }, [user, fetchProducts])
+
+  const handleSaveProduct = async (product: InsertProduct) => {
+    if (!user) return
+    setIsSaving(true)
+    try {
+      await MyProductsService.addProduct(supabase, {
+        ...product,
+        user_id: user.id
+      })
+      await fetchProducts()
+      trigger("success" as any)
+    } catch (err) {
+      alert("Erro ao salvar produto.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleDelete = async (id: string) => {
     // Apenas produtos do catálogo (my_products) podem ser deletados aqui.
@@ -72,7 +98,7 @@ export default function MyProductsPage() {
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="flex flex-col gap-4">
+      <header className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
@@ -80,31 +106,61 @@ export default function MyProductsPage() {
                 Meu Inventário
               </h1>
               <p className="text-sm text-zinc-500 font-medium">
-                Tudo o que você já comprou ou escaneou ({products.length} itens)
+                {viewMode === 'all' ? 'Tudo o que você já comprou ou escaneou' : 'Produtos cadastrados por você'} ({products.length} itens)
               </p>
             </div>
           </div>
-          <Link
-            href="/app/recipes"
-            onClick={() => trigger("light")}
-            className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
-          >
-            <UtensilsCrossed className="w-4 h-4" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
-              Receitas
-            </span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="p-2.5 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 active:scale-95 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+                Novo Produto
+              </span>
+            </button>
+            <Link
+              href="/app/recipes"
+              onClick={() => trigger("light")}
+              className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
+            >
+              <UtensilsCrossed className="w-4 h-4" />
+              <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
+                Receitas
+              </span>
+            </Link>
+          </div>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Buscar no seu histórico..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner"
-          />
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Buscar no seu histórico..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner"
+            />
+          </div>
+
+          <div className="flex bg-zinc-100 dark:bg-zinc-900 p-1.5 rounded-2xl border border-zinc-200 dark:border-white/5 self-start sm:self-auto">
+            <button
+              onClick={() => { setViewMode('all'); trigger('light'); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'all' ? 'bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
+            >
+              <Filter className="w-3.5 h-3.5" />
+              Tudo
+            </button>
+            <button
+              onClick={() => { setViewMode('mine'); trigger('light'); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'mine' ? 'bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm' : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'}`}
+            >
+              <User className="w-3.5 h-3.5" />
+              Meus Cadastros
+            </button>
+          </div>
         </div>
       </header>
 
@@ -204,6 +260,14 @@ export default function MyProductsPage() {
           </div>
         </div>
       </div>
+
+      {isModalOpen && (
+        <CreateProductModal 
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveProduct}
+          isSaving={isSaving}
+        />
+      )}
     </main>
   )
 }

@@ -56,6 +56,28 @@ export const MyProductsService = {
     );
   },
 
+  // Busca APENAS os produtos que o usuário cadastrou manualmente
+  async getMyRegisteredProducts(supabase: any): Promise<MyProduct[]> {
+    const { data, error } = await supabase
+      .from('my_products')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw new Error(`Erro ao buscar produtos registrados: ${error.message}`);
+    return data || [];
+  },
+
+  // Busca produtos do catálogo global
+  async getGlobalProducts(supabase: any): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('global_products')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) throw new Error(`Erro ao buscar catálogo global: ${error.message}`);
+    return data || [];
+  },
+
   async addProduct(supabase: any, product: InsertProduct): Promise<MyProduct> {
     const { data, error } = await supabase
       .from('my_products')
@@ -74,5 +96,45 @@ export const MyProductsService = {
       .eq('id', productId);
 
     if (error) throw new Error(`Erro ao deletar produto: ${error.message}`);
+  },
+
+  async updateProduct(supabase: any, productId: string, updates: Partial<MyProduct>): Promise<MyProduct> {
+    const { data, error } = await supabase
+      .from('my_products')
+      .update(updates)
+      .eq('id', productId)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Erro ao atualizar produto: ${error.message}`);
+    return data;
+  },
+
+  // Admin Only: Promover um produto de usuário para o catálogo global
+  async promoteToGlobal(supabase: any, product: Partial<MyProduct>): Promise<any> {
+    const { data, error } = await supabase
+      .from('global_products')
+      .upsert({
+        name: product.name,
+        category: product.category,
+        default_unit: product.default_unit || 'un',
+        image_url: product.image_url
+      }, { onConflict: 'name' })
+      .select()
+      .single();
+
+    if (error) throw new Error(`Erro ao promover produto: ${error.message}`);
+    return data;
+  },
+
+  // Admin Only: Buscar todos os produtos de todos os usuários para curadoria
+  async getAllUserProducts(supabase: any): Promise<MyProduct[]> {
+    const { data, error } = await supabase
+      .from('my_products')
+      .select('*, profiles(full_name, email)')
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(`Erro na curadoria: ${error.message}`);
+    return data || [];
   }
 };

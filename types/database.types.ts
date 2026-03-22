@@ -283,12 +283,44 @@ export type Database = {
           },
         ]
       }
+      global_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          default_unit: string | null
+          id: string
+          image_url: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          default_unit?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          default_unit?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       my_products: {
         Row: {
           barcode: string | null
           brand: string | null
           category: string | null
           created_at: string
+          default_notes: string | null
+          default_unit: string | null
           id: string
           image_url: string | null
           last_price: number | null
@@ -302,6 +334,8 @@ export type Database = {
           brand?: string | null
           category?: string | null
           created_at?: string
+          default_notes?: string | null
+          default_unit?: string | null
           id?: string
           image_url?: string | null
           last_price?: number | null
@@ -315,6 +349,8 @@ export type Database = {
           brand?: string | null
           category?: string | null
           created_at?: string
+          default_notes?: string | null
+          default_unit?: string | null
           id?: string
           image_url?: string | null
           last_price?: number | null
