@@ -170,6 +170,68 @@ export default function ProfilePage() {
         </Link>
       </section>
 
+      {/* Preferências do App */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 ml-1">
+          <Smartphone className="w-3.5 h-3.5 text-zinc-400" />
+          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+            Preferências do App
+          </h2>
+        </div>
+        <div className="glass-panel rounded-[2.5rem] overflow-hidden border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+          {/* Notificações Push */}
+          <div className="p-6 flex items-center justify-between border-b border-zinc-50 dark:border-white/5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <Bell className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                Notificações Push
+              </span>
+            </div>
+            <button
+              onClick={togglePush}
+              disabled={isUpdatingPush}
+              className={`w-12 h-6 rounded-full transition-all relative ${isPushEnabled ? "bg-emerald-500" : "bg-zinc-200 dark:bg-zinc-800"}`}
+            >
+              <div
+                className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${isPushEnabled ? "left-7" : "left-1"}`}
+              />
+            </button>
+          </div>
+
+          {/* Central de Notificações */}
+          <Link
+            href="/app/notifications"
+            onClick={() => trigger("light")}
+            className="p-6 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <Bell className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                Central de Avisos
+              </span>
+            </div>
+            <ChevronRight className="w-5 h-5 text-zinc-300" />
+          </Link>
+
+          {/* Tema (Placeholder para lógica futura) */}
+          <div className="p-6 flex items-center justify-between opacity-50 border-t border-zinc-50 dark:border-white/5">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
+                <Moon className="w-5 h-5" />
+              </div>
+              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                Modo Escuro (Auto)
+              </span>
+            </div>
+            <Check className="w-5 h-5 text-emerald-500" />
+          </div>
+        </div>
+      </section>
+
       {/* Suporte e Ajuda */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 ml-1">

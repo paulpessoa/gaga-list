@@ -276,6 +276,19 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/app/notifications"
+            onClick={() => trigger("light")}
+            className="relative p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 text-zinc-500 hover:text-indigo-500 transition-all active:scale-90"
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 animate-bounce">
+                {unreadCount}
+              </span>
+            )}
+          </Link>
+
           {isOffline && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
               <WifiOff className="w-3 h-3" />
