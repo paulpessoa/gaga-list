@@ -83,72 +83,71 @@ export function CreateListModal({
                       Organize suas compras com amigos e família.
                     </Drawer.Description>
                   </div>
-                  <form onSubmit={submitCreateList} className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-6">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => (isRecording ? stopRecording() : startRecording())}
+                        disabled={isAiProcessing}
+                        className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 transition-all border active:scale-95 relative overflow-hidden ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isAiProcessing ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : isRecording ? (
+                            <Square className="w-4 h-4 fill-current" />
+                          ) : (
+                            <Mic className="w-4 h-4 text-indigo-500" />
+                          )}
+                          {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
+                        </div>
+                        {!isAiProcessing && !isRecording && (
+                          <span className="text-[8px] opacity-60 tracking-tighter">1 grão</span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          trigger("medium")
+                          setIsOcrScannerOpen(true)
+                        }}
+                        disabled={isAiProcessing}
+                        className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Camera className="w-4 h-4 text-indigo-500" />
+                          <span>Via Foto</span>
+                        </div>
+                        <span className="text-[8px] opacity-60 tracking-tighter">2 grãos</span>
+                      </button>
+                    </div>
+
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
-                        Nome da Lista
+                        Ou digite um nome
                       </label>
                       <input
                         type="text"
                         placeholder="Ex: Mercado da Semana..."
                         required
-                        autoFocus
                         value={newListTitle}
                         onChange={(e) => setNewListTitle(e.target.value)}
                         className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner font-bold"
                       />
                     </div>
-                    <div className="flex flex-col gap-3">
-                      <button
-                        type="submit"
-                        disabled={createListPending || !newListTitle.trim() || isAiProcessing}
-                        className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {createListPending || isAiProcessing ? (
-                          <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : (
-                          "Criar Lista"
-                        )}
-                      </button>
-                      <div className="grid grid-cols-2 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => (isRecording ? stopRecording() : startRecording())}
-                          disabled={isAiProcessing}
-                          className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 transition-all border active:scale-95 relative overflow-hidden ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-white/5 hover:bg-zinc-200 dark:hover:bg-zinc-800"}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {isAiProcessing ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : isRecording ? (
-                              <Square className="w-4 h-4 fill-current" />
-                            ) : (
-                              <Mic className="w-4 h-4 text-indigo-500" />
-                            )}
-                            {isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}
-                          </div>
-                          {!isAiProcessing && !isRecording && (
-                            <span className="text-[8px] opacity-60 tracking-tighter">1 grão</span>
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            trigger("medium")
-                            setIsOcrScannerOpen(true)
-                          }}
-                          disabled={isAiProcessing}
-                          className="py-4 bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all border border-zinc-200 dark:border-white/5 active:scale-95"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Camera className="w-4 h-4 text-indigo-500" />
-                            <span>Via Foto</span>
-                          </div>
-                          <span className="text-[8px] opacity-60 tracking-tighter">2 grãos</span>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
+
+                    <button
+                      type="submit"
+                      disabled={createListPending || !newListTitle.trim() || isAiProcessing}
+                      className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {createListPending || isAiProcessing ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        "Criar Lista Manual"
+                      )}
+                    </button>
+                  </div>
                 </>
               ) : (
                 <div className="animate-in fade-in zoom-in-95 duration-300">

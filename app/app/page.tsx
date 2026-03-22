@@ -213,9 +213,11 @@ export default function AppPage() {
     )
   }
 
+  const sortedLists = [...(lists || [])].sort((a, b) => a.title.localeCompare(b.title))
+
   return (
     <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="flex items-start justify-between">
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl py-4 -mx-5 px-5 flex items-start justify-between border-b border-zinc-100/50 dark:border-white/5 transition-all">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
             Minhas Listas
@@ -226,28 +228,6 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/app/recipes"
-            onClick={() => trigger("light")}
-            className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
-          >
-            <UtensilsCrossed className="w-5 h-5" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
-              Receitas
-            </span>
-          </Link>
-
-          <Link
-            href="/app/products"
-            onClick={() => trigger("light")}
-            className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-all border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95 flex items-center gap-2"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-widest">
-              Produtos
-            </span>
-          </Link>
-
           {isOffline && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
               <WifiOff className="w-3 h-3" />
@@ -256,35 +236,6 @@ export default function AppPage() {
           )}
         </div>
       </header>
-
-      <div className="grid grid-cols-2 gap-4">
-        <button
-          onClick={() => {
-            trigger("medium")
-            setIsCreateModalOpen(true)
-          }}
-          className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex flex-col items-center justify-center gap-2 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 group relative overflow-hidden border border-zinc-200 dark:border-white/5"
-        >
-          <div className="absolute top-2 right-3 px-2 py-0.5 bg-indigo-500/10 group-hover:bg-white/20 rounded-md transition-colors">
-            <span className="text-[8px] font-black uppercase tracking-tighter">1 grão</span>
-          </div>
-          <Mic className="w-6 h-6 text-indigo-500 group-hover:text-white transition-colors" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Voz</span>
-        </button>
-        <button
-          onClick={() => {
-            trigger("medium")
-            setIsOcrScannerOpen(true)
-          }}
-          className="flex-1 py-6 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex flex-col items-center justify-center gap-2 hover:bg-rose-500 hover:text-white transition-all active:scale-95 group relative overflow-hidden border border-zinc-200 dark:border-white/5"
-        >
-          <div className="absolute top-2 right-3 px-2 py-0.5 bg-rose-500/10 group-hover:bg-white/20 rounded-md transition-colors">
-            <span className="text-[8px] font-black uppercase tracking-tighter">2 grãos</span>
-          </div>
-          <Camera className="w-6 h-6 text-rose-500 group-hover:text-white transition-colors" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Foto</span>
-        </button>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <button
@@ -299,8 +250,8 @@ export default function AppPage() {
             <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
               {createList.isPending ? "Criando..." : "Nova Lista"}
             </span>
-            <span className="text-xs text-zinc-500 font-medium mt-1">
-              Comece um novo projeto de compras
+            <span className="text-xs text-zinc-500 font-medium mt-1 text-center">
+              Crie via voz, foto ou manual
             </span>
           </div>
         </button>
@@ -331,7 +282,7 @@ export default function AppPage() {
             </h3>
           </div>
         ) : (
-          lists?.map((list: any) => (
+          sortedLists.map((list: any) => (
             <ListCard
               key={list.id}
               list={list}

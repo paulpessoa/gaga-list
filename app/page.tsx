@@ -3,9 +3,7 @@
 import Link from "next/link"
 import {
   ShoppingCart,
-  Users,
   Zap,
-  ShieldCheck,
   X,
   Mail,
   KeyRound,
@@ -16,7 +14,6 @@ import {
   BellOff,
   Eye,
   EyeOff,
-  Fingerprint,
   Loader2,
   PartyPopper,
   ChevronRight
@@ -361,7 +358,7 @@ function LandingContent() {
         ) : (
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <span>Sincronização em tempo real nativa</span>
+            <span>Sincronização em tempo real</span>
           </div>
         )}
 
@@ -374,7 +371,7 @@ function LandingContent() {
 
         <p className="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
           Crie, compartilhe e sincronize listas de compras com sua família e
-          amigos. Funciona offline, atualiza na velocidade da luz.
+          amigos.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
@@ -390,47 +387,6 @@ function LandingContent() {
               : "Acessar minhas listas"}
             <ChevronRight className="w-5 h-5" />
           </button>
-        </div>
-
-        <div className="mt-24 w-full max-w-5xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-left">
-            <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-sm">
-                <Users className="w-7 h-7 text-indigo-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                Colaboração Real
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Convide qualquer pessoa para editar a lista com você. Veja tudo
-                em tempo real.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-sm">
-                <Zap className="w-7 h-7 text-emerald-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                Offline-First
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Sem internet? Sem problemas. O app funciona offline e sincroniza
-                depois.
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shadow-sm">
-                <ShieldCheck className="w-7 h-7 text-rose-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                Segurança Staff
-              </h3>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                Proteção de dados em nível bancário. Suas listas são privadas e
-                seguras.
-              </p>
-            </div>
-          </div>
         </div>
 
         <div className="mt-20 mb-8 flex gap-8 z-10 opacity-60">

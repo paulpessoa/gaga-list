@@ -13,7 +13,8 @@ import {
   useAddCollaborator,
   useRemoveCollaborator,
   useInviteUser,
-  useUpdateList
+  useUpdateList,
+  useDeleteList
 } from "@/hooks/use-lists"
 import {
   Plus,
@@ -22,18 +23,17 @@ import {
   Trash2,
   ArrowLeft,
   ShoppingCart,
-  Navigation,
-  MessageSquare,
   MessageCircle,
   Map as MapIcon,
-  MoreVertical,
   ChevronDown,
   ChevronUp,
-  X,
-  User,
   UserPlus,
   Clock,
-  Coins
+  Coins,
+  Edit2,
+  LogOut,
+  Mic,
+  Camera
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -41,11 +41,10 @@ import { useHaptic } from "@/hooks/use-haptic"
 import { useUser } from "@/hooks/use-user"
 import { ShareModal } from "@/components/lists/share-modal"
 import { ListChat } from "@/components/lists/list-chat"
-import { Collaborator, Item } from "@/types"
+import { Collaborator } from "@/types"
 import Image from "next/image"
 import {
-  COMMON_GROCERY_ITEMS,
-  GrocerySuggestion
+  COMMON_GROCERY_ITEMS
 } from "@/lib/constants/grocery-items"
 import { useRouter } from "next/navigation"
 
@@ -66,6 +65,7 @@ export default function ListDetail({
   const updateItem = useUpdateItem(listId)
   const deleteItem = useDeleteItem(listId)
   const updateList = useUpdateList()
+  const deleteList = useDeleteList()
   const { trigger } = useHaptic()
 
   const [newItemName, setNewItemName] = useState("")
@@ -124,6 +124,10 @@ export default function ListDetail({
     [items]
   )
 
+  const totalPrice = useMemo(() => {
+    return items?.reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0) || 0
+  }, [items])
+
   const suggestions = useMemo(() => {
     if (!newItemName.trim()) return []
     return COMMON_GROCERY_ITEMS.filter((item) =>
@@ -168,6 +172,18 @@ export default function ListDetail({
     })
   }
 
+  const handleLeaveList = () => {
+    const msg = isOwner ? "Excluir esta lista permanentemente?" : "Sair desta lista?"
+    if (confirm(msg)) {
+      if (isOwner) {
+        // @ts-ignore
+        deleteList.mutate(listId, { onSuccess: () => router.push("/app") })
+      } else if (user?.id) {
+        removeCollaborator.mutate(user.id, { onSuccess: () => router.push("/app") })
+      }
+    }
+  }
+
   const filteredItems = items?.filter((item) => {
     if (filter === "all") return true
     if (filter === "pending") return !item.is_purchased
@@ -190,7 +206,7 @@ export default function ListDetail({
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <div>
+              <div className="flex items-center gap-2">
                 {isEditingTitle ? (
                   <input
                     autoFocus
@@ -220,73 +236,84 @@ export default function ListDetail({
                     className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500"
                   />
                 ) : (
-                  <h1
-                    onClick={() => {
-                      setEditTitle(list?.title || "")
-                      setIsEditingTitle(true)
-                    }}
-                    className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight cursor-pointer hover:text-indigo-500 transition-colors"
-                  >
-                    {list?.title || "Carregando..."}
-                  </h1>
+                  <>
+                    <h1 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight">
+                      {list?.title || "Carregando..."}
+                    </h1>
+                    <button 
+                      onClick={() => {
+                        setEditTitle(list?.title || "")
+                        setIsEditingTitle(true)
+                      }}
+                      className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
                 )}
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                    {pendingCount}{" "}
-                    {pendingCount === 1 ? "restante" : "restantes"}
-                  </span>
-                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div
-                className="flex items-center -space-x-2 cursor-pointer group hover:opacity-80 transition-opacity"
-                onClick={() => setIsShareModalOpen(true)}
+              <button
+                onClick={() => {
+                  trigger("light")
+                  setIsChatOpen(true)
+                }}
+                className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-sm border border-indigo-500/20"
               >
-                {otherCollaborators.slice(0, 3).map((collab, i) => (
-                  <div
-                    key={collab.user_id || `collab-${i}`}
-                    className="w-9 h-9 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
-                    style={{ zIndex: 10 - i }}
-                  >
-                    <Image
-                      src={
-                        collab.profiles?.avatar_url ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
-                      }
-                      width={36}
-                      height={36}
-                      className="object-cover"
-                      alt="Avatar"
-                    />
-                  </div>
-                ))}
-                <div className="w-9 h-9 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-3 shadow-inner">
-                  <UserPlus className="w-4 h-4" />
+                <MessageCircle className="w-5 h-5" />
+              </button>
+              
+              <button
+                onClick={handleLeaveList}
+                className="w-10 h-10 rounded-2xl bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm border border-rose-500/20"
+                title={isOwner ? "Excluir Lista" : "Sair da Lista"}
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div
+              className="flex items-center -space-x-2 cursor-pointer group"
+              onClick={() => setIsShareModalOpen(true)}
+            >
+              {otherCollaborators.slice(0, 3).map((collab, i) => (
+                <div
+                  key={collab.user_id || `collab-${i}`}
+                  className="w-8 h-8 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm transition-transform group-hover:scale-105"
+                  style={{ zIndex: 10 - i }}
+                >
+                  <Image
+                    src={
+                      collab.profiles?.avatar_url ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(collab.profiles?.full_name || "U")}&background=6366f1&color=fff`
+                    }
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                    alt="Avatar"
+                  />
                 </div>
+              ))}
+              <div className="w-8 h-8 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-2 shadow-inner">
+                <UserPlus className="w-3.5 h-3.5" />
               </div>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">
+                {isOwner ? "Sua Lista" : "Colaborando"}
+              </span>
+            </div>
 
-              <div className="h-8 w-px bg-zinc-100 dark:bg-zinc-900 mx-1" />
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => {
-                    trigger("light")
-                    setIsChatOpen(true)
-                  }}
-                  className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-sm border border-indigo-500/20"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                </button>
-                <Link
-                  href={`/app/lists/${listId}/map`}
-                  onClick={() => trigger("light")}
-                  className="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95 shadow-sm border border-zinc-200 dark:border-zinc-800"
-                >
-                  <MapIcon className="w-5 h-5" />
-                </Link>
-              </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                {pendingCount} {pendingCount === 1 ? "item" : "itens"}
+              </span>
+              <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800" />
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                R$ {totalPrice.toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
@@ -305,21 +332,36 @@ export default function ListDetail({
             <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Ex: Leite, Pão, Cerveja..."
+                placeholder="Adicionar item..."
                 value={newItemName}
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => {
                   setNewItemName(e.target.value)
                   setShowSuggestions(true)
                 }}
-                className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
+                className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 pr-24 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
               />
-              <ShoppingCart className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-zinc-700 pointer-events-none" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => trigger("medium")}
+                  className="p-2 text-zinc-400 hover:text-indigo-500 transition-colors"
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => trigger("medium")}
+                  className="p-2 text-zinc-400 hover:text-indigo-500 transition-colors"
+                >
+                  <Camera className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <button
               type="submit"
               disabled={createItem.isPending || !newItemName.trim()}
-              className="w-14 h-14 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-500/20 active:scale-95"
+              className="w-14 h-14 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center transition-all disabled:opacity-50 shadow-xl active:scale-95"
             >
               <Plus className="w-7 h-7" />
             </button>
@@ -555,11 +597,6 @@ export default function ListDetail({
                         <Trash2 className="w-4 h-4" />
                         Remover Item
                       </button>
-
-                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                        <Clock className="w-3.5 h-3.5" />
-                        Criado {new Date(item.created_at).toLocaleDateString()}
-                      </div>
                     </div>
                   </div>
                 )}

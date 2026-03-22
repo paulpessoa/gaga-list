@@ -26,6 +26,16 @@ export function formatPhoneForWhatsApp(
 }
 
 /**
+ * Formata um valor numérico para o padrão de moeda brasileiro (R$).
+ */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value)
+}
+
+/**
  * Sanitiza uma string removendo tags HTML e scripts, prevenindo XSS básico.
  * Também limita o tamanho máximo para evitar abusos no banco de dados.
  */

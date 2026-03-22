@@ -11,14 +11,15 @@ export const ListsService = {
    * Busca todas as listas de um usuário (como dono ou colaborador).
    * @param userId ID do usuário autenticado
    */
-  async getUserLists(supabase: any): Promise<(List & { items?: { is_purchased: boolean }[] })[]> {
+  async getUserLists(supabase: any): Promise<(List & { items?: { is_purchased: boolean }[], list_collaborators?: { profiles: { avatar_url: string | null, full_name: string | null } }[] })[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
     // Busca listas ativas (deleted_at is null) onde o usuário tem acesso
+    // Inclui itens e colaboradores para o dashboard
     const { data: lists, error } = await supabase
       .from('lists')
-      .select('*, items(is_purchased)')
+      .select('*, items(is_purchased), list_collaborators(profiles(avatar_url, full_name))')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
