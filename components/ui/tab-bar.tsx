@@ -65,14 +65,19 @@ export function TabBar({ onScanClick }: TabBarProps) {
       </Link>
 
       <Link
-        href="/app/people"
-        aria-current={isActive("/app/people") ? "page" : undefined}
+        href="/app/notifications"
+        aria-current={isActive("/app/notifications") ? "page" : undefined}
         onClick={() => trigger("light")}
-        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive("/app/people") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
+        className={`flex flex-col items-center gap-1 transition-all active:scale-90 relative ${isActive("/app/notifications") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
       >
-        <Users className={`w-5 h-5 ${isActive("/app/people") ? "fill-indigo-500/20" : ""}`} />
+        <Bell className={`w-5 h-5 ${isActive("/app/notifications") ? "fill-indigo-500/20" : ""}`} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 min-w-[1rem] h-[1rem] bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 px-1 animate-pulse">
+            {unreadCount}
+          </span>
+        )}
         <span className="text-[9px] font-bold uppercase tracking-tighter">
-          Pessoas
+          Avisos
         </span>
       </Link>
 
@@ -82,9 +87,9 @@ export function TabBar({ onScanClick }: TabBarProps) {
         onClick={() => trigger("light")}
         className={`flex flex-col items-center gap-1 transition-all active:scale-90 ${isActive("/app/profile") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
       >
-        <User className={`w-5 h-5 ${isActive("/app/profile") ? "fill-indigo-500/20" : ""}`} />
+        <Settings className={`w-5 h-5 ${isActive("/app/profile") ? "fill-indigo-500/20" : ""}`} />
         <span className="text-[9px] font-bold uppercase tracking-tighter">
-          Perfil
+          Config
         </span>
       </Link>
     </nav>

@@ -28,6 +28,7 @@ import {
   Loader2,
   Square,
   Bell,
+  Settings,
   Check,
   RotateCcw,
   UtensilsCrossed
@@ -287,6 +288,14 @@ export default function AppPage() {
                 {unreadCount}
               </span>
             )}
+          </Link>
+
+          <Link
+            href="/app/profile"
+            onClick={() => trigger("light")}
+            className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 text-zinc-500 hover:text-indigo-500 transition-all active:scale-90"
+          >
+            <Settings className="w-5 h-5" />
           </Link>
 
           {isOffline && (
