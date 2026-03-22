@@ -15,7 +15,8 @@ import {
   Lightbulb,
   ScanLine,
   History,
-  Info
+  Info,
+  Check
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -115,38 +116,51 @@ export default function CreditsPage() {
         <div className="absolute top-0 right-0 -mr-8 -mt-8 opacity-10 group-hover:rotate-12 transition-transform duration-500">
           <Sparkles className="w-32 h-32 text-indigo-500" />
         </div>
-        
+
         <div className="relative z-10 flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <Sparkles className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">O que são Grãos Mágicos?</h2>
+            <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+              O que são Grãos Mágicos?
+            </h2>
           </div>
-          
+
           <div className="space-y-4">
             <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
-              Os **Grãos Mágicos** são a energia que alimenta a Inteligência Artificial do Lista Pronta. Eles permitem que você use recursos avançados de automação.
+              Os **Grãos Mágicos** são a energia que alimenta a Inteligência
+              Artificial do Lista Pronta. Eles permitem que você use recursos
+              avançados de automação.
             </p>
-            
+
             <div className="grid grid-cols-1 gap-3">
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
                 <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">Economize Tempo</p>
-                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">Crie listas inteiras falando ou tirando uma foto do papel.</p>
+                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
+                    Economize Tempo
+                  </p>
+                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">
+                    Crie listas inteiras falando ou tirando uma foto do papel.
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
                 <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 mt-0.5">
                   <Check className="w-3.5 h-3.5" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">Como ganhar?</p>
-                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">Você ganha grãos ao se cadastrar, convidar amigos ou assinando um plano.</p>
+                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
+                    Como ganhar?
+                  </p>
+                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">
+                    Você ganha grãos ao se cadastrar, convidar amigos ou
+                    assinando um plano.
+                  </p>
                 </div>
               </div>
             </div>
@@ -271,11 +285,17 @@ export default function CreditsPage() {
                       </span>
                     </div>
                   </div>
-                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${log.cost < 0 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/5 border border-rose-500/10'}`}>
-                    <span className={`text-xs font-black ${log.cost < 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  <div
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${log.cost < 0 ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-rose-500/5 border border-rose-500/10"}`}
+                  >
+                    <span
+                      className={`text-xs font-black ${log.cost < 0 ? "text-emerald-500" : "text-rose-500"}`}
+                    >
                       {Math.abs(log.cost)}
                     </span>
-                    <Sparkles className={`w-3 h-3 ${log.cost < 0 ? 'text-emerald-400' : 'text-rose-400'}`} />
+                    <Sparkles
+                      className={`w-3 h-3 ${log.cost < 0 ? "text-emerald-400" : "text-rose-400"}`}
+                    />
                   </div>
                 </div>
               )

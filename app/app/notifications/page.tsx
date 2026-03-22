@@ -7,7 +7,8 @@ import {
   Trash2,
   Clock,
   Smartphone,
-  ChevronRight
+  ChevronRight,
+  Plus
 } from "lucide-react"
 import { useHaptic } from "@/hooks/use-haptic"
 import Link from "next/link"
@@ -55,7 +56,8 @@ export default function NotificationsPage() {
                   Tudo limpo por aqui
                 </h2>
                 <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-[240px] leading-relaxed">
-                  Você não tem avisos pendentes. Que tal convidar alguém para sua próxima lista?
+                  Você não tem avisos pendentes. Que tal convidar alguém para
+                  sua próxima lista?
                 </p>
               </div>
             </div>
@@ -65,14 +67,18 @@ export default function NotificationsPage() {
                 <Plus className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">Chame sua Dupla</h3>
-                <p className="text-xs text-zinc-500 font-medium mt-1">Ganhe 50 Grãos Mágicos por cada amigo que entrar!</p>
+                <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+                  Chame sua Dupla
+                </h3>
+                <p className="text-xs text-zinc-500 font-medium mt-1">
+                  Ganhe 50 Grãos Mágicos por cada amigo que entrar!
+                </p>
               </div>
-              <button 
+              <button
                 onClick={() => {
-                  trigger("medium");
-                  navigator.clipboard.writeText(`${window.location.origin}/app`);
-                  alert("Link de convite copiado!");
+                  trigger("medium")
+                  navigator.clipboard.writeText(`${window.location.origin}/app`)
+                  alert("Link de convite copiado!")
                 }}
                 className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
               >
