@@ -132,20 +132,32 @@ export function CreateListModal({
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
                           Ou crie manualmente
                         </label>
-                        <input
-                          type="text"
-                          placeholder="Digite o nome da lista..."
-                          required
-                          value={newListTitle}
-                          onChange={(e) => setNewListTitle(e.target.value)}
-                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
-                        />
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Digite o nome da lista..."
+                            required
+                            value={newListTitle}
+                            onChange={(e) => setNewListTitle(e.target.value)}
+                            className={`w-full bg-zinc-100 dark:bg-zinc-900 border-2 rounded-2xl py-5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base ${
+                              !newListTitle.trim() && newListTitle.length > 0 
+                                ? "border-red-500" 
+                                : "border-transparent focus:border-indigo-500"
+                            }`}
+                          />
+                          {!newListTitle.trim() && (
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-red-500 animate-pulse">
+                              Obrigatório
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <button
                         type="submit"
                         disabled={createListPending || !newListTitle.trim() || isAiProcessing}
-                        className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                        title={!newListTitle.trim() ? "Digite o nome da lista para continuar" : ""}
+                        className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                       >
                         {createListPending || isAiProcessing ? (
                           <Loader2 className="w-5 h-5 animate-spin" />

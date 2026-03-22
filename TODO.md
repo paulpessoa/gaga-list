@@ -9,10 +9,10 @@
 
 ## 🟠 ALTA PRIORIDADE (PRÓXIMAS 2 SEMANAS)
 
-- [ ] **Navegação Consistente:**
+- [x] **Navegação Consistente:**
   - Adicionar indicador visual de página ativa na Tab Bar (`aria-current="page"`).
   - Remover redundância: Links RECEITAS/PRODUTOS aparecem no Header e na Bottom Bar. Manter apenas Bottom Bar.
-- [ ] **UX & Feedback:**
+- [x] **UX & Feedback:**
   - Tooltips/Feedback para botões `disabled` (Ex: Criar Lista).
   - Feedback antes de consumir Grãos (Modal de confirmação).
   - Validação em tempo real no formulário de Nova Lista (Campo obrigatório *).
