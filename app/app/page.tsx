@@ -68,6 +68,7 @@ export default function AppPage() {
   // Estados para Preview de Voz
   const [voiceTranscription, setVoiceTranscription] = useState("")
   const [voiceItems, setVoiceItems] = useState<any[]>([])
+  const [voiceHint, setVoiceHint] = useState<string | null>(null)
   const [showVoicePreview, setShowVoicePreview] = useState(false)
 
   useEffect(() => {
@@ -95,12 +96,15 @@ export default function AppPage() {
         if (!response.ok) throw new Error("Falha na transcrição")
         const data = await response.json()
 
-        if (data.items && data.items.length > 0) {
-          setVoiceTranscription(data.transcription)
-          setVoiceItems(data.items)
-          setShowVoicePreview(true)
+        setVoiceTranscription(data.transcription)
+        setVoiceItems(data.items || [])
+        setVoiceHint(data.hint || null)
+        setShowVoicePreview(true)
+        
+        if (!data.items || data.items.length === 0) {
+          trigger("heavy")
         } else {
-          alert("A IA não identificou itens claros. Tente novamente.")
+          trigger("success")
         }
       } catch (err) {
         alert("Erro ao processar áudio.")
@@ -111,29 +115,68 @@ export default function AppPage() {
     [trigger]
   )
 
-  const confirmVoiceList = () => {
+  const reprocessVoiceTranscription = async () => {
+    if (!voiceTranscription.trim()) return
     setIsAiProcessing(true)
-    const title = voiceTranscription.slice(0, 25) + "..." || "Lista por Voz"
+    trigger("medium")
+    try {
+      // Usamos um endpoint simplificado ou o mesmo passando o texto
+      const response = await fetch("/api/ai/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: voiceTranscription })
+      })
+      const data = await response.json()
+      setVoiceItems(data.items || [])
+      setVoiceHint(data.hint || null)
+      trigger("success")
+    } catch (err) {
+      alert("Erro ao reprocessar texto.")
+    } finally {
+      setIsAiProcessing(false)
+    }
+  }
+
+  const confirmVoiceList = () => {
+    if (voiceItems.length === 0) return
+    setIsAiProcessing(true)
+    
+    // Título inteligente: usa as 3 primeiras palavras ou os 3 primeiros itens
+    const smartTitle = voiceItems.slice(0, 2).map(i => i.name).join(", ") + "..."
+    const title = smartTitle || "Nova Lista por Voz"
+
     createList.mutate(
       { title, color_theme: "indigo" },
       {
         onSuccess: async (newList) => {
-          for (const item of voiceItems) {
-            await fetch(`/api/lists/${newList.id}/items`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: item.name,
-                quantity: item.quantity || "1",
-                category: item.category
+          try {
+            // Persistência Robusta: Aguarda todos os itens serem criados
+            await Promise.all(voiceItems.map(item => 
+              fetch(`/api/lists/${newList.id}/items`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: item.name,
+                  quantity: item.quantity || "1",
+                  unit: item.unit || null,
+                  category: item.category || null,
+                  price: item.price || 0,
+                  notes: item.notes || null
+                })
               })
-            })
+            ))
+            
+            trigger("success")
+            setIsCreateModalOpen(false)
+            setShowVoicePreview(false)
+            router.push(`/app/lists/${newList.id}`)
+          } catch (err) {
+            console.error("Erro ao salvar itens:", err)
+            alert("Lista criada, mas houve um erro ao salvar alguns itens.")
+            router.push(`/app/lists/${newList.id}`)
+          } finally {
+            setIsAiProcessing(false)
           }
-          trigger("success" as any)
-          setIsAiProcessing(false)
-          setIsCreateModalOpen(false)
-          setShowVoicePreview(false)
-          router.push(`/app/lists/${newList.id}`)
         }
       }
     )
@@ -154,21 +197,26 @@ export default function AppPage() {
       },
       {
         onSuccess: async (newList) => {
-          for (const item of items) {
-            await fetch(`/api/lists/${newList.id}/items`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: item.name,
-                quantity: item.quantity || "1",
-                category: item.category
+          try {
+            await Promise.all(items.map((item: any) => 
+              fetch(`/api/lists/${newList.id}/items`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  name: item.name,
+                  quantity: item.quantity || "1",
+                  category: item.category
+                })
               })
-            })
+            ))
+            trigger("success")
+            router.push(`/app/lists/${newList.id}`)
+          } catch (err) {
+            alert("Erro ao salvar itens da foto.")
+          } finally {
+            setIsAiProcessing(false)
+            setIsCreateModalOpen(false)
           }
-          trigger("success" as any)
-          setIsAiProcessing(false)
-          setIsCreateModalOpen(false)
-          router.push(`/app/lists/${newList.id}`)
         }
       }
     )
@@ -309,8 +357,11 @@ export default function AppPage() {
         trigger={trigger}
         setIsOcrScannerOpen={setIsOcrScannerOpen}
         voiceTranscription={voiceTranscription}
+        setVoiceTranscription={setVoiceTranscription}
         voiceItems={voiceItems}
+        voiceHint={voiceHint}
         confirmVoiceList={confirmVoiceList}
+        reprocessVoiceTranscription={reprocessVoiceTranscription}
         createListPending={createList.isPending}
       />
       <VisionScanner

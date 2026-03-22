@@ -48,24 +48,31 @@ export async function POST(request: Request) {
     // 2. Extrair itens usando Gemini
     const prompt = `Você é um assistente de compras inteligente. 
     Extraia os itens de compra do seguinte texto transcrito de áudio: "${text}"
-    Retorne APENAS um JSON com a chave "items" contendo um array de objetos. 
-    Cada objeto deve ter: "name" (string), "quantity" (string ou null) e "category" (string ou null).
-    Exemplo: {"items": [{"name": "Leite", "quantity": "2 caixas", "category": "Laticínios"}]}`;
+    
+    Retorne UM JSON com o seguinte formato:
+    {
+      "items": [{"name": "item", "quantity": "quantidade", "category": "categoria", "unit": "unidade", "price": 0, "notes": "obs"}],
+      "hint": "Caso o texto esteja confuso, sugira aqui como o usuário deve falar. Ex: 'Tente dizer: Comprar 2kg de arroz por 10 reais'. Se estiver ok, deixe null."
+    }
+    
+    Regras:
+    - Se não houver itens claros, o array "items" deve ser vazio e o "hint" deve ser preenchido com uma orientação educativa.
+    - Se houver itens, extraia o máximo de detalhes possível (quantidade, unidade, preço se mencionado).
+    - Retorne APENAS o JSON puro.`;
 
     const result = await geminiModel.generateContent(prompt);
     const response = await result.response;
     const rawText = response.text();
     
     // Parsing robusto
-    let items = [];
+    let finalData = { items: [], hint: null };
     try {
       const jsonText = rawText.replace(/```json|```/g, '').trim();
       const parsedResult = JSON.parse(jsonText);
-      items = Array.isArray(parsedResult) ? parsedResult : (parsedResult.items || []);
+      finalData.items = parsedResult.items || [];
+      finalData.hint = parsedResult.hint || null;
     } catch (e) {
-      console.warn('Falha ao parsear JSON da IA, tentando extração manual...');
-      // Fallback simples se o JSON falhar
-      items = [];
+      console.warn('Falha ao parsear JSON da IA:', e);
     }
 
     // Deduzir créditos e logar
@@ -75,11 +82,12 @@ export async function POST(request: Request) {
       feature: 'voice',
       cost: 1,
       model_used: 'whisper-large-v3 + gemini-flash-latest'
-    });
+    } as any);
 
     return NextResponse.json({ 
       transcription: text,
-      items: items 
+      items: finalData.items,
+      hint: finalData.hint
     });
 
   } catch (error: any) {

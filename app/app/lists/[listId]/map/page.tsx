@@ -178,10 +178,13 @@ export default function CadeTuPage() {
               <Lock className="w-10 h-10" />
             </div>
             <div className="space-y-2 max-w-xs px-4">
-              <h2 className="text-2xl font-black tracking-tight text-zinc-100">Opa! Precisamos da sua bússola 🧭</h2>
+              <h2 className="text-2xl font-black tracking-tight text-zinc-100">
+                Opa! Precisamos da sua bússola 🧭
+              </h2>
               <p className="text-zinc-400 text-sm font-medium leading-relaxed">
-                Para mostrar onde sua família e amigos estão no mercado, 
-                você precisa ativar a localização (GPS) do seu celular e autorizar o navegador.
+                Para mostrar onde sua família e amigos estão no mercado, você
+                precisa ativar a localização (GPS) do seu celular e autorizar o
+                navegador.
               </p>
             </div>
             <button
@@ -258,7 +261,7 @@ export default function CadeTuPage() {
         )}
       </div>
 
-      <div className="h-[38vh] bg-zinc-950 border-t border-white/10 z-[1001] flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
+      <div className="h-[28vh] bg-zinc-950 border-t border-white/10 z-[1001] flex flex-col shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
         <div className="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mt-3 mb-2" />
         <div className="flex-1 overflow-y-auto px-6 pb-6 scrollbar-hide">
           <div className="flex flex-col gap-3">

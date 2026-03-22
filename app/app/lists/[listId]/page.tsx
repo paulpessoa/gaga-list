@@ -309,7 +309,7 @@ export default function ListDetail({
                 <ArrowLeft className="w-5 h-5" />
               </Link>
               <div className="flex items-center gap-2 min-w-0">
-                {isEditingTitle ? (
+                {isEditingTitle && isOwner ? (
                   <input
                     autoFocus
                     value={editTitle}
@@ -326,15 +326,17 @@ export default function ListDetail({
                     <h1 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight truncate">
                       {list?.title || "Carregando..."}
                     </h1>
-                    <button
-                      onClick={() => {
-                        setEditTitle(list?.title || "")
-                        setIsEditingTitle(true)
-                      }}
-                      className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors shrink-0"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    {isOwner && (
+                      <button
+                        onClick={() => {
+                          setEditTitle(list?.title || "")
+                          setIsEditingTitle(true)
+                        }}
+                        className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors shrink-0"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </>
                 )}
               </div>
