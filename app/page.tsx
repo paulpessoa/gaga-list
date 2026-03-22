@@ -18,17 +18,11 @@ import {
   PartyPopper,
   ChevronRight
 } from "lucide-react"
-import dynamic from "next/dynamic"
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { subscribeUser, unsubscribeUser } from "./actions"
 
 import { createClient } from "@/lib/supabase/client"
-
-// Carrega o Lottie dinamicamente
-const LottieFooter = dynamic(() => import("@/components/ui/lottie-footer"), {
-  ssr: false
-})
 
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
@@ -349,47 +343,49 @@ function LandingContent() {
         </div>
       </nav>
 
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 z-10 py-4">
-        {inviteContext ? (
-          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-sm font-bold text-amber-600 dark:text-amber-400 mb-4 animate-bounce">
-            <PartyPopper className="w-5 h-5" />
-            <span>Você recebeu um convite para colaborar!</span>
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 z-10 py-8">
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
+          {inviteContext ? (
+            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-sm font-bold text-amber-600 dark:text-amber-400 mb-4 animate-bounce">
+              <PartyPopper className="w-5 h-5" />
+              <span>Você recebeu um convite para colaborar!</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+              <span>Sincronização em tempo real</span>
+            </div>
+          )}
+
+          <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
+            Suas compras em <br className="hidden md:block" />
+            <span className="text-indigo-500 text-5xl md:text-8xl">
+              perfeita sintonia.
+            </span>
+          </h1>
+
+          <p className="text-base md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
+            Crie, compartilhe e sincronize listas de compras com sua família e
+            amigos.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
+            <button
+              onClick={() => {
+                setAuthMode(inviteContext ? "password_signup" : "magic_link")
+                setIsModalOpen(true)
+              }}
+              className="px-10 py-4 text-xs font-black uppercase tracking-[0.2em] bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.25rem] transition-all hover:scale-105 flex items-center justify-center gap-3 cursor-pointer shadow-2xl shadow-indigo-500/20 active:scale-95"
+            >
+              {inviteContext
+                ? "Criar conta e entrar na lista"
+                : "Acessar minhas listas"}
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
-        ) : (
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-xs font-medium text-indigo-600 dark:text-indigo-300 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <span>Sincronização em tempo real</span>
-          </div>
-        )}
-
-        <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-zinc-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-zinc-100 dark:to-zinc-500 max-w-4xl mb-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100 leading-tight">
-          Suas compras em <br className="hidden md:block" />
-          <span className="text-indigo-500 text-5xl md:text-8xl">
-            perfeita sintonia.
-          </span>
-        </h1>
-
-        <p className="text-base md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-          Crie, compartilhe e sincronize listas de compras com sua família e
-          amigos.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
-          <button
-            onClick={() => {
-              setAuthMode(inviteContext ? "password_signup" : "magic_link")
-              setIsModalOpen(true)
-            }}
-            className="px-10 py-4 text-xs font-black uppercase tracking-[0.2em] bg-indigo-500 hover:bg-indigo-600 text-white rounded-[1.25rem] transition-all hover:scale-105 flex items-center justify-center gap-3 cursor-pointer shadow-2xl shadow-indigo-500/20 active:scale-95"
-          >
-            {inviteContext
-              ? "Criar conta e entrar na lista"
-              : "Acessar minhas listas"}
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
 
-        <div className="mt-12 mb-4 flex gap-8 z-10 opacity-60">
+        <div className="mt-auto py-4 flex gap-8 z-10 opacity-60">
           <Link
             href="/privacy"
             className="text-xs font-bold uppercase tracking-widest text-zinc-500 dark:text-zinc-400 hover:text-indigo-500 transition-colors flex items-center gap-2"
@@ -404,8 +400,6 @@ function LandingContent() {
           </Link>
         </div>
       </main>
-
-      <LottieFooter />
 
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">

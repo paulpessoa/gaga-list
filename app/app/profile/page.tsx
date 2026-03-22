@@ -216,19 +216,6 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="w-5 h-5 text-zinc-300" />
           </Link>
-
-          {/* Tema (Placeholder para lógica futura) */}
-          <div className="p-6 flex items-center justify-between opacity-50 border-t border-zinc-50 dark:border-white/5">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center justify-center">
-                <Moon className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
-                Modo Escuro (Auto)
-              </span>
-            </div>
-            <Check className="w-5 h-5 text-emerald-500" />
-          </div>
         </div>
       </section>
 
