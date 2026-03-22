@@ -101,7 +101,7 @@ export default function AppPage() {
         setVoiceItems(data.items || [])
         setVoiceHint(data.hint || null)
         setShowVoicePreview(true)
-        
+
         if (!data.items || data.items.length === 0) {
           trigger("heavy")
         } else {
@@ -141,9 +141,13 @@ export default function AppPage() {
   const confirmVoiceList = () => {
     if (voiceItems.length === 0) return
     setIsAiProcessing(true)
-    
+
     // Título inteligente: usa as 3 primeiras palavras ou os 3 primeiros itens
-    const smartTitle = voiceItems.slice(0, 2).map(i => i.name).join(", ") + "..."
+    const smartTitle =
+      voiceItems
+        .slice(0, 2)
+        .map((i) => i.name)
+        .join(", ") + "..."
     const title = smartTitle || "Nova Lista por Voz"
 
     createList.mutate(
@@ -152,21 +156,23 @@ export default function AppPage() {
         onSuccess: async (newList) => {
           try {
             // Persistência Robusta: Aguarda todos os itens serem criados
-            await Promise.all(voiceItems.map(item => 
-              fetch(`/api/lists/${newList.id}/items`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  name: item.name,
-                  quantity: item.quantity || "1",
-                  unit: item.unit || null,
-                  category: item.category || null,
-                  price: item.price || 0,
-                  notes: item.notes || null
+            await Promise.all(
+              voiceItems.map((item) =>
+                fetch(`/api/lists/${newList.id}/items`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: item.name,
+                    quantity: item.quantity || "1",
+                    unit: item.unit || null,
+                    category: item.category || null,
+                    price: item.price || 0,
+                    notes: item.notes || null
+                  })
                 })
-              })
-            ))
-            
+              )
+            )
+
             trigger("success")
             setIsCreateModalOpen(false)
             setShowVoicePreview(false)
@@ -199,17 +205,19 @@ export default function AppPage() {
       {
         onSuccess: async (newList) => {
           try {
-            await Promise.all(items.map((item: any) => 
-              fetch(`/api/lists/${newList.id}/items`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  name: item.name,
-                  quantity: item.quantity || "1",
-                  category: item.category
+            await Promise.all(
+              items.map((item: any) =>
+                fetch(`/api/lists/${newList.id}/items`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    name: item.name,
+                    quantity: item.quantity || "1",
+                    category: item.category
+                  })
                 })
-              })
-            ))
+              )
+            )
             trigger("success")
             router.push(`/app/lists/${newList.id}`)
           } catch (err) {
@@ -262,7 +270,9 @@ export default function AppPage() {
     )
   }
 
-  const sortedLists = [...(lists || [])].sort((a, b) => a.title.localeCompare(b.title))
+  const sortedLists = [...(lists || [])].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  )
 
   return (
     <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -277,27 +287,6 @@ export default function AppPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/app/notifications"
-            onClick={() => trigger("light")}
-            className="relative p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 text-zinc-500 hover:text-indigo-500 transition-all active:scale-90"
-          >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-950 animate-bounce">
-                {unreadCount}
-              </span>
-            )}
-          </Link>
-
-          <Link
-            href="/app/profile"
-            onClick={() => trigger("light")}
-            className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 text-zinc-500 hover:text-indigo-500 transition-all active:scale-90"
-          >
-            <Settings className="w-5 h-5" />
-          </Link>
-
           {isOffline && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
               <WifiOff className="w-3 h-3" />

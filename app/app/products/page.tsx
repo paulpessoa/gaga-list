@@ -26,7 +26,7 @@ export default function MyProductsPage() {
   const supabase = createClient()
   const [products, setProducts] = useState<MyProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -46,6 +46,13 @@ export default function MyProductsPage() {
   }, [user, fetchProducts])
 
   const handleDelete = async (id: string) => {
+    // Apenas produtos do catálogo (my_products) podem ser deletados aqui.
+    // Itens que vêm do histórico de listas são virtuais (id começa com item-)
+    if (id.startsWith('item-')) {
+      alert("Este item faz parte do seu histórico de listas e não pode ser removido daqui.")
+      return
+    }
+
     if (confirm("Remover este produto do seu catálogo?")) {
       trigger("medium")
       try {
@@ -70,10 +77,10 @@ export default function MyProductsPage() {
           <div className="flex items-center gap-4">
             <div>
               <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
-                Meus Produtos
+                Meu Inventário
               </h1>
               <p className="text-sm text-zinc-500 font-medium">
-                Seu catálogo inteligente ({products.length} itens)
+                Tudo o que você já comprou ou escaneou ({products.length} itens)
               </p>
             </div>
           </div>
@@ -93,9 +100,9 @@ export default function MyProductsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
           <input
             type="text"
-            placeholder="Buscar por nome ou marca..."
+            placeholder="Buscar no seu histórico..."
             value={searchQuery}
-            onChange={(e) => setSearchSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner"
           />
         </div>
@@ -105,7 +112,7 @@ export default function MyProductsPage() {
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
           <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">
-            Carregando Catálogo...
+            Sincronizando Inventário...
           </p>
         </div>
       ) : filteredProducts.length === 0 ? (
@@ -115,56 +122,62 @@ export default function MyProductsPage() {
           </div>
           <div className="space-y-2">
             <h3 className="text-xl font-black text-zinc-900 dark:text-white">
-              Seu catálogo está vazio
+              Nenhum item encontrado
             </h3>
             <p className="text-zinc-500 text-sm max-w-xs mx-auto">
-              Use o AI Scanner no menu inferior para identificar produtos e
-              salvá-los aqui.
+              Comece a adicionar itens às suas listas ou use o AI Scanner para
+              popular seu inventário.
             </p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="glass-panel p-5 rounded-[2rem] flex items-center gap-5 group hover:border-indigo-500/30 transition-all bg-white dark:bg-zinc-900/40"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl shadow-inner shrink-0 relative overflow-hidden border border-zinc-200 dark:border-white/5">
-                {product.image_url ? (
-                  <Image
-                    src={product.image_url}
-                    fill
-                    className="object-cover"
-                    alt={product.name}
-                  />
-                ) : (
-                  <ShoppingBag className="w-7 h-7 text-indigo-500/40" />
+          {filteredProducts.map((product) => {
+            const isFromHistory = product.id.startsWith('item-')
+            
+            return (
+              <div
+                key={product.id}
+                className={`glass-panel p-5 rounded-[2rem] flex items-center gap-5 group hover:border-indigo-500/30 transition-all ${isFromHistory ? 'bg-zinc-50/50 dark:bg-zinc-900/20' : 'bg-white dark:bg-zinc-900/40'}`}
+              >
+                <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-2xl shadow-inner shrink-0 relative overflow-hidden border border-zinc-200 dark:border-white/5">
+                  {product.image_url ? (
+                    <Image
+                      src={product.image_url}
+                      fill
+                      className="object-cover"
+                      alt={product.name}
+                    />
+                  ) : (
+                    <ShoppingBag className={`w-7 h-7 ${isFromHistory ? 'text-zinc-400/40' : 'text-indigo-500/40'}`} />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-black text-zinc-900 dark:text-zinc-100 truncate leading-tight uppercase text-sm tracking-tight">
+                    {product.name}
+                  </h4>
+                  <p className={`text-xs font-bold uppercase tracking-widest mt-0.5 ${isFromHistory ? 'text-zinc-400' : 'text-indigo-500'}`}>
+                    {product.brand || (isFromHistory ? "Do Histórico" : "Marca Genérica")}
+                  </p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md text-zinc-500">
+                      <Tag className="w-3 h-3" /> {product.category || "Geral"}
+                    </span>
+                  </div>
+                </div>
+
+                {!isFromHistory && (
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20 shadow-sm"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 )}
               </div>
-
-              <div className="flex-1 min-w-0">
-                <h4 className="font-black text-zinc-900 dark:text-zinc-100 truncate leading-tight uppercase text-sm tracking-tight">
-                  {product.name}
-                </h4>
-                <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mt-0.5">
-                  {product.brand || "Marca Genérica"}
-                </p>
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-md text-zinc-500">
-                    <Tag className="w-3 h-3" /> {product.category || "Geral"}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent hover:border-red-500/20 shadow-sm"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
