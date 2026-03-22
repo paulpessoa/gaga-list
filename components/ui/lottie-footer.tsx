@@ -33,7 +33,7 @@ export default function LottieFooter() {
   if (!animationData) return <div className="h-48" />;
 
   return (
-    <footer className="w-full h-64 mt-20 relative flex items-end justify-center overflow-hidden pointer-events-none">
+    <footer className="w-full h-48 relative flex items-end justify-center overflow-hidden pointer-events-none mt-auto">
       {/* Glow effect */}
       <div className="absolute bottom-[-50px] w-full h-32 bg-indigo-500/10 blur-[100px] rounded-full" />
       
