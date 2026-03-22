@@ -222,6 +222,29 @@ export function useDeleteList() {
 }
 
 /**
+ * Hook para sair de uma lista (remover a si mesmo como colaborador).
+ */
+export function useLeaveList(listId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await fetch(`/api/lists/${listId}/collaborators/${userId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao sair da lista');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: LISTS_QUERY_KEY });
+    },
+  });
+}
+
+/**
  * Hook para buscar as listas na lixeira.
  */
 export function useTrashLists() {
