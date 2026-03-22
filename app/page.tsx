@@ -336,7 +336,7 @@ function LandingContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <div className="h-dvh flex flex-col relative overflow-hidden bg-white dark:bg-zinc-950 transition-colors duration-300">
       <InstallPrompt />
 
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-600/10 dark:bg-indigo-600/20 rounded-full blur-[100px] pointer-events-none" />
