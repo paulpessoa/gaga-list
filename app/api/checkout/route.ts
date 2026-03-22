@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@/lib/supabase/server"
 
-export const dynamic = "force-dynamic"
+export const dynamic = 'force-dynamic';
 
-const stripe = process.env.STRIPE_SECRET_KEY
+console.log('🔄 Inicializando API de Checkout. Stripe configurado:', !!process.env.STRIPE_SECRET_KEY);
+
+const stripe = process.env.STRIPE_SECRET_KEY 
+
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
       apiVersion: "2025-02-24-preview" as any
     })
