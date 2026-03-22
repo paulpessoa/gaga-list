@@ -47,6 +47,7 @@ import Image from "next/image"
 import { COMMON_GROCERY_ITEMS } from "@/lib/constants/grocery-items"
 import { useRouter } from "next/navigation"
 
+import { AICreditLock } from "@/components/ui/ai-credit-lock"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 
@@ -72,7 +73,10 @@ export default function ListDetail({
   // Estados da Interface
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatTarget, setChatTarget] = useState<{ id: string; full_name: string | null; avatar_url: string | null } | undefined>(undefined)
+  const [chatTarget, setChatTarget] = useState<
+    | { id: string; full_name: string | null; avatar_url: string | null }
+    | undefined
+  >(undefined)
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -96,9 +100,11 @@ export default function ListDetail({
   const inviteUser = useInviteUser(listId)
 
   const otherCollaborators = useMemo(() => {
-    return ((collaborators as Collaborator[] | undefined)?.filter(
+    return (
+      (collaborators as Collaborator[] | undefined)?.filter(
         (c) => c.user_id !== user?.id && c.profiles?.id !== user?.id
-      ) || [])
+      ) || []
+    )
   }, [collaborators, user?.id])
 
   useEffect(() => {
@@ -446,30 +452,34 @@ export default function ListDetail({
                 }}
                 className="w-full bg-zinc-50 dark:bg-zinc-900/40 border-2 border-transparent focus:border-indigo-500 rounded-[1.5rem] py-5 px-6 pr-24 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-base"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() =>
-                    isRecording ? stopRecording() : startRecording()
-                  }
-                  className={`p-2.5 rounded-xl transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800"}`}
-                >
-                  {isAiProcessing ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Mic className="w-5 h-5" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    trigger("medium")
-                    setIsOcrScannerOpen(true)
-                  }}
-                  className="p-2.5 rounded-xl text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800 transition-all"
-                >
-                  <Camera className="w-5 h-5" />
-                </button>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <AICreditLock variant="overlay">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      isRecording ? stopRecording() : startRecording()
+                    }
+                    className={`p-2.5 rounded-xl transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800"}`}
+                  >
+                    {isAiProcessing ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Mic className="w-5 h-5" />
+                    )}
+                  </button>
+                </AICreditLock>
+                <AICreditLock variant="overlay">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trigger("medium")
+                      setIsOcrScannerOpen(true)
+                    }}
+                    className="p-2.5 rounded-xl text-zinc-400 hover:text-indigo-500 hover:bg-white dark:hover:bg-zinc-800 transition-all"
+                  >
+                    <Camera className="w-5 h-5" />
+                  </button>
+                </AICreditLock>
               </div>
             </div>
             <button
