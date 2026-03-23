@@ -42,19 +42,22 @@ export async function POST(request: Request) {
     }
 
     const prompt = type === 'from_list' || type === 'from_products'
-      ? `Você é um Chef Minimalista e Prático. Sua tarefa é sugerir 3 receitas usando EXCLUSIVAMENTE estes ingredientes: ${items.join(', ')}.
+      ? `Você é um Chef de Cozinha Realista e Rigoroso. 
+         Sua tarefa é sugerir 3 receitas REAIS e SEGURAS usando EXCLUSIVAMENTE os ingredientes comestíveis desta lista: ${items.join(', ')}.
          
-         REGRAS RÍGIDAS DE OURO:
-         1. NÃO peça ingredientes extras que não estão na lista (ex: se o usuário NÃO enviou "creme de leite", você JAMAIS pode sugerir uma receita que use creme de leite).
-         2. Use APENAS o que foi fornecido. 
-         3. ÚNICAS Exceções permitidas (Itens de Despensa Universal): Sal, Água, Óleo/Azeite e Açúcar. Todo o restante DEVE vir da lista fornecida.
-         4. Se o usuário enviou apenas 2 ou 3 itens, sugira preparos simples (ex: batata cozida com ervas) em vez de pratos complexos que exijam mais itens.
-         5. Se a lista contiver apenas itens não comestíveis, retorne um erro no JSON.
-
+         PROTOCOLO DE SEGURANÇA E REALISMO:
+         1. TRIAGEM: Identifique e IGNORE completamente itens que não são comida (ex: eletrônicos, produtos de limpeza, ferramentas, vestuário). 
+         2. VALIDAÇÃO: Se após o filtro NÃO sobrarem ingredientes suficientes para uma receita real, retorne um erro no JSON com a mensagem: "Os itens informados não são adequados para cozinhar."
+         3. REGRAS DE OURO:
+            - Use APENAS o que foi fornecido. 
+            - Exceções permitidas (Despensa Básica): Sal, Água, Óleo/Azeite, Vinagre e Açúcar.
+            - Proibido inventar receitas "desconstruídas" ou experimentais para tentar usar itens não-comestíveis.
+            - As receitas devem ser baseadas em pratos reais da culinária mundial.
+         
          Retorne estritamente um JSON com a chave "recipes" contendo um array de objetos. 
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`
-      : `Você é um Chef Gourmet. Sugira uma receita detalhada para: "${items[0]}".
-         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível, NÃO gere a receita.
+      : `Você é um Chef Gourmet Realista. Sugira uma receita detalhada e REAL para: "${items[0]}".
+         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível, NÃO gere a receita. Retorne um erro no JSON.
          Retorne um JSON com a chave "recipes" contendo um array com essa única receita.
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`;
 
