@@ -12,7 +12,8 @@ import {
   MessageCircle,
   X,
   HelpCircle,
-  Plus
+  Plus,
+  Camera
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"

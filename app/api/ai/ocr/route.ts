@@ -1,80 +1,105 @@
-import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
-import { cleanBase64Image } from '@/lib/ai-utils';
-import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from "next/server"
+import OpenAI from "openai"
+import { cleanBase64Image } from "@/lib/ai-utils"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = await createClient()
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
     }
 
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("credits")
+      .eq("id", user.id)
+      .single()
     if (!profile || (profile.credits ?? 0) < 2) {
-      return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 2 grãos para escanear fotos.' }, { status: 403 });
+      return NextResponse.json(
+        {
+          error:
+            "Energia insuficiente. Você precisa de 2 grãos para escanear fotos."
+        },
+        { status: 403 }
+      )
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'Configuração de IA ausente' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Configuração de IA ausente" },
+        { status: 500 }
+      )
     }
 
-    const openai = new OpenAI({ apiKey });
+    const openai = new OpenAI({ apiKey })
 
-    const { image } = await request.json();
+    const { image } = await request.json()
 
     if (!image) {
-      return NextResponse.json({ error: 'Nenhuma imagem enviada' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Nenhuma imagem enviada" },
+        { status: 400 }
+      )
     }
 
-    const finalImage = cleanBase64Image(image);
+    const finalImage = cleanBase64Image(image)
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras e transformar em dados estruturados. Retorne estritamente um objeto JSON com a chave 'items', contendo um array de objetos com as chaves \"name\", \"quantity\" e \"category\". Não inclua explicações ou markdown. Retorne APENAS o JSON puro.",
+          content:
+            'Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras e transformar em dados estruturados. Retorne estritamente um objeto JSON com a chave \'items\', contendo um array de objetos com as chaves "name", "quantity" e "category". Não inclua explicações ou markdown. Retorne APENAS o JSON puro.'
         },
         {
           role: "user",
           content: [
-            { type: "text", text: "Extraia todos os itens de compra desta imagem para o formato JSON solicitado." },
+            {
+              type: "text",
+              text: "Extraia todos os itens de compra desta imagem para o formato JSON solicitado."
+            },
             {
               type: "image_url",
               image_url: {
-                url: finalImage,
-              },
-            },
-          ],
-        },
+                url: finalImage
+              }
+            }
+          ]
+        }
       ],
-      response_format: { type: "json_object" },
-    });
+      response_format: { type: "json_object" }
+    })
 
-    const content = response.choices[0]?.message?.content || '{}';
-    const result = JSON.parse(content);
-    const items = result.items || result.list || (Array.isArray(result) ? result : []);
+    const content = response.choices[0]?.message?.content || "{}"
+    const result = JSON.parse(content)
+    const items =
+      result.items || result.list || (Array.isArray(result) ? result : [])
 
     // Deduzir créditos e logar
-    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 2 }).eq('id', user.id);
-    await supabase.from('ai_usage_logs').insert({
+    await supabase
+      .from("profiles")
+      .update({ credits: (profile.credits ?? 0) - 2 })
+      .eq("id", user.id)
+    await supabase.from("ai_usage_logs").insert({
       user_id: user.id,
-      feature: 'ocr',
+      feature: "ocr",
       cost: 2,
-      model_used: 'gpt-4o-mini'
-    });
+      model_used: "gpt-4o-mini"
+    })
 
-    return NextResponse.json({ items });
-
+    return NextResponse.json({ items })
   } catch (error: any) {
-    console.error('Erro no OCR AI:', error);
+    console.error("Erro no OCR AI:", error)
     return NextResponse.json(
-      { error: 'Erro ao extrair lista da foto', details: error.message },
+      { error: "Erro ao extrair lista da foto", details: error.message },
       { status: 500 }
-    );
+    )
   }
 }

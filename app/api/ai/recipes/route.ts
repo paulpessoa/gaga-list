@@ -41,14 +41,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nenhum ingrediente fornecido' }, { status: 400 });
     }
 
-    const prompt = type === 'from_list' 
-      ? `Você é um Chef Gourmet. Baseado nesta lista de compras: ${items.join(', ')}, sugira 3 receitas criativas e práticas. Priorize o aproveitamento total dos ingredientes.
-         REGRA DE SEGURANÇA: Se a lista contiver majoritariamente itens não comestíveis (ex: eletrônicos, ferramentas, limpeza) que não podem compor uma receita, NÃO gere receitas. Em vez disso, explique o motivo.
-         Retorne um JSON com a chave "recipes" contendo um array de objetos. 
+    const prompt = type === 'from_list' || type === 'from_products'
+      ? `Você é um Chef Minimalista e Prático. Sua tarefa é sugerir 3 receitas usando EXCLUSIVAMENTE estes ingredientes: ${items.join(', ')}.
+         
+         REGRAS RÍGIDAS DE OURO:
+         1. NÃO peça ingredientes extras que não estão na lista (ex: se o usuário NÃO enviou "creme de leite", você JAMAIS pode sugerir uma receita que use creme de leite).
+         2. Use APENAS o que foi fornecido. 
+         3. ÚNICAS Exceções permitidas (Itens de Despensa Universal): Sal, Água, Óleo/Azeite e Açúcar. Todo o restante DEVE vir da lista fornecida.
+         4. Se o usuário enviou apenas 2 ou 3 itens, sugira preparos simples (ex: batata cozida com ervas) em vez de pratos complexos que exijam mais itens.
+         5. Se a lista contiver apenas itens não comestíveis, retorne um erro no JSON.
+
+         Retorne estritamente um JSON com a chave "recipes" contendo um array de objetos. 
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`
       : `Você é um Chef Gourmet. Sugira uma receita detalhada para: "${items[0]}".
-         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível ou um ingrediente culinário, NÃO gere a receita.
-         Retorne un JSON com a chave "recipes" contendo um array com essa única receita.
+         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível, NÃO gere a receita.
+         Retorne um JSON com a chave "recipes" contendo um array com essa única receita.
          Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`;
 
     console.log('Gerando conteúdo com Gemini...');

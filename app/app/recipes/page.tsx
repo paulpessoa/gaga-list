@@ -96,7 +96,16 @@ function RecipesContent() {
         if (!selectedListId) return
         const response = await fetch(`/api/lists/${selectedListId}/items`)
         const result = await response.json()
-        items = (result.data || []).map((i: any) => i.name)
+        const listItems = result.data || []
+        
+        if (listItems.length === 0) {
+          alert("Sua lista está vazia! Adicione ingredientes antes de pedir sugestões ao Chef.")
+          setIsLoading(false)
+          setLoadingStatus("")
+          return
+        }
+        
+        items = listItems.map((i: any) => i.name)
       } else if (type === "from_selection") {
         items = selectedProductNames
       } else {
@@ -262,33 +271,44 @@ function RecipesContent() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-2 border-indigo-500/10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-indigo-500">
-                    <UtensilsCrossed className="w-5 h-5" />
-                    <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
-                  </div>
-                  <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
-                    <span className="text-[8px] font-black text-indigo-500 uppercase">1 Grão</span>
-                  </div>
-                </div>
-                <select
-                  value={selectedListId}
-                  onChange={(e) => setSelectedListId(e.target.value)}
-                  className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
-                >
-                  <option value="">Escolha uma lista...</option>
-                  {lists?.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
-                </select>
-                <button 
-                  onClick={() => checkAndAct(1, () => generateRecipes('from_list'))}
-                  disabled={!selectedListId || isLoading}
-                  className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
-                >
-                  Gerar da Lista
-                </button>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-indigo-500/5 border-2 border-indigo-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 text-indigo-500">
+              <UtensilsCrossed className="w-5 h-5" />
+              <h2 className="font-black uppercase tracking-widest text-[10px]">Sugerir da Lista</h2>
+            </div>
+            <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
+              <span className="text-[8px] font-black text-indigo-500 uppercase">1 Grão</span>
+            </div>
+          </div>
+          <select
+            value={selectedListId}
+            onChange={(e) => setSelectedListId(e.target.value)}
+            className="w-full bg-white dark:bg-zinc-900 border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
+          >
+            <option value="">Escolha uma lista...</option>
+            {lists
+              ?.filter((l: any) => (l.items?.length || 0) > 0) // Filtrar apenas listas com itens
+              .map((l: any) => (
+                <option key={l.id} value={l.id}>
+                  {l.title} ({l.items?.length} itens)
+                </option>
+              ))}
+          </select>
+          {lists?.every((l: any) => (l.items?.length || 0) === 0) && (
+            <p className="text-[9px] text-rose-500 font-bold text-center -mt-2 px-2">
+              Você não tem listas com itens para cozinhar.
+            </p>
+          )}
+          <button 
+            onClick={() => checkAndAct(1, () => generateRecipes('from_list'))}
+            disabled={!selectedListId || isLoading}
+            className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+          >
+            Gerar da Lista
+          </button>
+        </div>
 
               <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-rose-500/5 border-2 border-rose-500/10">
                 <div className="flex items-center justify-between">
