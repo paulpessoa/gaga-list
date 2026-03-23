@@ -17,7 +17,8 @@ import {
   History,
   Info,
   Check,
-  TrendingUp
+  TrendingUp,
+  ChevronRight
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -25,8 +26,6 @@ import {
   BarChart,
   Bar,
   XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   Cell
@@ -41,11 +40,11 @@ const FEATURE_ICONS: Record<string, any> = {
 }
 
 const FEATURE_COLORS: Record<string, string> = {
-  recipe: "text-emerald-500 bg-emerald-500/10",
-  ocr: "text-indigo-500 bg-indigo-500/10",
-  vision: "text-indigo-500 bg-indigo-500/10",
-  voice: "text-rose-500 bg-rose-500/10",
-  suggestion: "text-amber-500 bg-amber-500/10"
+  recipe: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+  ocr: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
+  vision: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+  voice: "text-rose-500 bg-rose-500/10 border-rose-500/20",
+  suggestion: "text-amber-500 bg-amber-500/10 border-amber-500/20"
 }
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -55,6 +54,14 @@ const FEATURE_LABELS: Record<string, string> = {
   voice: "Comando de Voz",
   suggestion: "Sugestão Inteligente"
 }
+
+const PRICING_DATA = [
+  { id: 'recipe', label: 'Receita', cost: 1, color: 'emerald', icon: ChefHat },
+  { id: 'ocr', label: 'Scanner', cost: 2, color: 'indigo', icon: ScanLine },
+  { id: 'vision', label: 'Visão', cost: 1, color: 'blue', icon: Camera },
+  { id: 'voice', label: 'Áudio', cost: 1, color: 'rose', icon: Mic },
+  { id: 'suggestion', label: 'Dicas', cost: 1, color: 'amber', icon: Lightbulb },
+]
 
 export default function CreditsPage() {
   const { data: user } = useUser()
@@ -90,13 +97,12 @@ export default function CreditsPage() {
     }
   }, [user, supabase])
 
-  // Lógica de Dados para o Recharts (Limpa e Determinística)
   const chartData = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const date = new Date()
       date.setDate(date.getDate() - i)
       const label = date.toLocaleDateString("pt-BR", { weekday: "short" }).toUpperCase()
-      const dateKey = date.toLocaleDateString("pt-BR") // DD/MM/YYYY
+      const dateKey = date.toLocaleDateString("pt-BR")
 
       const dayTotal = logs
         .filter((log) => {
@@ -147,8 +153,8 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* Seção de Recarga e Valores */}
-      <div className="flex flex-col gap-4">
+      {/* Seção de Recarga e Valores (Carousel Ribbon) */}
+      <div className="flex flex-col gap-6">
         <div className="bg-zinc-900 dark:bg-zinc-900/5 dark:bg-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-zinc-800 dark:border-zinc-100/10">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
             <Zap className="w-24 h-24 text-white" />
@@ -156,7 +162,7 @@ export default function CreditsPage() {
           
           <div className="relative z-10">
             <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Libere todo o potencial do seu Chef e Scanner IA.</p>
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 px-4 leading-tight">Libere o potencial máximo do seu Assistente IA.</p>
           </div>
 
           <Link
@@ -168,26 +174,31 @@ export default function CreditsPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { icon: ChefHat, label: "Receita", cost: 1, color: "emerald" },
-            { icon: ScanLine, label: "Scanner", cost: 2, color: "indigo" },
-            { icon: Mic, label: "Áudio", cost: 1, color: "rose" }
-          ].map((item, i) => (
-            <div key={i} className="glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-2 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
-              <div className={`w-9 h-9 rounded-xl bg-${item.color}-500/10 text-${item.color}-500 flex items-center justify-center`}>
-                <item.icon className="w-5 h-5" />
+        {/* Ribbon Horizontal de Preços (STAFF UX) */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 ml-2">
+            <Info className="w-3.5 h-3.5 text-zinc-400" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+              Valores de Consumo
+            </h3>
+          </div>
+          <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 snap-x">
+            {PRICING_DATA.map((item) => (
+              <div key={item.id} className="snap-start flex-shrink-0 w-32 glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 shadow-sm">
+                <div className={`w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center`}>
+                  <item.icon className={`w-5 h-5 ${FEATURE_COLORS[item.id].split(' ')[0]}`} />
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase tracking-tighter">{item.label}</span>
+                  <span className="text-[9px] font-black text-zinc-400 uppercase">{item.cost} Grão{item.cost > 1 ? 's' : ''}</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">{item.label}</span>
-                <span className="text-[10px] font-black text-zinc-400 uppercase">{item.cost} Grão{item.cost > 1 ? 's' : ''}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Gráfico Recharts (Apple Dashboard Style) */}
+      {/* Gráfico Recharts */}
       <section className="glass-panel p-8 rounded-[2.5rem] bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-white/5 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -215,16 +226,11 @@ export default function CreditsPage() {
                   return null;
                 }}
               />
-              <Bar 
-                dataKey="grains" 
-                radius={[6, 6, 6, 6]} 
-                barSize={12}
-              >
+              <Bar dataKey="grains" radius={[6, 6, 6, 6]} barSize={12}>
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={entry.grains > 0 ? '#6366f1' : '#e4e4e730'} 
-                    className="transition-all duration-500"
                   />
                 ))}
               </Bar>
@@ -265,12 +271,12 @@ export default function CreditsPage() {
             {logs.map((log) => {
               const Icon = FEATURE_ICONS[log.feature] || Zap
               const label = FEATURE_LABELS[log.feature] || log.feature
-              const colorClass = FEATURE_COLORS[log.feature] || "text-indigo-500 bg-indigo-500/10"
+              const colorClass = FEATURE_COLORS[log.feature] || "text-indigo-500 bg-indigo-500/10 border-indigo-500/20"
 
               return (
                 <div key={log.id} className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all shrink-0">
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass}`}>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass.split(' border')[0]}`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col gap-0.5">
