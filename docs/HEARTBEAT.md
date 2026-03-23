@@ -3,14 +3,14 @@
 
 ## 📍 Estado Atual
 - **Data:** 22 de Março de 2026
-- **Status:** Sistema de Créditos (Grãos) 100% funcional. Dashboard de Créditos com gráfico de consumo. List Detail com FAB ergonômico. Build estável.
+- **Status:** Sistema de Créditos 100% funcional. Fluxo Receita -> Lista corrigido (sequencial). Dashboard de Créditos com gráfico resiliente e layout denso.
 - **Ambiente:** Next.js 15, Supabase, OpenAI/Gemini.
 
 ## 🛠️ Últimas Alterações (Checkpoint)
-1. **Credits Dashboard Refactor:** Adicionado gráfico de consumo dos últimos 7 dias. Unificada a cor de "Voz" para Rose (Rosa) e ícones consistentes.
-2. **Monetização Otimizada:** Card de recarga movido para logo abaixo do saldo principal na página de créditos.
-3. **Functional AI Credits:** Removido 'AICreditLock' visual. Agora o bloqueio é via hook 'useAICreditCheck' que dispara o 'AICreditModal' global.
-4. **Item Creation Hub:** Implementado FAB (Floating Action Button) e 'CreateItemModal' para limpeza visual da lista.
+1. **Recipe Creation Fix:** Corrigida a função `createListFromRecipe` para salvar itens de forma sequencial, resolvendo falhas de persistência.
+2. **Credits Graph & Layout:** Gráfico de consumo corrigido para normalização ISO. Tabela de preços movida para o topo e compactada (lado a lado).
+3. **Item Creation Hub:** 'CreateItemModal' alinhado visualmente com 'CreateListModal' (Design System unificado).
+4. **Credits Dashboard Refactor:** Unificada a cor de "Voz" para Rose (Rosa) e ícones consistentes.
 
 ## 🚀 Próximos Passos Imediatos
 1. Refatoração de UX (Apple Standard) na página de Perfil (limpeza de layout).

@@ -68,13 +68,13 @@ export default function CreditsPage() {
 
         setCredits(profile?.credits ?? 0)
 
-        // Fetch logs
+        // Fetch logs (Aumentado limite para 100 para evitar sumiço de itens manuais)
         const { data: usageLogs } = await supabase
           .from("ai_usage_logs")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
-          .limit(50)
+          .limit(100)
 
         if (usageLogs) setLogs(usageLogs)
         setIsLoading(false)
@@ -83,18 +83,22 @@ export default function CreditsPage() {
     }
   }, [user, supabase])
 
-  // Lógica para o Gráfico de Consumo (Últimos 7 dias)
+  // Lógica para o Gráfico de Consumo (Últimos 7 dias) - Corrigida
   const usageStats = useMemo(() => {
     const stats = Array.from({ length: 7 }, (_, i) => {
       const date = new Date()
       date.setDate(date.getDate() - i)
-      const dateStr = date.toLocaleDateString('pt-BR', { weekday: 'short' })
-      const dayLogs = logs.filter(log => 
-        log.cost > 0 && // Apenas gastos
-        new Date(log.created_at).toDateString() === date.toDateString()
-      )
+      const dateKey = date.toISOString().split('T')[0] // YYYY-MM-DD
+      const dateLabel = date.toLocaleDateString('pt-BR', { weekday: 'short' })
+      
+      const dayLogs = logs.filter(log => {
+        if (!log.created_at || log.cost < 0) return false
+        const logDate = new Date(log.created_at).toISOString().split('T')[0]
+        return logDate === dateKey
+      })
+      
       const totalCost = dayLogs.reduce((acc, log) => acc + log.cost, 0)
-      return { label: dateStr, value: totalCost }
+      return { label: dateLabel, value: totalCost }
     }).reverse()
 
     const maxValue = Math.max(...stats.map(s => s.value), 1)
@@ -139,24 +143,60 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* Card de Compra (Reposicionado logo abaixo do saldo) */}
-      <div className="bg-zinc-900 dark:bg-zinc-900/5 dark:bg-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-zinc-800 dark:border-zinc-100/10 -mt-2">
-        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
-          <Zap className="w-24 h-24 text-white" />
-        </div>
-        
-        <div className="relative z-10">
-          <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
-          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Libere todo o potencial do seu Chef e Scanner IA.</p>
+      {/* Recarga e Valores (Agrupados conforme solicitado) */}
+      <div className="flex flex-col gap-4">
+        {/* Botão de Compra */}
+        <div className="bg-zinc-900 dark:bg-zinc-900/5 dark:bg-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-zinc-800 dark:border-zinc-100/10">
+          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
+            <Zap className="w-24 h-24 text-white" />
+          </div>
+          
+          <div className="relative z-10">
+            <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Libere todo o potencial do seu Chef e Scanner IA.</p>
+          </div>
+
+          <Link
+            href="/app/plans"
+            onClick={() => trigger("medium")}
+            className="relative z-10 w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
+          >
+            <CreditCard className="w-4 h-4" /> Recarregar Agora
+          </Link>
         </div>
 
-        <Link
-          href="/app/plans"
-          onClick={() => trigger("medium")}
-          className="relative z-10 w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
-        >
-          <CreditCard className="w-4 h-4" /> Recarregar Agora
-        </Link>
+        {/* Tabela de Consumo Lado a Lado */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-2 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <ChefHat className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Receita</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">1 Grão</span>
+            </div>
+          </div>
+          
+          <div className="glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-2 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+              <ScanLine className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Scanner</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">2 Grãos</span>
+            </div>
+          </div>
+
+          <div className="glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-2 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+              <Mic className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Áudio IA</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">1 Grão</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Gráfico de Consumo (Últimos 7 dias) */}
@@ -166,7 +206,7 @@ export default function CreditsPage() {
             <TrendingUp className="w-4 h-4 text-indigo-500" />
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Consumo da Semana</h3>
           </div>
-          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">Últimos 7 Dias</span>
+          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">Grãos Usados</span>
         </div>
 
         <div className="flex items-end justify-between h-32 gap-3 px-2">
@@ -191,47 +231,6 @@ export default function CreditsPage() {
           })}
         </div>
       </section>
-
-      {/* Tabela de Consumo Ajustada */}
-      <div className="space-y-5">
-        <div className="flex items-center gap-2 ml-2">
-          <Info className="w-3.5 h-3.5 text-zinc-400" />
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-            Valores de Energia
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <ChefHat className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Receita</span>
-              <span className="text-xs font-bold text-zinc-500">1 grão</span>
-            </div>
-          </div>
-          
-          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-              <ScanLine className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Scanner</span>
-              <span className="text-xs font-bold text-zinc-500">2 grãos</span>
-            </div>
-          </div>
-
-          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
-            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
-              <Mic className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Áudio</span>
-              <span className="text-xs font-bold text-zinc-500">1 grão</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Histórico */}
       <div className="space-y-5">
