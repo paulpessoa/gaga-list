@@ -486,21 +486,21 @@ export default function ListDetail({
           filteredAndSortedItems?.map((item: any) => (
             <div
               key={item.id}
-              className={`flex flex-col rounded-3xl transition-all duration-300 border ${expandedItemId === item.id ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg" : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
+              className={`flex flex-col rounded-[1.5rem] transition-all duration-300 border ${expandedItemId === item.id ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg" : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"}`}
             >
               {/* Linha Principal do Item */}
-              <div className="flex items-center justify-between p-4 px-5">
-                <div className="flex items-center gap-4 flex-1">
+              <div className="flex items-center justify-between p-3 px-4">
+                <div className="flex items-center gap-3.5 flex-1 min-w-0">
                   <button
                     onClick={() => handleToggleItem(item)}
-                    className="transition-transform active:scale-90"
+                    className="transition-transform active:scale-90 shrink-0"
                   >
                     {item.is_purchased ? (
-                      <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-in zoom-in-50 duration-200">
-                        <CheckCircle2 className="w-4 h-4 text-white" />
+                      <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 animate-in zoom-in-50 duration-200">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                       </div>
                     ) : (
-                      <Circle className="w-7 h-7 text-zinc-200 dark:text-zinc-800 group-hover:text-indigo-500 transition-colors" />
+                      <Circle className="w-6 h-6 text-zinc-200 dark:text-zinc-800 hover:text-indigo-500 transition-colors" />
                     )}
                   </button>
 
@@ -518,11 +518,11 @@ export default function ListDetail({
                       {item.name}
                     </span>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tighter">
+                      <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tight">
                         {item.quantity} {item.unit || "un"}
                       </span>
                       {item.price > 0 && (
-                        <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tighter">
+                        <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tight">
                           • R$ {(item.price * item.quantity).toFixed(2)}
                         </span>
                       )}
@@ -539,9 +539,9 @@ export default function ListDetail({
                     className={`p-2 rounded-xl transition-all ${expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"}`}
                   >
                     {expandedItemId === item.id ? (
-                      <ChevronUp className="w-4 h-4" />
+                      <ChevronUp className="w-3.5 h-3.5" />
                     ) : (
-                      <ChevronDown className="w-4 h-4" />
+                      <ChevronDown className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>

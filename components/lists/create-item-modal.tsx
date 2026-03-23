@@ -52,7 +52,7 @@ export function CreateItemModal({
 }: CreateItemModalProps) {
   const [itemName, setItemName] = useState("")
   const { checkAndAct } = useAICreditCheck()
-  
+
   const suggestions = useMemo(() => {
     if (!itemName.trim()) return []
     return COMMON_GROCERY_ITEMS.filter((item) =>
@@ -68,8 +68,8 @@ export function CreateItemModal({
   }
 
   return (
-    <Drawer.Root 
-      open={isOpen} 
+    <Drawer.Root
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           onClose()
@@ -82,7 +82,7 @@ export function CreateItemModal({
         <Drawer.Content className="bg-white dark:bg-zinc-950 flex flex-col rounded-t-[2.5rem] h-[auto] max-h-[90vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-white/5 shadow-2xl">
           <div className="p-4 bg-white dark:bg-zinc-950 rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-800 mb-8" />
-            
+
             <div className="max-w-md mx-auto">
               {!showAiPreview ? (
                 <>
@@ -103,10 +103,16 @@ export function CreateItemModal({
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => checkAndAct(1, () => (isRecording ? stopRecording() : startRecording()))}
+                        onClick={() =>
+                          checkAndAct(1, () =>
+                            isRecording ? stopRecording() : startRecording()
+                          )
+                        }
                         className={`p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-indigo-500/10 dark:bg-indigo-500/20'}`}>
+                        <div
+                          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? "bg-white/20" : "bg-indigo-500/10 dark:bg-indigo-500/20"}`}
+                        >
                           {isAiProcessing ? (
                             <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
                           ) : isRecording ? (
@@ -115,12 +121,25 @@ export function CreateItemModal({
                             <Mic className="w-6 h-6 text-indigo-500" />
                           )}
                         </div>
-                        <span className="text-[11px] font-black">{isRecording ? "Parar" : "Voz"}</span>
+                        <span className="text-[11px] font-black">
+                          {isRecording ? "Parar" : "Voz"}
+                        </span>
+                        {/* <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-black">{isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}</span>
+                          {!isAiProcessing && !isRecording && (
+                            <span className="text-[8px] opacity-40 font-bold">Consome 1 grão</span>
+                          )}
+                        </div> */}
                       </button>
-                      
+
                       <button
                         type="button"
-                        onClick={() => checkAndAct(2, () => { trigger("medium"); setIsOcrScannerOpen(true); })}
+                        onClick={() =>
+                          checkAndAct(2, () => {
+                            trigger("medium")
+                            setIsOcrScannerOpen(true)
+                          })
+                        }
                         className="p-6 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
@@ -155,8 +174,8 @@ export function CreateItemModal({
                                 key={i}
                                 type="button"
                                 onClick={() => {
-                                  onAddManual(s.name, s.category, s.unit);
-                                  setItemName("");
+                                  onAddManual(s.name, s.category, s.unit)
+                                  setItemName("")
                                 }}
                                 className="w-full flex items-center justify-between p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
                               >
@@ -165,8 +184,12 @@ export function CreateItemModal({
                                     🛒
                                   </div>
                                   <div>
-                                    <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">{s.name}</p>
-                                    <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">{s.category}</p>
+                                    <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">
+                                      {s.name}
+                                    </p>
+                                    <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">
+                                      {s.category}
+                                    </p>
                                   </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-indigo-500/30" />
@@ -197,7 +220,7 @@ export function CreateItemModal({
                       A IA identificou estes produtos:
                     </p>
                   </div>
-                  
+
                   <div className="bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-6 max-h-80 overflow-y-auto border border-zinc-100 dark:border-white/5 shadow-inner mb-8">
                     <ul className="space-y-3">
                       {voiceItems.map((item, i) => (
