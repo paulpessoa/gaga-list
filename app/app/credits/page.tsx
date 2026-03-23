@@ -2,7 +2,7 @@
 
 import { useUser } from "@/hooks/use-user"
 import { createClient } from "@/lib/supabase/client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   ArrowLeft,
   Sparkles,
@@ -16,7 +16,9 @@ import {
   ScanLine,
   History,
   Info,
-  Check
+  Check,
+  TrendingUp,
+  ChevronRight
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -27,6 +29,14 @@ const FEATURE_ICONS: Record<string, any> = {
   vision: Camera,
   voice: Mic,
   suggestion: Lightbulb
+}
+
+const FEATURE_COLORS: Record<string, string> = {
+  recipe: "text-emerald-500 bg-emerald-500/10",
+  ocr: "text-indigo-500 bg-indigo-500/10",
+  vision: "text-indigo-500 bg-indigo-500/10",
+  voice: "text-rose-500 bg-rose-500/10",
+  suggestion: "text-amber-500 bg-amber-500/10"
 }
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -64,7 +74,7 @@ export default function CreditsPage() {
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
-          .limit(20)
+          .limit(50)
 
         if (usageLogs) setLogs(usageLogs)
         setIsLoading(false)
@@ -72,6 +82,24 @@ export default function CreditsPage() {
       fetchData()
     }
   }, [user, supabase])
+
+  // Lógica para o Gráfico de Consumo (Últimos 7 dias)
+  const usageStats = useMemo(() => {
+    const stats = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toLocaleDateString('pt-BR', { weekday: 'short' })
+      const dayLogs = logs.filter(log => 
+        log.cost > 0 && // Apenas gastos
+        new Date(log.created_at).toDateString() === date.toDateString()
+      )
+      const totalCost = dayLogs.reduce((acc, log) => acc + log.cost, 0)
+      return { label: dateStr, value: totalCost }
+    }).reverse()
+
+    const maxValue = Math.max(...stats.map(s => s.value), 1)
+    return { stats, maxValue }
+  }, [logs])
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -111,115 +139,15 @@ export default function CreditsPage() {
         </div>
       </div>
 
-      {/* O que são Grãos? */}
-      <section className="glass-panel p-8 rounded-[2.5rem] bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-indigo-500/10 flex flex-col gap-6 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-          <Sparkles className="w-32 h-32 text-indigo-500" />
+      {/* Card de Compra (Reposicionado logo abaixo do saldo) */}
+      <div className="bg-zinc-900 dark:bg-zinc-900/5 dark:bg-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-zinc-800 dark:border-zinc-100/10 -mt-2">
+        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
+          <Zap className="w-24 h-24 text-white" />
         </div>
-
-        <div className="relative z-10 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
-              O que são Grãos Mágicos?
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
-              Os **Grãos Mágicos** são a energia que alimenta a Inteligência
-              Artificial do Lista Pronta. Eles permitem que você use recursos
-              avançados de automação.
-            </p>
-
-            <div className="grid grid-cols-1 gap-3">
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
-                <div className="w-6 h-6 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
-                    Economize Tempo
-                  </p>
-                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">
-                    Crie listas inteiras falando ou tirando uma foto do papel.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-white/5">
-                <div className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 mt-0.5">
-                  <Check className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tighter">
-                    Como ganhar?
-                  </p>
-                  <p className="text-[11px] text-zinc-500 font-medium leading-normal">
-                    Você ganha grãos ao se cadastrar, convidar amigos ou
-                    assinando um plano.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Como usar */}
-      <div className="space-y-5">
-        <div className="flex items-center gap-2 ml-2">
-          <Info className="w-3.5 h-3.5 text-zinc-400" />
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
-            Tabela de Consumo
-          </h3>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="glass-panel p-5 rounded-3xl flex items-center justify-between border-2 border-transparent hover:border-emerald-500/20 transition-all bg-zinc-50/50 dark:bg-zinc-900/20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <ChefHat className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
-                Gerar Receita
-              </span>
-            </div>
-            <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2.5 py-1.5 rounded-lg border border-emerald-500/10">
-              1 grão
-            </span>
-          </div>
-          <div className="glass-panel p-5 rounded-3xl flex items-center justify-between border-2 border-transparent hover:border-indigo-500/20 transition-all bg-zinc-50/50 dark:bg-zinc-900/20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                <Camera className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">
-                Scanner IA
-              </span>
-            </div>
-            <span className="text-[10px] font-black text-indigo-500 bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-500/10">
-              2 grãos
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Recarga / Monetização */}
-      <div className="bg-zinc-900 dark:bg-white rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-          <Zap className="w-20 h-20 text-white dark:text-zinc-900" />
-        </div>
-
+        
         <div className="relative z-10">
-          <h3 className="text-xl font-black text-white dark:text-zinc-900">
-            Sua energia acabou?
-          </h3>
-          <p className="text-sm text-zinc-400 dark:text-zinc-500 mt-2 max-w-[280px] mx-auto font-medium">
-            Apoie o projeto e garanta grãos ilimitados para suas criações
-            culinárias.
-          </p>
+          <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
+          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Libere todo o potencial do seu Chef e Scanner IA.</p>
         </div>
 
         <Link
@@ -227,8 +155,82 @@ export default function CreditsPage() {
           onClick={() => trigger("medium")}
           className="relative z-10 w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
         >
-          <CreditCard className="w-4 h-4" /> Comprar Grãos
+          <CreditCard className="w-4 h-4" /> Recarregar Agora
         </Link>
+      </div>
+
+      {/* Gráfico de Consumo (Últimos 7 dias) */}
+      <section className="glass-panel p-8 rounded-[2.5rem] bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-white/5 flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-indigo-500" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Consumo da Semana</h3>
+          </div>
+          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">Últimos 7 Dias</span>
+        </div>
+
+        <div className="flex items-end justify-between h-32 gap-3 px-2">
+          {usageStats.stats.map((stat, i) => {
+            const heightPercentage = (stat.value / usageStats.maxValue) * 100
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
+                <div className="w-full relative flex items-end justify-center h-full">
+                  <div 
+                    className="w-full max-w-[12px] bg-indigo-500/20 group-hover:bg-indigo-500 rounded-full transition-all duration-500" 
+                    style={{ height: `${Math.max(heightPercentage, 5)}%` }} 
+                  />
+                  {stat.value > 0 && (
+                    <div className="absolute -top-6 bg-zinc-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                      {stat.value}
+                    </div>
+                  )}
+                </div>
+                <span className="text-[8px] font-black text-zinc-400 uppercase">{stat.label}</span>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* Tabela de Consumo Ajustada */}
+      <div className="space-y-5">
+        <div className="flex items-center gap-2 ml-2">
+          <Info className="w-3.5 h-3.5 text-zinc-400" />
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+            Valores de Energia
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <ChefHat className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Receita</span>
+              <span className="text-xs font-bold text-zinc-500">1 grão</span>
+            </div>
+          </div>
+          
+          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+              <ScanLine className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Scanner</span>
+              <span className="text-xs font-bold text-zinc-500">2 grãos</span>
+            </div>
+          </div>
+
+          <div className="glass-panel p-4 rounded-3xl flex flex-col gap-3 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+              <Mic className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase">Áudio</span>
+              <span className="text-xs font-bold text-zinc-500">1 grão</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Histórico */}
@@ -261,6 +263,7 @@ export default function CreditsPage() {
             {logs.map((log) => {
               const Icon = FEATURE_ICONS[log.feature] || Zap
               const label = FEATURE_LABELS[log.feature] || log.feature
+              const colorClass = FEATURE_COLORS[log.feature] || "text-indigo-500 bg-indigo-500/10"
 
               return (
                 <div
@@ -268,7 +271,7 @@ export default function CreditsPage() {
                   className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 flex items-center justify-center shadow-sm">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass}`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col gap-0.5">
@@ -276,7 +279,7 @@ export default function CreditsPage() {
                         {label}
                       </span>
                       <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3.5 h-3.5" />
                         {new Date(log.created_at).toLocaleDateString()} às{" "}
                         {new Date(log.created_at).toLocaleTimeString([], {
                           hour: "2-digit",

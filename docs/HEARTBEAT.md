@@ -1,26 +1,21 @@
 # ❤️ HEARTBEAT (Recovery State)
-
-_Este arquivo é a caixa-preta do projeto. Atualizado a cada turn significante._
+*Este arquivo é a caixa-preta do projeto. Atualizado a cada turn significante.*
 
 ## 📍 Estado Atual
-
 - **Data:** 22 de Março de 2026
-- **Status:** Sistema de Créditos (Grãos) funcional via Modal Global. List Detail com FAB ergonômico e Item Creation Hub funcional. Build passando.
+- **Status:** Sistema de Créditos (Grãos) 100% funcional. Dashboard de Créditos com gráfico de consumo. List Detail com FAB ergonômico. Build estável.
 - **Ambiente:** Next.js 15, Supabase, OpenAI/Gemini.
 
 ## 🛠️ Últimas Alterações (Checkpoint)
-
-1. **Functional AI Credits:** Removido o componente 'AICreditLock' (cadeados visuais). Agora o bloqueio é puramente funcional via hook 'useAICreditCheck' que dispara um **AICreditModal Global** elegante ao clicar.
-2. **List Detail FAB:** Implementado Floating Action Button (FAB) no lado esquerdo inferior para adicionar itens, eliminando a poluição visual do topo da lista.
-3. **Item Creation Hub:** Criado 'CreateItemModal' (Bottom Sheet) que centraliza voz, foto e input manual em um único local.
-4. **Inventory Pivot:** Excluída a página '/app/app/products' e limpeza de abas redundantes em receitas.
+1. **Credits Dashboard Refactor:** Adicionado gráfico de consumo dos últimos 7 dias. Unificada a cor de "Voz" para Rose (Rosa) e ícones consistentes.
+2. **Monetização Otimizada:** Card de recarga movido para logo abaixo do saldo principal na página de créditos.
+3. **Functional AI Credits:** Removido 'AICreditLock' visual. Agora o bloqueio é via hook 'useAICreditCheck' que dispara o 'AICreditModal' global.
+4. **Item Creation Hub:** Implementado FAB (Floating Action Button) e 'CreateItemModal' para limpeza visual da lista.
 
 ## 🚀 Próximos Passos Imediatos
-
 1. Refatoração de UX (Apple Standard) na página de Perfil (limpeza de layout).
 2. Implementação da Máscara de Preços nos itens da lista.
 3. Clonagem Staff (Admin tool).
 
 ## 💾 Contexto de Recuperação
-
-Se a sessão cair, leia: `docs/HEARTBEAT.md`, `docs/product/VISION.md` e `hooks/use-user.ts`.
+Se a sessão cair, leia: `docs/HEARTBEAT.md`, `docs/product/VISION.md` e `app/app/credits/page.tsx`.

@@ -2,11 +2,12 @@
 *Histórico de marcos e decisões técnicas importantes.*
 
 ## 🗓️ 22 de Março de 2026
+- **Credits UX Refactor:** Implementado gráfico de consumo semanal e unificação visual da feature de Voz (Rose/Mic).
+- **Functional AI Credits:** Transição do bloqueio visual (cadeados) para bloqueio funcional via Modal Global.
+- **Item Creation Hub:** Implementado FAB e Bottom Sheet para adição de itens, otimizando espaço em tela.
 - **Inventory Pivot:** Exclusão completa da página '/app/app/products' e limpeza de abas redundantes em receitas. Foco total em simplificação de UX.
-- **Navigation Align:** Tab Bar atualizada seguindo a UI_SPECS (Listas, Receitas, Pessoas, Perfil). Link de 'Avisos' removido do menu principal.
-- **Consolidação de Documentação:** Limpeza total da pasta `docs`. Introduzido o `HEARTBEAT.md` para recuperação de contexto.
-- **Resiliência de IA:** Implementado fallback de texto bruto no Vision/OCR. Melhorada a estruturação de prompts para garantir objetos JSON válidos.
-- **Segurança de Créditos:** Finalizada a integração de bloqueio de IA baseado em grãos (créditos) no `ListDetail`.
+- **Navigation Align:** Tab Bar atualizada seguindo a UI_SPECS. Link de 'Avisos' removido do menu principal.
+- **Resiliência de IA:** Fallback de texto bruto e prompts estruturados.
 
 ## 🗓️ 21 de Março de 2026
 - **Integração Stripe:** Webhook concluído. O sistema agora recarrega grãos automaticamente após pagamento confirmado.
