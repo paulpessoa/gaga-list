@@ -19,11 +19,13 @@ import {
   Loader2,
   Camera,
   Check,
-  CreditCard
+  CreditCard,
+  Trash2
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
 import { subscribeUser, unsubscribeUser } from "@/app/actions"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function ProfilePage() {
   const { data: user, isLoading: userLoading } = useUser()
@@ -83,6 +85,38 @@ export default function ProfilePage() {
       alert("Erro ao ajustar notificações. Verifique se o site está em HTTPS.")
     } finally {
       setIsUpdatingPush(false)
+    }
+  }
+
+  // Estados de Exclusão
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmEmail !== (profile?.email || user?.email)) return
+    setIsDeleting(true)
+    trigger("heavy")
+    try {
+      // Aqui dispararíamos uma Edge Function ou Rota de API para marcar exclusão em 30 dias
+      const { error } = await (supabase
+        .from('profiles') as any)
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          // Adicionar flag ou nota para o admin se necessário
+        })
+        .eq('id', user?.id)
+
+      if (error) throw error
+      
+      alert("Sua solicitação foi registrada. Sua conta e dados serão removidos definitivamente em 30 dias. Você será deslogado agora.")
+      await supabase.auth.signOut()
+      router.push("/")
+    } catch (err) {
+      alert("Erro ao processar solicitação. Tente novamente.")
+    } finally {
+      setIsDeleting(false)
+      setIsDeleteModalOpen(false)
     }
   }
 
@@ -245,13 +279,90 @@ export default function ProfilePage() {
       </section>
 
       {/* Ações de Conta */}
-      <section className="mt-4 pt-10 border-t border-zinc-100 dark:border-white/5 space-y-4">
+      <section className="mt-4 pt-10 border-t border-zinc-100 dark:border-zinc-900/50 space-y-4">
         <button
           onClick={handleLogout}
-          className="w-full py-5 bg-rose-500/5 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/10 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="w-full py-5 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3 shadow-sm"
         >
           <LogOut className="w-4 h-4" /> Sair da Conta
         </button>
+
+        <button
+          onClick={() => { trigger("medium"); setIsDeleteModalOpen(true); }}
+          className="w-full py-5 bg-rose-500/5 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/10 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3"
+        >
+          <Trash2 className="w-4 h-4" /> Excluir Minha Conta
+        </button>
+
+        {/* Modal de Exclusão (Danger Zone) */}
+        <AnimatePresence>
+          {isDeleteModalOpen && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-sm bg-white dark:bg-zinc-950 rounded-[3rem] p-10 shadow-2xl border border-rose-500/20 text-center overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 w-full h-2 bg-rose-500" />
+                
+                <div className="w-20 h-20 bg-rose-500/10 rounded-[2.5rem] flex items-center justify-center mb-8 mx-auto">
+                  <Shield className="w-10 h-10 text-rose-500" />
+                </div>
+
+                <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-4 tracking-tight">
+                  Zona de Perigo
+                </h2>
+                
+                <div className="text-zinc-500 dark:text-zinc-400 text-sm font-medium space-y-4 mb-10 text-left">
+                  <p>Ao confirmar a exclusão:</p>
+                  <ul className="list-disc pl-5 space-y-2 text-xs">
+                    <li>Sua conta será desativada imediatamente.</li>
+                    <li>Todos os seus dados (listas, receitas, grãos) serão **removidos definitivamente em 30 dias**.</li>
+                    <li>Este processo é **irreversível** após o prazo.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2 text-left">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
+                      Confirme seu e-mail para prosseguir
+                    </label>
+                    <input 
+                      type="email"
+                      placeholder={user?.email}
+                      value={deleteConfirmEmail}
+                      onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                      className="w-full bg-zinc-50 dark:bg-zinc-900 border-2 border-transparent focus:border-rose-500 rounded-2xl py-4 px-5 text-sm font-bold outline-none transition-all shadow-inner"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || deleteConfirmEmail !== (profile?.email || user?.email)}
+                    className="w-full py-5 bg-rose-500 hover:bg-rose-600 disabled:bg-zinc-100 dark:disabled:bg-zinc-900 disabled:text-zinc-400 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar Exclusão"}
+                  </button>
+                  
+                  <button 
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="w-full py-2 text-zinc-400 font-black uppercase tracking-widest text-[9px] hover:text-zinc-900 dark:hover:text-white transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         <footer className="text-center space-y-1">
           <p className="text-[10px] text-zinc-400 dark:text-zinc-600 uppercase font-black tracking-widest">

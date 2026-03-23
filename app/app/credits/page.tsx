@@ -36,7 +36,8 @@ const FEATURE_ICONS: Record<string, any> = {
   ocr: ScanLine,
   vision: Camera,
   voice: Mic,
-  suggestion: Lightbulb
+  suggestion: Lightbulb,
+  referral_bonus: Sparkles
 }
 
 const FEATURE_COLORS: Record<string, string> = {
@@ -44,7 +45,8 @@ const FEATURE_COLORS: Record<string, string> = {
   ocr: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
   vision: "text-blue-500 bg-blue-500/10 border-blue-500/20",
   voice: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-  suggestion: "text-amber-500 bg-amber-500/10 border-amber-500/20"
+  suggestion: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  referral_bonus: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
 }
 
 const FEATURE_LABELS: Record<string, string> = {
@@ -52,7 +54,8 @@ const FEATURE_LABELS: Record<string, string> = {
   ocr: "Leitura de Foto",
   vision: "Análise de Imagem",
   voice: "Comando de Voz",
-  suggestion: "Sugestão Inteligente"
+  suggestion: "Sugestão Inteligente",
+  referral_bonus: "Bônus de Indicação"
 }
 
 const PRICING_DATA = [
