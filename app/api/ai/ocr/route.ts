@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import OpenAI from "openai"
 import { cleanBase64Image } from "@/lib/ai-utils"
 import { createClient } from "@/lib/supabase/server"
+import { SettingsService } from "@/services/settings.service"
 
 export async function POST(request: Request) {
   try {
@@ -14,16 +15,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
     }
 
+    // 1. Verificar Custos Dinâmicos
+    const costs = await SettingsService.getAICosts(supabase)
+    const requiredCredits = costs.cost_ocr
+
+    // 2. Verificar Créditos (Grãos)
     const { data: profile } = await supabase
       .from("profiles")
       .select("credits")
       .eq("id", user.id)
       .single()
-    if (!profile || (profile.credits ?? 0) < 2) {
+    if (!profile || (profile.credits ?? 0) < requiredCredits) {
       return NextResponse.json(
         {
           error:
-            "Energia insuficiente. Você precisa de 2 grãos para escanear fotos."
+            `Energia insuficiente. Você precisa de ${requiredCredits} grãos para escanear fotos.`
         },
         { status: 403 }
       )
@@ -82,15 +88,15 @@ export async function POST(request: Request) {
     const items =
       result.items || result.list || (Array.isArray(result) ? result : [])
 
-    // Deduzir créditos e logar
+    // 3. Deduzir créditos e logar
     await supabase
       .from("profiles")
-      .update({ credits: (profile.credits ?? 0) - 2 })
+      .update({ credits: (profile.credits ?? 0) - requiredCredits })
       .eq("id", user.id)
     await supabase.from("ai_usage_logs").insert({
       user_id: user.id,
       feature: "ocr",
-      cost: 2,
+      cost: requiredCredits,
       model_used: "gpt-4o-mini"
     })
 

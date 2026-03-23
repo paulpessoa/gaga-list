@@ -22,7 +22,8 @@ import {
   Globe,
   Star,
   Package,
-  CheckCircle
+  CheckCircle,
+  Settings
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -188,6 +189,13 @@ export default function AdminPage() {
             >
               <Star className="w-4 h-4" /> Curadoria
             </button>
+            <Link
+              href="/app/admin/settings"
+              onClick={() => trigger("light")}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
+            >
+              <Settings className="w-4 h-4" /> Configurações
+            </Link>
           </div>
         </header>
 

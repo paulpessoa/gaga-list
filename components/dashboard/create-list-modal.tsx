@@ -12,6 +12,8 @@ import {
   Plus
 } from "lucide-react"
 import { Drawer } from "vaul"
+import { useAICosts } from "@/hooks/use-ai-costs"
+import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 
 interface CreateListModalProps {
   isOpen: boolean
@@ -58,6 +60,8 @@ export function CreateListModal({
   reprocessVoiceTranscription,
   createListPending
 }: CreateListModalProps) {
+  const { costs } = useAICosts()
+  const { checkAndAct } = useAICreditCheck()
   return (
     <Drawer.Root 
       open={isOpen} 
@@ -92,7 +96,7 @@ export function CreateListModal({
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() => (isRecording ? stopRecording() : startRecording())}
+                        onClick={() => checkAndAct(costs.cost_voice, () => (isRecording ? stopRecording() : startRecording()))}
                         disabled={isAiProcessing}
                         className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
@@ -108,7 +112,7 @@ export function CreateListModal({
                         <div className="flex flex-col items-center gap-1">
                           <span className="text-[11px] font-black">{isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}</span>
                           {!isAiProcessing && !isRecording && (
-                            <span className="text-[8px] opacity-40 font-bold">Consome 1 grão</span>
+                            <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_voice} {costs.cost_voice === 1 ? 'grão' : 'grãos'}</span>
                           )}
                         </div>
                       </button>
@@ -117,7 +121,7 @@ export function CreateListModal({
                         type="button"
                         onClick={() => {
                           trigger("medium")
-                          setIsOcrScannerOpen(true)
+                          checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
                         className="p-6 w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
@@ -127,7 +131,7 @@ export function CreateListModal({
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <span className="text-[11px] font-black">Via Foto</span>
-                          <span className="text-[8px] opacity-40 font-bold">Consome 2 grãos</span>
+                          <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_ocr} {costs.cost_ocr === 1 ? 'grão' : 'grãos'}</span>
                         </div>
                       </button>
                     </div>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { cleanBase64Image } from '@/lib/ai-utils';
 import { createClient } from '@/lib/supabase/server';
+import { SettingsService } from '@/services/settings.service';
 
 export async function POST(request: Request) {
   try {
@@ -12,11 +13,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || (profile.credits ?? 0) < 1) {
-      return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 1 grão para identificar produtos.' }, { status: 403 });
-    }
+    // 1. Verificar Custos Dinâmicos
+    const costs = await SettingsService.getAICosts(supabase);
+    const requiredCredits = costs.cost_vision;
 
+    // 2. Verificar Créditos (Grãos)
+    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
+    if (!profile || (profile.credits ?? 0) < requiredCredits) {
+      return NextResponse.json({ error: `Energia insuficiente. Você precisa de ${requiredCredits} grãos.` }, { status: 403 });
+    }
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Configuração de IA ausente (OPENAI_API_KEY)' }, { status: 500 });
@@ -59,11 +64,11 @@ export async function POST(request: Request) {
     const finalData = result.data || result;
     
     // Deduzir créditos e logar
-    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - requiredCredits }).eq('id', user.id);
     await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'vision',
-      cost: 1,
+      cost: requiredCredits,
       model_used: 'gpt-4o-mini'
     });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from '@/lib/supabase/server';
+import { SettingsService } from '@/services/settings.service';
 
 /**
  * Gera receitas gourmet utilizando a IA do Gemini com base em uma lista de ingredientes ou um item específico.
@@ -21,10 +22,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    // 1. Verificar Créditos (Grãos)
+    // 1. Verificar Custos Dinâmicos
+    const costs = await SettingsService.getAICosts(supabase);
+    const requiredCredits = costs.cost_recipe;
+
+    // 2. Verificar Créditos (Grãos)
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || (profile.credits ?? 0) < 1) {
-      return NextResponse.json({ error: 'Energia insuficiente. Recarregue seus grãos.' }, { status: 403 });
+    if (!profile || (profile.credits ?? 0) < requiredCredits) {
+      return NextResponse.json({ error: `Energia insuficiente. Você precisa de ${requiredCredits} grãos.` }, { status: 403 });
     }
 
     const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY;
@@ -80,12 +85,12 @@ export async function POST(request: Request) {
        }, { status: 200 }); // Status 200 para o front tratar a mensagem
     }
 
-    // 2. Deduzir crédito e logar
-    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
+    // 3. Deduzir créditos e logar
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - requiredCredits }).eq('id', user.id);
     await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'recipe',
-      cost: 1,
+      cost: requiredCredits,
       model_used: 'gemini-flash-latest'
     });
 

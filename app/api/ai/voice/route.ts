@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from '@/lib/supabase/server';
+import { SettingsService } from '@/services/settings.service';
 
 export async function POST(request: Request) {
   try {
@@ -12,9 +13,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    // 1. Verificar Custos Dinâmicos
+    const costs = await SettingsService.getAICosts(supabase);
+    const requiredCredits = costs.cost_voice;
+
+    // 2. Verificar Créditos (Grãos)
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || (profile.credits ?? 0) < 1) {
-      return NextResponse.json({ error: 'Energia insuficiente. Você precisa de 1 grão para usar a voz.' }, { status: 403 });
+    if (!profile || (profile.credits ?? 0) < requiredCredits) {
+      return NextResponse.json({ error: `Energia insuficiente. Você precisa de ${requiredCredits} grão(s) para usar a voz.` }, { status: 403 });
     }
 
     const groqKey = process.env.GROQ_API_KEY;
@@ -75,12 +81,12 @@ export async function POST(request: Request) {
       console.warn('Falha ao parsear JSON da IA:', e);
     }
 
-    // Deduzir créditos e logar
-    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
+    // 3. Deduzir créditos e logar
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - requiredCredits }).eq('id', user.id);
     await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'voice',
-      cost: 1,
+      cost: requiredCredits,
       model_used: 'whisper-large-v3 + gemini-flash-latest'
     } as any);
 

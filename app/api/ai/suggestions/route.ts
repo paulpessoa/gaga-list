@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { createClient } from '@/lib/supabase/server';
+import { SettingsService } from '@/services/settings.service';
 
 export async function POST(request: Request) {
   try {
@@ -11,9 +12,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
+    // 1. Verificar Custos Dinâmicos
+    const costs = await SettingsService.getAICosts(supabase);
+    const requiredCredits = costs.cost_suggestion;
+
+    // 2. Verificar Créditos (Grãos)
     const { data: profile } = await supabase.from('profiles').select('credits').eq('id', user.id).single();
-    if (!profile || (profile.credits ?? 0) < 1) {
-      return NextResponse.json({ error: 'Energia insuficiente.' }, { status: 403 });
+    if (!profile || (profile.credits ?? 0) < requiredCredits) {
+      return NextResponse.json({ error: `Energia insuficiente. Você precisa de ${requiredCredits} grão(s).` }, { status: 403 });
     }
 
     const apiKey = process.env.GROQ_API_KEY;
@@ -37,12 +43,12 @@ export async function POST(request: Request) {
       response_format: { type: 'json_object' },
     });
 
-    // Deduzir créditos e logar
-    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - 1 }).eq('id', user.id);
+    // 3. Deduzir créditos e logar
+    await supabase.from('profiles').update({ credits: (profile.credits ?? 0) - requiredCredits }).eq('id', user.id);
     await supabase.from('ai_usage_logs').insert({
       user_id: user.id,
       feature: 'suggestion',
-      cost: 1,
+      cost: requiredCredits,
       model_used: 'llama-3.3'
     });
 

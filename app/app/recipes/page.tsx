@@ -28,11 +28,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Drawer } from "vaul"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
+import { useAICosts } from "@/hooks/use-ai-costs"
 
 function RecipesContent() {
   const { data: lists } = useLists()
   const { trigger } = useHaptic()
   const { checkAndAct } = useAICreditCheck()
+  const { costs } = useAICosts()
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -299,7 +301,7 @@ function RecipesContent() {
                 </div>
                 <div className="px-2 py-1 bg-indigo-500/10 rounded-lg">
                   <span className="text-[8px] font-black text-indigo-500 uppercase">
-                    1 Grão
+                    {costs.cost_recipe} {costs.cost_recipe === 1 ? 'Grão' : 'Grãos'}
                   </span>
                 </div>
               </div>
@@ -321,7 +323,7 @@ function RecipesContent() {
 
               <button
                 onClick={() =>
-                  checkAndAct(1, () => generateRecipes("from_list"))
+                  checkAndAct(costs.cost_recipe, () => generateRecipes("from_list"))
                 }
                 disabled={!selectedListId || isLoading}
                 className="w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50"
