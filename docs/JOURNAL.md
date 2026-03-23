@@ -2,13 +2,13 @@
 *Histórico de marcos e decisões técnicas importantes.*
 
 ## 🗓️ 22 de Março de 2026
-- **Recipe Flow Fix:** Refatorada criação de lista a partir de receita para fluxo sequencial (`async/await` em loop), garantindo 100% de persistência dos ingredientes.
-- **Credits Refinement:** Gráfico de consumo corrigido com normalização ISO. Layout da tabela de preços compactado em 3 colunas e reposicionado.
-- **CreateItemModal Alignment:** UI do modal de itens unificada com o modal de listas (Design System consistency).
-- **Credits UX Refactor:** Implementado gráfico de consumo semanal e unificação visual da feature de Voz (Rose/Mic).
-- **Functional AI Credits:** Transição do bloqueio visual (cadeados) para bloqueio funcional via Modal Global.
-- **Item Creation Hub:** Implementado FAB e Bottom Sheet para adição de itens, otimizando espaço em tela.
-- **Inventory Pivot:** Exclusão completa da página '/app/app/products'. Foco total em simplificação de UX.
+- **Charts Infrastructure:** Integrada a biblioteca **Recharts** para visualização de dados. O dashboard de créditos agora utiliza um motor profissional que resolve bugs de fuso horário e escala.
+- **Scrollable History:** Implementado scroll vertical no histórico de créditos para estabilidade de layout.
+- **Recipe Flow Fix:** Refatorada criação de lista a partir de receita para fluxo sequencial, garantindo 100% de persistência.
+- **CreateItemModal Alignment:** UI unificada com modal de listas.
+- **Functional AI Credits:** Transição para bloqueio funcional via Modal Global.
+- **Item Creation Hub:** Implementado FAB e Bottom Sheet.
+- **Inventory Pivot:** Exclusão completa da página '/app/app/products'.
 - **Navigation Align:** Tab Bar atualizada seguindo a UI_SPECS.
 - **Resiliência de IA:** Fallback de texto bruto e prompts estruturados.
 

@@ -3,19 +3,19 @@
 
 ## 📍 Estado Atual
 - **Data:** 22 de Março de 2026
-- **Status:** Sistema de Créditos 100% funcional. Fluxo Receita -> Lista corrigido (sequencial). Dashboard de Créditos com gráfico resiliente e layout denso.
-- **Ambiente:** Next.js 15, Supabase, OpenAI/Gemini.
+- **Status:** Sistema de Créditos com infraestrutura de gráficos profissional (Recharts). Histórico com scroll e maior densidade. Build estável.
+- **Ambiente:** Next.js 15, Supabase, OpenAI/Gemini, Recharts.
 
 ## 🛠️ Últimas Alterações (Checkpoint)
-1. **Recipe Creation Fix:** Corrigida a função `createListFromRecipe` para salvar itens de forma sequencial, resolvendo falhas de persistência.
-2. **Credits Graph & Layout:** Gráfico de consumo corrigido para normalização ISO. Tabela de preços movida para o topo e compactada (lado a lado).
-3. **Item Creation Hub:** 'CreateItemModal' alinhado visualmente com 'CreateListModal' (Design System unificado).
-4. **Credits Dashboard Refactor:** Unificada a cor de "Voz" para Rose (Rosa) e ícones consistentes.
+1. **Recharts Integration:** Migrado gráfico de consumo manual (CSS) para a biblioteca **Recharts**, garantindo precisão de fuso horário e visual premium.
+2. **Usage History Scroll:** Adicionada rolagem vertical (`max-h-[400px]`) no histórico de logs para manter o layout enxuto.
+3. **Recipe Flow Fix:** Refatorada criação de lista a partir de receita para fluxo sequencial, garantindo 100% de persistência.
+4. **Item Creation Hub:** 'CreateItemModal' alinhado visualmente com 'CreateListModal'.
 
 ## 🚀 Próximos Passos Imediatos
 1. Refatoração de UX (Apple Standard) na página de Perfil (limpeza de layout).
 2. Implementação da Máscara de Preços nos itens da lista.
-3. Clonagem Staff (Admin tool).
+3. Área Administrativa: Visualização global de consumo (usando Recharts).
 
 ## 💾 Contexto de Recuperação
 Se a sessão cair, leia: `docs/HEARTBEAT.md`, `docs/product/VISION.md` e `app/app/credits/page.tsx`.
