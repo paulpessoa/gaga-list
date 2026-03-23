@@ -82,31 +82,43 @@ export default function CreditsPage() {
       fetchData()
     }
   }, [user, supabase])
+// Lógica para o Gráfico de Consumo (Últimos 7 dias) - Versão Staff Resiliente
+const usageStats = useMemo(() => {
+  // 1. Gerar os últimos 7 dias (incluindo hoje) em formato local YYYY-MM-DD
+  const stats = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
 
-  // Lógica para o Gráfico de Consumo (Últimos 7 dias) - Corrigida
-  const usageStats = useMemo(() => {
-    const stats = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - i)
-      const dateKey = date.toISOString().split('T')[0] // YYYY-MM-DD
-      const dateLabel = date.toLocaleDateString('pt-BR', { weekday: 'short' })
-      
-      const dayLogs = logs.filter(log => {
-        if (!log.created_at || log.cost < 0) return false
-        const logDate = new Date(log.created_at).toISOString().split('T')[0]
-        return logDate === dateKey
-      })
-      
-      const totalCost = dayLogs.reduce((acc, log) => acc + log.cost, 0)
-      return { label: dateLabel, value: totalCost }
-    }).reverse()
+    // Formato local YYYY-MM-DD para comparação precisa
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const dateKey = `${year}-${month}-${day}`
 
-    const maxValue = Math.max(...stats.map(s => s.value), 1)
-    return { stats, maxValue }
+    const dateLabel = d.toLocaleDateString('pt-BR', { weekday: 'short' })
+
+    // 2. Filtrar e somar logs que batem com este dia local
+    const dayLogs = logs.filter(log => {
+      if (!log.created_at || Number(log.cost) <= 0) return false
+
+      const ld = new Date(log.created_at)
+      const lYear = ld.getFullYear()
+      const lMonth = String(ld.getMonth() + 1).padStart(2, '0')
+      const lDay = String(ld.getDate()).padStart(2, '0')
+      const logKey = `${lYear}-${lMonth}-${lDay}`
+
+      return logKey === dateKey
+    })
+
+    const totalCost = dayLogs.reduce((acc, log) => acc + Number(log.cost), 0)
+    return { label: dateLabel, value: totalCost }
+  }).reverse()
+
+  const maxValue = Math.max(...stats.map(s => s.value), 1)
+  return { stats, maxValue }
   }, [logs])
 
-  return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+  return (    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
       <header className="flex items-center gap-4">
         <Link
           href="/app/profile"
@@ -150,10 +162,14 @@ export default function CreditsPage() {
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
             <Zap className="w-24 h-24 text-white" />
           </div>
-          
+
           <div className="relative z-10">
-            <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
-            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Libere todo o potencial do seu Chef e Scanner IA.</p>
+            <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">
+              Precisa de mais Grãos?
+            </h3>
+            <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              Libere todo o potencial do seu Chef e Scanner IA.
+            </p>
           </div>
 
           <Link
@@ -172,18 +188,26 @@ export default function CreditsPage() {
               <ChefHat className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Receita</span>
-              <span className="text-[10px] font-black text-zinc-400 uppercase">1 Grão</span>
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">
+                Receita
+              </span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">
+                1 Grão
+              </span>
             </div>
           </div>
-          
+
           <div className="glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-2 border border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40">
             <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
               <ScanLine className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Scanner</span>
-              <span className="text-[10px] font-black text-zinc-400 uppercase">2 Grãos</span>
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">
+                Scanner
+              </span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">
+                2 Grãos
+              </span>
             </div>
           </div>
 
@@ -192,8 +216,12 @@ export default function CreditsPage() {
               <Mic className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">Áudio IA</span>
-              <span className="text-[10px] font-black text-zinc-400 uppercase">1 Grão</span>
+              <span className="font-black text-zinc-900 dark:text-zinc-100 text-[8px] uppercase tracking-tighter">
+                Áudio IA
+              </span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase">
+                1 Grão
+              </span>
             </div>
           </div>
         </div>
@@ -204,20 +232,27 @@ export default function CreditsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-indigo-500" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Consumo da Semana</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+              Consumo da Semana
+            </h3>
           </div>
-          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">Grãos Usados</span>
+          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-md">
+            Grãos Usados
+          </span>
         </div>
 
         <div className="flex items-end justify-between h-32 gap-3 px-2">
           {usageStats.stats.map((stat, i) => {
             const heightPercentage = (stat.value / usageStats.maxValue) * 100
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
+              <div
+                key={i}
+                className="flex-1 flex flex-col items-center gap-3 group"
+              >
                 <div className="w-full relative flex items-end justify-center h-full">
-                  <div 
-                    className="w-full max-w-[12px] bg-indigo-500/20 group-hover:bg-indigo-500 rounded-full transition-all duration-500" 
-                    style={{ height: `${Math.max(heightPercentage, 5)}%` }} 
+                  <div
+                    className="w-full max-w-[12px] bg-indigo-500/20 group-hover:bg-indigo-500 rounded-full transition-all duration-500"
+                    style={{ height: `${Math.max(heightPercentage, 5)}%` }}
                   />
                   {stat.value > 0 && (
                     <div className="absolute -top-6 bg-zinc-900 text-white text-[8px] font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
@@ -225,7 +260,9 @@ export default function CreditsPage() {
                     </div>
                   )}
                 </div>
-                <span className="text-[8px] font-black text-zinc-400 uppercase">{stat.label}</span>
+                <span className="text-[8px] font-black text-zinc-400 uppercase">
+                  {stat.label}
+                </span>
               </div>
             )
           })}
@@ -262,7 +299,9 @@ export default function CreditsPage() {
             {logs.map((log) => {
               const Icon = FEATURE_ICONS[log.feature] || Zap
               const label = FEATURE_LABELS[log.feature] || log.feature
-              const colorClass = FEATURE_COLORS[log.feature] || "text-indigo-500 bg-indigo-500/10"
+              const colorClass =
+                FEATURE_COLORS[log.feature] ||
+                "text-indigo-500 bg-indigo-500/10"
 
               return (
                 <div
@@ -270,7 +309,9 @@ export default function CreditsPage() {
                   className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass}`}>
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass}`}
+                    >
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col gap-0.5">
