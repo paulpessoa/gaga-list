@@ -22,7 +22,7 @@ export function ListCard({
   const router = useRouter()
   const { trigger } = useHaptic()
   const leaveList = useLeaveList(list.id)
-  
+
   const [isConfirming, setIsConfirming] = useState(false)
 
   const totalItems = list.items?.length || 0
@@ -63,7 +63,7 @@ export function ListCard({
       }}
       className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500"
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-2 bg-red">
         <div className="flex flex-col min-w-0">
           <h3 className="font-black text-xl text-zinc-900 dark:text-white truncate group-hover:text-indigo-500 transition-colors leading-tight tracking-tight">
             {list.title}
