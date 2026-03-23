@@ -295,7 +295,7 @@ const usageStats = useMemo(() => {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-3">
             {logs.map((log) => {
               const Icon = FEATURE_ICONS[log.feature] || Zap
               const label = FEATURE_LABELS[log.feature] || log.feature
@@ -306,7 +306,7 @@ const usageStats = useMemo(() => {
               return (
                 <div
                   key={log.id}
-                  className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all"
+                  className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all shrink-0"
                 >
                   <div className="flex items-center gap-4">
                     <div
