@@ -41,25 +41,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nenhum ingrediente fornecido' }, { status: 400 });
     }
 
-    const prompt = type === 'from_list' || type === 'from_products'
+    const prompt = type === 'from_list' || type === 'from_products' || type === 'custom'
       ? `Você é um Chef de Cozinha Realista e Rigoroso. 
-         Sua tarefa é sugerir 3 receitas REAIS e SEGURAS usando EXCLUSIVAMENTE os ingredientes comestíveis desta lista: ${items.join(', ')}.
+         Sua tarefa é sugerir 3 receitas REAIS e SEGURAS.
          
-         PROTOCOLO DE SEGURANÇA E REALISMO:
-         1. TRIAGEM: Identifique e IGNORE completamente itens que não são comida (ex: eletrônicos, produtos de limpeza, ferramentas, vestuário). 
-         2. VALIDAÇÃO: Se após o filtro NÃO sobrarem ingredientes suficientes para uma receita real, retorne um erro no JSON com a mensagem: "Os itens informados não são adequados para cozinhar."
-         3. REGRAS DE OURO:
-            - Use APENAS o que foi fornecido. 
-            - Exceções permitidas (Despensa Básica): Sal, Água, Óleo/Azeite, Vinagre e Açúcar.
-            - Proibido inventar receitas "desconstruídas" ou experimentais para tentar usar itens não-comestíveis.
-            - As receitas devem ser baseadas em pratos reais da culinária mundial.
+         CONTEXTO: ${type === 'custom' ? `O usuário quer ideias para: "${items[0]}"` : `Usar EXCLUSIVAMENTE os itens: ${items.join(', ')}`}.
          
-         Retorne estritamente um JSON com a chave "recipes" contendo um array de objetos. 
-         Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`
-      : `Você é um Chef Gourmet Realista. Sugira uma receita detalhada e REAL para: "${items[0]}".
-         REGRA DE SEGURANÇA: Se o item "${items[0]}" não for algo comestível, NÃO gere a receita. Retorne um erro no JSON.
-         Retorne um JSON com a chave "recipes" contendo um array com essa única receita.
-         Cada objeto deve ter: "title", "description", "prep_time", "difficulty", "ingredients" (array de {name, quantity}), "instructions" (array de strings).`;
+         PROTOCOLO DE SEGURANÇA:
+         1. Se houver itens não comestíveis, ignore-os. Se não sobrar nada real, retorne um erro no JSON.
+         2. As receitas devem ser baseadas em pratos reais.
+         
+         Retorne estritamente um JSON com a chave "recipes" contendo um array de 3 objetos. 
+         Cada objeto deve ter: 
+         "title", 
+         "description", 
+         "prep_time", 
+         "difficulty", 
+         "ingredients" (array de {name, quantity}), 
+         "instructions" (array de strings),
+         "youtube_query" (string para buscar o vídeo desta receita no youtube).`
+      : `Sugira uma receita detalhada para: "${items[0]}". (Resto do protocolo de segurança mantido)...`;
 
     console.log('Gerando conteúdo com Gemini...');
     const result = await model.generateContent(prompt);

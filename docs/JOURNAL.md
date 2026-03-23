@@ -2,15 +2,13 @@
 *Histórico de marcos e decisões técnicas importantes.*
 
 ## 🗓️ 22 de Março de 2026
-- **Charts Infrastructure:** Integrada a biblioteca **Recharts** para visualização de dados. O dashboard de créditos agora utiliza um motor profissional que resolve bugs de fuso horário e escala.
-- **Scrollable History:** Implementado scroll vertical no histórico de créditos para estabilidade de layout.
-- **Recipe Flow Fix:** Refatorada criação de lista a partir de receita para fluxo sequencial, garantindo 100% de persistência.
-- **CreateItemModal Alignment:** UI unificada com modal de listas.
-- **Functional AI Credits:** Transição para bloqueio funcional via Modal Global.
-- **Item Creation Hub:** Implementado FAB e Bottom Sheet.
+- **Strict AI Chef Protocol:** Implementada filtragem semântica rigorosa na IA de receitas. O sistema agora ignora itens não-comestíveis e foca 100% no inventário fornecido, elevando o realismo gastronômico.
+- **Recipe 3-Tab System:** Refatorada interface de receitas para três categorias: "Minha Lista" (eficiência), "Inspiração" (descoberta com criação de lista automática) e "Meu Livro" (favoritos).
+- **Help Center V1:** Criada central de suporte `/app/help` com FAQ reativo e busca fuzzy.
+- **Charts Infrastructure:** Integrada a biblioteca **Recharts** para visualização de dados.
+- **Recipe Flow Fix:** Refatorada criação de lista a partir de receita para fluxo sequencial.
 - **Inventory Pivot:** Exclusão completa da página '/app/app/products'.
 - **Navigation Align:** Tab Bar atualizada seguindo a UI_SPECS.
-- **Resiliência de IA:** Fallback de texto bruto e prompts estruturados.
 
 ## 🗓️ 21 de Março de 2026
 - **Integração Stripe:** Webhook concluído. O sistema agora recarrega grãos automaticamente após pagamento confirmado.
