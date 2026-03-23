@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Check,
   Plus,
-  X,
   Search,
   Tag
 } from "lucide-react"
@@ -79,7 +78,7 @@ export function CreateItemModal({
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
-        <Drawer.Content className="bg-white dark:bg-zinc-950 flex flex-col rounded-t-[2.5rem] h-[auto] max-h-[90vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-white/5 shadow-2xl">
+        <Drawer.Content className="bg-white dark:bg-zinc-950 flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-white/5 shadow-2xl">
           <div className="p-4 bg-white dark:bg-zinc-950 rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-800 mb-8" />
 
@@ -90,11 +89,11 @@ export function CreateItemModal({
                     <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-3xl flex items-center justify-center mb-6 mx-auto">
                       <Plus className="w-8 h-8 text-indigo-500" />
                     </div>
-                    <Drawer.Title className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
-                      Adicionar Item
+                    <Drawer.Title className="text-3xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">
+                      Novo Item
                     </Drawer.Title>
                     <Drawer.Description className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
-                      Use voz, foto ou digite o nome do item.
+                      Adicione produtos rapidamente à sua lista.
                     </Drawer.Description>
                   </div>
 
@@ -103,66 +102,56 @@ export function CreateItemModal({
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        onClick={() =>
-                          checkAndAct(1, () =>
-                            isRecording ? stopRecording() : startRecording()
-                          )
-                        }
-                        className={`p-6 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
+                        onClick={() => checkAndAct(1, () => (isRecording ? stopRecording() : startRecording()))}
+                        disabled={isAiProcessing}
+                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
-                        <div
-                          className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? "bg-white/20" : "bg-indigo-500/10 dark:bg-indigo-500/20"}`}
-                        >
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-indigo-500/10 dark:bg-indigo-500/20'}`}>
                           {isAiProcessing ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                            <Loader2 className="w-6 h-6 animate-spin" />
                           ) : isRecording ? (
                             <Square className="w-5 h-5 fill-current text-white" />
                           ) : (
                             <Mic className="w-6 h-6 text-indigo-500" />
                           )}
                         </div>
-                        <span className="text-[11px] font-black">
-                          {isRecording ? "Parar" : "Voz"}
-                        </span>
-                        {/* <div className="flex flex-col items-center gap-1">
+                        <div className="flex flex-col items-center gap-1">
                           <span className="text-[11px] font-black">{isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}</span>
                           {!isAiProcessing && !isRecording && (
                             <span className="text-[8px] opacity-40 font-bold">Consome 1 grão</span>
                           )}
-                        </div> */}
+                        </div>
                       </button>
-
+                      
                       <button
                         type="button"
-                        onClick={() =>
-                          checkAndAct(2, () => {
-                            trigger("medium")
-                            setIsOcrScannerOpen(true)
-                          })
-                        }
-                        className="p-6 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        onClick={() => checkAndAct(2, () => { trigger("medium"); setIsOcrScannerOpen(true); })}
+                        disabled={isAiProcessing}
+                        className="p-6 w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
-                          <Camera className="w-6 h-6 text-emerald-500" />
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-indigo-500" />
                         </div>
-                        <span className="text-[11px] font-black">Foto</span>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] font-black">Via Foto</span>
+                          <span className="text-[8px] opacity-40 font-bold">Consome 2 grãos</span>
+                        </div>
                       </button>
                     </div>
 
                     {/* Input Manual */}
                     <form onSubmit={handleManualSubmit} className="space-y-6">
-                      <div className="space-y-3 relative">
+                      <div className="space-y-3">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
                           Ou digite abaixo
                         </label>
                         <div className="relative">
-                          <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
                           <input
                             type="text"
-                            placeholder="Ex: Leite Integral..."
+                            placeholder="Nome do item (ex: Arroz 5kg)..."
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
-                            className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-[1.5rem] py-5 pl-14 pr-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
+                            className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
                           />
                         </div>
 
@@ -174,8 +163,8 @@ export function CreateItemModal({
                                 key={i}
                                 type="button"
                                 onClick={() => {
-                                  onAddManual(s.name, s.category, s.unit)
-                                  setItemName("")
+                                  onAddManual(s.name, s.category, s.unit);
+                                  setItemName("");
                                 }}
                                 className="w-full flex items-center justify-between p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
                               >
@@ -184,12 +173,8 @@ export function CreateItemModal({
                                     🛒
                                   </div>
                                   <div>
-                                    <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">
-                                      {s.name}
-                                    </p>
-                                    <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">
-                                      {s.category}
-                                    </p>
+                                    <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">{s.name}</p>
+                                    <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">{s.category}</p>
                                   </div>
                                 </div>
                                 <Plus className="w-5 h-5 text-indigo-500/30" />
@@ -220,7 +205,7 @@ export function CreateItemModal({
                       A IA identificou estes produtos:
                     </p>
                   </div>
-
+                  
                   <div className="bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-6 max-h-80 overflow-y-auto border border-zinc-100 dark:border-white/5 shadow-inner mb-8">
                     <ul className="space-y-3">
                       {voiceItems.map((item, i) => (

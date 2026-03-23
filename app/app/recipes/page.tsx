@@ -141,20 +141,28 @@ function RecipesContent() {
 
       if (!newList?.id) throw new Error("Falha ao criar lista")
 
+      // Usar loop sequencial para garantir persistência e ordem
       for (const ingredient of recipe.ingredients) {
-        await fetch(`/api/lists/${newList.id}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: ingredient.name,
-            quantity: ingredient.quantity || "1"
+        try {
+          await fetch(`/api/lists/${newList.id}/items`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: ingredient.name,
+              quantity: ingredient.quantity || "1",
+              unit: ingredient.unit || null
+            })
           })
-        })
+        } catch (itemErr) {
+          console.error(`Falha ao adicionar item: ${ingredient.name}`, itemErr)
+        }
       }
+      
       trigger("success" as any)
       router.push(`/app/lists/${newList.id}`)
     } catch (err) {
-      alert("Erro ao criar lista.")
+      console.error("Erro geral na criação da lista:", err)
+      alert("Erro ao criar lista. Tente novamente.")
     }
   }
 
