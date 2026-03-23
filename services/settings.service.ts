@@ -26,7 +26,12 @@ export const SettingsService = {
 
       // Transformar array de {key, value} em um objeto
       const costs = data.reduce((acc: any, curr) => {
-        acc[curr.key] = Number(curr.value);
+        // Garantir que o valor seja convertido para número com segurança
+        const numValue = typeof curr.value === 'string' 
+          ? Number(curr.value) 
+          : Number(JSON.parse(JSON.stringify(curr.value)));
+          
+        acc[curr.key] = isNaN(numValue) ? DEFAULT_AI_COSTS[curr.key as keyof typeof DEFAULT_AI_COSTS] : numValue;
         return acc;
       }, {});
 
