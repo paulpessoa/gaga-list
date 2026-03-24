@@ -1,22 +1,35 @@
 // services/settings.service.ts
-import { createClient } from '@/lib/supabase/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
+/**
+ * Custos de IA padronizados para o sistema.
+ * PORQUÊ: Centralizar aqui permite que o app seja rápido (sem bater no DB toda hora)
+ * mas ainda permite sobrescrever via Variáveis de Ambiente se necessário.
+ */
 export const DEFAULT_AI_COSTS = {
-  cost_recipe: 1,
-  cost_ocr: 2,
-  cost_vision: 1,
-  cost_voice: 1,
-  cost_suggestion: 1,
-  referral_bonus: 50
+  cost_recipe: Number(process.env.NEXT_PUBLIC_COST_RECIPE) || 1,
+  cost_ocr: Number(process.env.NEXT_PUBLIC_COST_OCR) || 2,
+  cost_vision: Number(process.env.NEXT_PUBLIC_COST_VISION) || 1,
+  cost_voice: Number(process.env.NEXT_PUBLIC_COST_VOICE) || 1,
+  cost_suggestion: Number(process.env.NEXT_PUBLIC_COST_SUGGESTION) || 1,
+  referral_bonus: Number(process.env.NEXT_PUBLIC_REFERRAL_BONUS) || 50
 };
 
 export const SettingsService = {
   /**
-   * Busca todas as configurações de custo do banco.
-   * Se falhar, retorna os valores padrão (fallback).
+   * Retorna os custos de IA. 
+   * Agora é síncrono por padrão para evitar latência de rede.
+   * O parâmetro supabase é mantido para compatibilidade, mas não é usado para o 'get'.
    */
-  async getAICosts(supabase: SupabaseClient): Promise<typeof DEFAULT_AI_COSTS> {
+  getAICosts(_supabase?: SupabaseClient): typeof DEFAULT_AI_COSTS {
+    return DEFAULT_AI_COSTS;
+  },
+
+  /**
+   * Busca custos do banco de dados (OPCIONAL/LEGACY).
+   * Mantemos apenas se realmente precisarmos de uma mudança "ao vivo" sem deploy.
+   */
+  async getAICostsFromDB(supabase: SupabaseClient): Promise<typeof DEFAULT_AI_COSTS> {
     try {
       const { data, error } = await supabase
         .from('system_settings')
@@ -24,23 +37,18 @@ export const SettingsService = {
 
       if (error || !data) return DEFAULT_AI_COSTS;
 
-      // Transformar array de {key, value} em um objeto
       const costs = data.reduce((acc: any, curr) => {
-        // Garantir que o valor seja convertido para número com segurança
-        const numValue = typeof curr.value === 'string' 
-          ? Number(curr.value) 
-          : Number(JSON.parse(JSON.stringify(curr.value)));
-          
+        let val = curr.value;
+        if (typeof val === 'object' && val !== null) {
+          val = val.value || val.val || Object.values(val)[0];
+        }
+        const numValue = Number(val);
         acc[curr.key] = isNaN(numValue) ? DEFAULT_AI_COSTS[curr.key as keyof typeof DEFAULT_AI_COSTS] : numValue;
         return acc;
       }, {});
 
-      return {
-        ...DEFAULT_AI_COSTS,
-        ...costs
-      };
+      return { ...DEFAULT_AI_COSTS, ...costs };
     } catch (err) {
-      console.error('Erro ao buscar custos de IA:', err);
       return DEFAULT_AI_COSTS;
     }
   },
@@ -53,7 +61,7 @@ export const SettingsService = {
       .from('system_settings')
       .upsert({ 
         key, 
-        value: String(value), // Salvando como string para compatibilidade com o JSONB
+        value: String(value),
         updated_at: new Date().toISOString()
       }, { onConflict: 'key' });
 
@@ -63,7 +71,6 @@ export const SettingsService = {
 
   /**
    * Atualiza múltiplas configurações de uma vez (Bulk Update).
-   * PORQUÊ: Mais eficiente e reduz o número de requisições à rede.
    */
   async updateAllSettings(supabase: SupabaseClient, settings: Record<string, any>) {
     const payload = Object.entries(settings).map(([key, value]) => ({

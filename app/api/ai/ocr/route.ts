@@ -15,8 +15,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 })
     }
 
-    // 1. Verificar Custos Dinâmicos
-    const costs = await SettingsService.getAICosts(supabase)
+    // 1. Verificar Custos (Síncrono para velocidade)
+    const costs = SettingsService.getAICosts()
     const requiredCredits = costs.cost_ocr
 
     // 2. Verificar Créditos (Grãos)
@@ -28,8 +28,7 @@ export async function POST(request: Request) {
     if (!profile || (profile.credits ?? 0) < requiredCredits) {
       return NextResponse.json(
         {
-          error:
-            `Energia insuficiente. Você precisa de ${requiredCredits} grãos para escanear fotos.`
+          error: `Energia insuficiente. Você precisa de ${requiredCredits} grãos para escanear fotos.`
         },
         { status: 403 }
       )
@@ -102,7 +101,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ items })
   } catch (error: any) {
-    console.error("Erro no OCR AI:", error)
+    console.error("BLABLA #1 OCR ERROR:", error)
     return NextResponse.json(
       { error: "Erro ao extrair lista da foto", details: error.message },
       { status: 500 }

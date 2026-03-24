@@ -205,8 +205,7 @@ function RecipesContent() {
         prep_time: recipe.prep_time,
         difficulty: recipe.difficulty,
         ai_metadata: {
-          saved_at: new Date().toISOString(),
-          youtube_query: recipe.youtube_query
+          saved_at: new Date().toISOString()
         }
       })
 
@@ -379,7 +378,7 @@ function RecipesContent() {
                 </div>
                 <button
                   onClick={() =>
-                    checkAndAct(1, () => generateRecipes("from_selection"))
+                    checkAndAct(costs.cost_recipe, () => generateRecipes("from_selection"))
                   }
                   disabled={isLoading}
                   className="w-full py-5 bg-rose-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/20 active:scale-95 transition-all"
@@ -410,7 +409,7 @@ function RecipesContent() {
                 </div>
                 <div className="px-2 py-1 bg-rose-500/10 rounded-lg">
                   <span className="text-[8px] font-black text-rose-500 uppercase">
-                    1 Grão
+                    {costs.cost_recipe} {costs.cost_recipe === 1 ? 'Grão' : 'Grãos'}
                   </span>
                 </div>
               </div>
@@ -424,7 +423,7 @@ function RecipesContent() {
               />
 
               <button
-                onClick={() => checkAndAct(1, () => generateRecipes("custom"))}
+                onClick={() => checkAndAct(costs.cost_recipe, () => generateRecipes("custom"))}
                 disabled={!customQuery || isLoading}
                 className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl active:scale-95 transition-all disabled:opacity-50"
               >
@@ -599,16 +598,6 @@ function RecipesContent() {
                       >
                         <BookOpen className="w-4 h-4" /> Salvar
                       </button>
-                      {recipe.youtube_query && (
-                        <a
-                          href={`https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.youtube_query)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-4 bg-rose-500/10 text-rose-500 rounded-2xl flex items-center justify-center gap-2 font-black uppercase text-[10px] hover:bg-rose-500 hover:text-white transition-all"
-                        >
-                          <Youtube className="w-4 h-4" />
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -710,16 +699,6 @@ function RecipesContent() {
                       <ShoppingCart className="w-5 h-5" /> Criar Lista de
                       Compras
                     </button>
-                    {viewingRecipe.ai_metadata?.youtube_query && (
-                      <a
-                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(viewingRecipe.ai_metadata.youtube_query)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="py-6 px-10 bg-rose-500 text-white rounded-3xl font-black uppercase text-[10px] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all"
-                      >
-                        <Youtube className="w-5 h-5" /> Ver no YouTube
-                      </a>
-                    )}
                     <button
                       onClick={() => setViewingRecipe(null)}
                       className="px-10 py-6 bg-zinc-100 dark:bg-zinc-900 rounded-3xl font-black uppercase text-[10px] text-zinc-500 active:scale-95 transition-all"
