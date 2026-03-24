@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css" // Leaflet styles
 import Providers from "./providers"
 import Script from "next/script"
 import { NavigationWrapper } from "@/components/navigation-wrapper"
+import { DesktopBlocker } from "@/components/ui/desktop-blocker"
 
 export const metadata: Metadata = {
   title: "Lista Pronta",
@@ -70,6 +71,7 @@ export default function RootLayout({
       </head>
       <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0 transition-colors duration-300">
         <Providers>
+          <DesktopBlocker />
           {children}
           <NavigationWrapper />
         </Providers>
