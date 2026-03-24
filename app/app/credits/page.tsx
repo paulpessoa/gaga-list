@@ -31,6 +31,8 @@ import {
   Cell
 } from "recharts"
 
+import { useAICosts } from "@/hooks/use-ai-costs"
+
 const FEATURE_ICONS: Record<string, any> = {
   recipe: ChefHat,
   ocr: ScanLine,
@@ -58,18 +60,19 @@ const FEATURE_LABELS: Record<string, string> = {
   referral_bonus: "Bônus de Indicação"
 }
 
-const PRICING_DATA = [
-  { id: 'recipe', label: 'Receita', cost: 1, color: 'emerald', icon: ChefHat },
-  { id: 'ocr', label: 'Scanner', cost: 2, color: 'indigo', icon: ScanLine },
-  { id: 'vision', label: 'Visão', cost: 1, color: 'blue', icon: Camera },
-  { id: 'voice', label: 'Áudio', cost: 1, color: 'rose', icon: Mic },
-  { id: 'suggestion', label: 'Dicas', cost: 1, color: 'amber', icon: Lightbulb },
-]
-
 export default function CreditsPage() {
   const { data: user } = useUser()
   const { trigger } = useHaptic()
+  const { costs } = useAICosts()
   const supabase = createClient()
+
+  const PRICING_DATA = [
+    { id: 'recipe', label: 'Receita', cost: costs.cost_recipe, color: 'emerald', icon: ChefHat },
+    { id: 'ocr', label: 'Scanner', cost: costs.cost_ocr, color: 'indigo', icon: ScanLine },
+    { id: 'vision', label: 'Visão', cost: costs.cost_vision, color: 'blue', icon: Camera },
+    { id: 'voice', label: 'Áudio', cost: costs.cost_voice, color: 'rose', icon: Mic },
+    { id: 'suggestion', label: 'Dicas', cost: costs.cost_suggestion, color: 'amber', icon: Lightbulb },
+  ]
 
   const [credits, setCredits] = useState<number>(0)
   const [logs, setLogs] = useState<any[]>([])
