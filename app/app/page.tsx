@@ -365,10 +365,10 @@ export default function AppPage() {
         isAiProcessing={isAiProcessing}
         submitCreateList={submitCreateList}
         isRecording={isRecording}
-        startRecording={() => checkAndAct(1, startRecording)}
+        startRecording={() => startRecording()}
         stopRecording={stopRecording}
         trigger={trigger}
-        setIsOcrScannerOpen={(val) => val ? checkAndAct(2, () => setIsOcrScannerOpen(true)) : setIsOcrScannerOpen(false)}
+        setIsOcrScannerOpen={setIsOcrScannerOpen}
         voiceTranscription={voiceTranscription}
         setVoiceTranscription={setVoiceTranscription}
         voiceItems={voiceItems}

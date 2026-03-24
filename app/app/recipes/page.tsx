@@ -154,6 +154,8 @@ function RecipesContent() {
 
   const createListFromRecipe = async (recipe: any) => {
     trigger("medium")
+    console.log("Criando lista para receita:", recipe.title)
+    
     try {
       const response = await fetch("/api/lists", {
         method: "POST",
@@ -163,30 +165,50 @@ function RecipesContent() {
       const result = await response.json()
       const newList = result.data
 
-      if (!newList?.id) throw new Error("Falha ao criar lista")
+      if (!newList?.id) {
+        console.error("Falha ao criar lista:", result)
+        throw new Error("Falha ao criar lista base")
+      }
 
-      // Usar loop sequencial para garantir persistência e ordem
-      for (const ingredient of recipe.ingredients) {
+      console.log("Lista criada com ID:", newList.id)
+
+      // Garantir que ingredients é um array
+      const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
+      
+      if (ingredients.length === 0) {
+        console.warn("Receita não possui ingredientes estruturados.")
+      }
+
+      // Adicionar itens sequencialmente
+      for (const ingredient of ingredients) {
         try {
+          // Normalizar o ingrediente (pode vir como string ou objeto)
+          const itemName = typeof ingredient === 'string' ? ingredient : ingredient.name
+          const itemQty = typeof ingredient === 'string' ? "1" : (ingredient.quantity || "1")
+          const itemUnit = typeof ingredient === 'string' ? null : (ingredient.unit || null)
+
+          if (!itemName) continue
+
           await fetch(`/api/lists/${newList.id}/items`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              name: ingredient.name,
-              quantity: ingredient.quantity || "1",
-              unit: ingredient.unit || null
+              name: itemName,
+              quantity: itemQty,
+              unit: itemUnit
             })
           })
+          console.log("Item adicionado:", itemName)
         } catch (itemErr) {
-          console.error(`Falha ao adicionar item: ${ingredient.name}`, itemErr)
+          console.error(`Falha ao adicionar ingrediente:`, ingredient, itemErr)
         }
       }
 
       trigger("success" as any)
       router.push(`/app/lists/${newList.id}`)
-    } catch (err) {
-      console.error("Erro geral na criação da lista:", err)
-      alert("Erro ao criar lista. Tente novamente.")
+    } catch (err: any) {
+      console.error("Erro geral no fluxo Receita -> Lista:", err)
+      alert(`Erro ao criar lista: ${err.message}`)
     }
   }
 
