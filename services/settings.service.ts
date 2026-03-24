@@ -2,33 +2,53 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
- * Custos de IA padronizados para o sistema.
- * PORQUÊ: Centralizar aqui permite que o app seja rápido (sem bater no DB toda hora)
- * mas ainda permite sobrescrever via Variáveis de Ambiente se necessário.
+ * AI Costs and Plan Prices standardized for the system.
+ * WHY: Centralizing here makes the app fast (no DB hits every click)
+ * but still allows overriding via Environment Variables.
  */
 export const DEFAULT_AI_COSTS = {
-  cost_recipe: Number(process.env.NEXT_PUBLIC_COST_RECIPE) || 1,
-  cost_ocr: Number(process.env.NEXT_PUBLIC_COST_OCR) || 2,
-  cost_vision: Number(process.env.NEXT_PUBLIC_COST_VISION) || 1,
+  cost_recipe: Number(process.env.NEXT_PUBLIC_COST_RECIPE) || 2,
+  cost_ocr: Number(process.env.NEXT_PUBLIC_COST_OCR) || 3,
+  cost_vision: Number(process.env.NEXT_PUBLIC_COST_VISION) || 4,
   cost_voice: Number(process.env.NEXT_PUBLIC_COST_VOICE) || 1,
   cost_suggestion: Number(process.env.NEXT_PUBLIC_COST_SUGGESTION) || 1,
   referral_bonus: Number(process.env.NEXT_PUBLIC_REFERRAL_BONUS) || 50
 };
 
+/**
+ * Plan Prices (in Cents for Stripe and BRL for UI)
+ */
+export const PLAN_CONFIGS = {
+  semente: { name: "Semente", amount: 0, grains: 50, priceLabel: "Grátis" },
+  broto: { 
+    name: "Broto", 
+    amount: Number(process.env.NEXT_PUBLIC_PLAN_BROTO_CENTS) || 990, 
+    grains: 500,
+    priceLabel: "R$ 9,90"
+  },
+  colheita: { 
+    name: "Colheita", 
+    amount: Number(process.env.NEXT_PUBLIC_PLAN_COLHEITA_CENTS) || 1990, 
+    grains: 1500,
+    priceLabel: "R$ 19,90"
+  },
+  fazenda: { 
+    name: "Fazenda", 
+    amount: Number(process.env.NEXT_PUBLIC_PLAN_FAZENDA_CENTS) || 14900, 
+    grains: 5000,
+    priceLabel: "R$ 149,00"
+  }
+};
+
 export const SettingsService = {
-  /**
-   * Retorna os custos de IA. 
-   * Agora é síncrono por padrão para evitar latência de rede.
-   * O parâmetro supabase é mantido para compatibilidade, mas não é usado para o 'get'.
-   */
   getAICosts(_supabase?: SupabaseClient): typeof DEFAULT_AI_COSTS {
     return DEFAULT_AI_COSTS;
   },
 
-  /**
-   * Busca custos do banco de dados (OPCIONAL/LEGACY).
-   * Mantemos apenas se realmente precisarmos de uma mudança "ao vivo" sem deploy.
-   */
+  getPlanConfigs() {
+    return PLAN_CONFIGS;
+  },
+
   async getAICostsFromDB(supabase: SupabaseClient): Promise<typeof DEFAULT_AI_COSTS> {
     try {
       const { data, error } = await supabase
@@ -53,9 +73,6 @@ export const SettingsService = {
     }
   },
 
-  /**
-   * Atualiza uma configuração específica no banco.
-   */
   async updateSetting(supabase: SupabaseClient, key: string, value: any) {
     const { error } = await supabase
       .from('system_settings')
@@ -69,9 +86,6 @@ export const SettingsService = {
     return true;
   },
 
-  /**
-   * Atualiza múltiplas configurações de uma vez (Bulk Update).
-   */
   async updateAllSettings(supabase: SupabaseClient, settings: Record<string, any>) {
     const payload = Object.entries(settings).map(([key, value]) => ({
       key,

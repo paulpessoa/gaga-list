@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import Stripe from "stripe"
 import { createClient } from "@/lib/supabase/server"
+import { PLAN_CONFIGS } from "@/services/settings.service"
 
 export const dynamic = 'force-dynamic';
 
@@ -12,16 +13,6 @@ const stripe = process.env.STRIPE_SECRET_KEY
     })
   : null;
 
-const PLANS_CONFIG: Record<
-  string,
-  { name: string; amount: number; grains: number }
-> = {
-  semente: { name: "Pacote Semente", amount: 0, grains: 50 },
-  broto: { name: "Pacote Broto", amount: 990, grains: 500 }, // R$ 9,90
-  colheita: { name: "Pacote Colheita", amount: 1990, grains: 1500 }, // R$ 19,90
-  fazenda: { name: "Pacote Fazenda", amount: 14900, grains: 5000 } // R$ 149,00
-}
-
 export async function POST(request: Request) {
   try {
     if (!stripe) {
@@ -30,7 +21,7 @@ export async function POST(request: Request) {
       )
     }
     const { planId } = await request.json()
-    const plan = PLANS_CONFIG[planId]
+    const plan = PLAN_CONFIGS[planId as keyof typeof PLAN_CONFIGS]
 
     if (!plan) {
       return NextResponse.json({ error: "Plano inválido" }, { status: 400 })
@@ -64,7 +55,7 @@ export async function POST(request: Request) {
           price_data: {
             currency: "brl",
             product_data: {
-              name: plan.name,
+              name: `Pacote ${plan.name}`,
               description: `${plan.grains} Grãos para usar com IA`
             },
             unit_amount: plan.amount

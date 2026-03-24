@@ -16,12 +16,11 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-const PLANS = [
+import { SettingsService, PLAN_CONFIGS } from "@/services/settings.service"
+
+const PLANS_DATA = [
   {
     id: "semente",
-    name: "Semente",
-    price: "Grátis",
-    grains: 50,
     icon: Leaf,
     color: "text-emerald-500",
     bgColor: "bg-emerald-500/10",
@@ -30,9 +29,6 @@ const PLANS = [
   },
   {
     id: "broto",
-    name: "Broto",
-    price: "R$ 9,90",
-    grains: 500,
     icon: Wheat,
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",
@@ -46,9 +42,6 @@ const PLANS = [
   },
   {
     id: "colheita",
-    name: "Colheita",
-    price: "R$ 19,90",
-    grains: 1500,
     icon: Sparkles,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
@@ -62,9 +55,6 @@ const PLANS = [
   },
   {
     id: "fazenda",
-    name: "Fazenda",
-    price: "R$ 149,00",
-    grains: 5000,
     icon: Tractor,
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
@@ -82,6 +72,12 @@ export default function PlansPage() {
   const router = useRouter()
   const { trigger } = useHaptic()
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
+  // Fusion static UI data with dynamic config
+  const plans = PLANS_DATA.map(p => ({
+    ...p,
+    ...PLAN_CONFIGS[p.id as keyof typeof PLAN_CONFIGS]
+  }))
 
   const handleSelectPlan = async (id: string) => {
     trigger("medium")
@@ -140,7 +136,7 @@ export default function PlansPage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {PLANS.map((plan) => {
+        {plans.map((plan) => {
           const Icon = plan.icon
           const isLoading = loadingPlan === plan.id
 
@@ -167,7 +163,7 @@ export default function PlansPage() {
                   </h3>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-2xl font-black text-indigo-500">
-                      {plan.price}
+                      {plan.priceLabel}
                     </span>
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
                       / pacote
