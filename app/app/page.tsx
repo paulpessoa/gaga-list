@@ -71,6 +71,7 @@ export default function AppPage() {
   // Estados para Preview de Voz
   const [voiceTranscription, setVoiceTranscription] = useState("")
   const [voiceItems, setVoiceItems] = useState<any[]>([])
+  const [suggestedTitle, setSuggestedTitle] = useState("")
   const [voiceHint, setVoiceHint] = useState<string | null>(null)
   const [showVoicePreview, setShowVoicePreview] = useState(false)
 
@@ -101,6 +102,7 @@ export default function AppPage() {
 
         setVoiceTranscription(data.transcription)
         setVoiceItems(data.items || [])
+        setSuggestedTitle(data.suggested_title || "")
         setVoiceHint(data.hint || null)
         setShowVoicePreview(true)
 
@@ -131,6 +133,7 @@ export default function AppPage() {
       })
       const data = await response.json()
       setVoiceItems(data.items || [])
+      setSuggestedTitle(data.suggested_title || suggestedTitle)
       setVoiceHint(data.hint || null)
       trigger("success")
     } catch (err) {
@@ -144,13 +147,14 @@ export default function AppPage() {
     if (voiceItems.length === 0) return
     setIsAiProcessing(true)
 
-    // Título inteligente: usa as 3 primeiras palavras ou os 3 primeiros itens
-    const smartTitle =
+    // Prioriza o título sugerido pela IA, senão faz o fallback inteligente
+    const smartTitleFallback =
       voiceItems
         .slice(0, 2)
         .map((i) => i.name)
         .join(", ") + "..."
-    const title = smartTitle || "Nova Lista por Voz"
+    
+    const title = suggestedTitle || smartTitleFallback || "Nova Lista por Voz"
 
     createList.mutate(
       { title, color_theme: "indigo" },
@@ -199,9 +203,13 @@ export default function AppPage() {
       return
     }
     setIsAiProcessing(true)
+    
+    // Usa o título sugerido pela IA de OCR
+    const title = result.suggested_title || `Foto ${new Date().toLocaleDateString()}`
+
     createList.mutate(
       {
-        title: `Foto ${new Date().toLocaleDateString()}`,
+        title: title,
         color_theme: "indigo"
       },
       {

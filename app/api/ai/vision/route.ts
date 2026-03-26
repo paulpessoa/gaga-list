@@ -62,7 +62,7 @@ export async function POST(request: Request) {
           content: [
             {
               type: "text",
-              text: "Identifique este produto de supermercado. Retorne estritamente um objeto JSON com a chave 'data' contendo: 'name', 'brand', 'category', 'benefits' (breve texto), 'suggested_uses' (array de strings). Não inclua explicações ou blocos de código markdown. Retorne APENAS o JSON puro."
+              text: "Identifique este produto de supermercado. Retorne estritamente um objeto JSON com a chave 'data' contendo: 'name', 'brand', 'category', 'benefits' (breve texto), 'suggested_uses' (array de strings) e 'suggested_title' (um nome curto para uma lista baseada neste item, ex: 'Compras de Laticínios'). Não inclua explicações ou blocos de código markdown. Retorne APENAS o JSON puro."
             },
             {
               type: "image_url",

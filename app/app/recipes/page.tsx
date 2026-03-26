@@ -154,61 +154,61 @@ function RecipesContent() {
 
   const createListFromRecipe = async (recipe: any) => {
     trigger("medium")
-    console.log("Criando lista para receita:", recipe.title)
+    setIsLoading(true)
+    setLoadingStatus(`Criando lista para: ${recipe.title}...`)
     
     try {
+      // 1. Criar a lista base
       const response = await fetch("/api/lists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: `Compras: ${recipe.title}` })
+        body: JSON.stringify({ 
+          title: recipe.title, // Usa o nome da receita como título
+          color_theme: "indigo"
+        })
       })
       const result = await response.json()
       const newList = result.data
 
       if (!newList?.id) {
-        console.error("Falha ao criar lista:", result)
-        throw new Error("Falha ao criar lista base")
+        throw new Error("Não foi possível criar a lista de compras.")
       }
 
-      console.log("Lista criada com ID:", newList.id)
-
-      // Garantir que ingredients é um array
+      // 2. Preparar ingredientes
       const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
       
-      if (ingredients.length === 0) {
-        console.warn("Receita não possui ingredientes estruturados.")
-      }
+      if (ingredients.length > 0) {
+        setLoadingStatus(`Adicionando ${ingredients.length} ingredientes...`)
+        
+        // Adicionar itens em paralelo para performance
+        await Promise.all(
+          ingredients.map(async (ingredient: any) => {
+            const itemName = typeof ingredient === 'string' ? ingredient : ingredient.name
+            const itemQty = typeof ingredient === 'string' ? "1" : (ingredient.quantity || "1")
+            
+            if (!itemName) return
 
-      // Adicionar itens sequencialmente
-      for (const ingredient of ingredients) {
-        try {
-          // Normalizar o ingrediente (pode vir como string ou objeto)
-          const itemName = typeof ingredient === 'string' ? ingredient : ingredient.name
-          const itemQty = typeof ingredient === 'string' ? "1" : (ingredient.quantity || "1")
-          const itemUnit = typeof ingredient === 'string' ? null : (ingredient.unit || null)
-
-          if (!itemName) continue
-
-          await fetch(`/api/lists/${newList.id}/items`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: itemName,
-              quantity: itemQty,
-              unit: itemUnit
+            return fetch(`/api/lists/${newList.id}/items`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: itemName,
+                quantity: itemQty,
+                unit: typeof ingredient === 'object' ? (ingredient.unit || null) : null
+              })
             })
           })
-          console.log("Item adicionado:", itemName)
-        } catch (itemErr) {
-          console.error(`Falha ao adicionar ingrediente:`, ingredient, itemErr)
-        }
+        )
       }
 
-      trigger("success" as any)
+      trigger("success")
       router.push(`/app/lists/${newList.id}`)
     } catch (err: any) {
-      console.error("Erro geral no fluxo Receita -> Lista:", err)
-      alert(`Erro ao criar lista: ${err.message}`)
+      console.error("Erro ao converter receita em lista:", err)
+      alert(err.message)
+    } finally {
+      setIsLoading(false)
+      setLoadingStatus("")
     }
   }
 
