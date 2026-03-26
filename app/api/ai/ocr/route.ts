@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            'Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras e transformar em dados estruturados. Retorne estritamente um objeto JSON com a chave \'items\', contendo um array de objetos com as chaves "name", "quantity" e "category". Não inclua explicações ou markdown. Retorne APENAS o JSON puro.'
+            'Você é um especialista em extração de dados (OCR). Sua tarefa é ler imagens de listas de compras e transformar em dados estruturados. Retorne estritamente um objeto JSON com as chaves "items" (array de objetos com "name", "quantity", "category") e "suggested_title" (string curta baseada no contexto da lista, ex: "Compras de Domingo"). Não inclua explicações ou markdown. Retorne APENAS o JSON puro.'
         },
         {
           role: "user",
@@ -84,8 +84,8 @@ export async function POST(request: Request) {
 
     const content = response.choices[0]?.message?.content || "{}"
     const result = JSON.parse(content)
-    const items =
-      result.items || result.list || (Array.isArray(result) ? result : [])
+    const items = result.items || []
+    const suggested_title = result.suggested_title || "Lista via Foto"
 
     // 3. Deduzir créditos e logar
     await supabase
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       model_used: "gpt-4o-mini"
     })
 
-    return NextResponse.json({ items })
+    return NextResponse.json({ items, suggested_title })
   } catch (error: any) {
     console.error("BLABLA #1 OCR ERROR:", error)
     return NextResponse.json(

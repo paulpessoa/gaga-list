@@ -273,7 +273,7 @@ export default function AppPage() {
   }
 
   const sortedLists = [...(lists || [])].sort((a, b) =>
-    a.title.localeCompare(b.title)
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   )
 
   return (
