@@ -95,7 +95,7 @@ export default function ListDetail({
   useEffect(() => {
     if (items) {
       const sorted = [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
-      setLocalItems(sorted)
+      setLocalItems(sorted) // eslint-disable-line react-hooks/set-state-in-effect
     }
   }, [items])
 

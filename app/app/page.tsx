@@ -13,38 +13,22 @@ import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { useNotifications } from "@/providers/notification-provider"
 import {
   Plus,
-  ShoppingBag,
   WifiOff,
-  LogOut,
-  User,
-  Trash2,
   X,
-  Edit2,
-  CheckCircle2,
-  ChevronRight,
-  QrCode,
-  Mic,
-  Camera,
   Loader2,
-  Square,
-  Bell,
-  Settings,
-  Check,
-  RotateCcw,
-  UtensilsCrossed
 } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { QRScanner } from "@/components/ui/qr-scanner"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 
+import { Reorder } from "framer-motion"
+
 export default function AppPage() {
   const router = useRouter()
-  const { data: lists, isLoading, isError, error } = useLists()
+  const { data: lists, isLoading, isError } = useLists()
   const { data: user } = useUser()
   const { checkAndAct } = useAICreditCheck()
   const { unreadCount } = useNotifications()
@@ -65,8 +49,6 @@ export default function AppPage() {
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
-  const [editingListId, setEditingListId] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState("")
 
   // Estados para Preview de Voz
   const [voiceTranscription, setVoiceTranscription] = useState("")
@@ -74,6 +56,9 @@ export default function AppPage() {
   const [suggestedTitle, setSuggestedTitle] = useState("")
   const [voiceHint, setVoiceHint] = useState<string | null>(null)
   const [showVoicePreview, setShowVoicePreview] = useState(false)
+
+  // Estado local para Reordenação (Drag & Drop)
+  const [localLists, setLocalLists] = useState<any[]>([])
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
@@ -85,6 +70,29 @@ export default function AppPage() {
       window.removeEventListener("offline", handleOffline)
     }
   }, [])
+
+  // Sincroniza estado local com os dados do React Query
+  useEffect(() => {
+    if (lists) {
+      const sorted = [...lists].sort((a, b) => (a.position || 0) - (b.position || 0))
+      setLocalLists(sorted) // eslint-disable-line react-hooks/set-state-in-effect
+    }
+  }, [lists])
+
+  const handleReorder = (newOrder: any[]) => {
+    setLocalLists(newOrder)
+    
+    // Atualiza posições no banco
+    newOrder.forEach((list, index) => {
+      if (list.position !== index) {
+        updateList.mutate({
+          listId: list.id,
+          updates: { position: index } as any
+        })
+      }
+    })
+    trigger("light")
+  }
 
   const handleProcessVoice = useCallback(
     async (blob: Blob) => {
@@ -125,7 +133,6 @@ export default function AppPage() {
     setIsAiProcessing(true)
     trigger("medium")
     try {
-      // Usamos um endpoint simplificado ou o mesmo passando o texto
       const response = await fetch("/api/ai/suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +154,6 @@ export default function AppPage() {
     if (voiceItems.length === 0) return
     setIsAiProcessing(true)
 
-    // Prioriza o título sugerido pela IA, senão faz o fallback inteligente
     const smartTitleFallback =
       voiceItems
         .slice(0, 2)
@@ -161,7 +167,6 @@ export default function AppPage() {
       {
         onSuccess: async (newList) => {
           try {
-            // Persistência Robusta: Aguarda todos os itens serem criados
             await Promise.all(
               voiceItems.map((item) =>
                 fetch(`/api/lists/${newList.id}/items`, {
@@ -204,7 +209,6 @@ export default function AppPage() {
     }
     setIsAiProcessing(true)
     
-    // Usa o título sugerido pela IA de OCR
     const title = result.suggested_title || `Foto ${new Date().toLocaleDateString()}`
 
     createList.mutate(
@@ -265,24 +269,6 @@ export default function AppPage() {
       }
     )
   }
-  const handleRename = (listId: string, currentTitle: string) => {
-    setEditingListId(listId)
-    setEditTitle(currentTitle)
-  }
-  const submitRename = (listId: string) => {
-    if (!editTitle.trim()) {
-      setEditingListId(null)
-      return
-    }
-    updateList.mutate(
-      { listId, updates: { title: editTitle } },
-      { onSuccess: () => setEditingListId(null) }
-    )
-  }
-
-  const sortedLists = [...(lists || [])].sort((a, b) =>
-    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  )
 
   return (
     <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
@@ -292,7 +278,7 @@ export default function AppPage() {
             Minhas Listas
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
-            {lists?.length || 0} listas ativas • Gerencie seus itens
+            {localLists.length} listas ativas • Gerencie seus itens
           </p>
         </div>
 
@@ -306,11 +292,11 @@ export default function AppPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr">
         <button
           onClick={handleCreateList}
           disabled={createList.isPending}
-          className="glass-panel rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 min-h-[200px] border-dashed border-2 border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/20 hover:bg-zinc-100 dark:hover:bg-zinc-900/40 transition-all group cursor-pointer"
+          className="glass-panel rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 min-h-[180px] border-dashed border-2 border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/20 hover:bg-zinc-100 dark:hover:bg-zinc-900/40 transition-all group cursor-pointer"
         >
           <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
             <Plus className="w-7 h-7 text-indigo-600 dark:text-indigo-400 group-hover:text-white transition-colors" />
@@ -326,40 +312,34 @@ export default function AppPage() {
         </button>
 
         {isLoading ? (
-          [1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="glass-panel rounded-[2.5rem] p-8 min-h-[180px] flex flex-col gap-4 animate-pulse bg-zinc-50/50 dark:bg-zinc-900/20 border border-zinc-100 dark:border-white/5"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-zinc-200 dark:bg-zinc-800 rounded-2xl" />
-                <div className="flex-1 space-y-3">
-                  <div className="h-5 bg-zinc-200 dark:bg-zinc-800 rounded-full w-3/4" />
-                  <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded-full w-1/2" />
-                </div>
-              </div>
-              <div className="mt-auto h-10 bg-zinc-200 dark:bg-zinc-800 rounded-xl w-full" />
-            </div>
+          [1, 2].map((i) => (
+            <div key={i} className="h-[180px] bg-zinc-50 dark:bg-zinc-900 rounded-[2rem] animate-pulse" />
           ))
         ) : isError ? (
-          <div className="col-span-full glass-panel rounded-[2rem] p-12 flex flex-col items-center justify-center border-red-500/20 gap-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
-              <X className="w-8 h-8 text-red-500" />
-            </div>
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-              Ops! Erro ao carregar listas
-            </h3>
-          </div>
+          <div className="col-span-full py-12 text-center text-rose-500 font-bold">Erro ao carregar listas.</div>
         ) : (
-          sortedLists.map((list: any) => (
-            <ListCard
-              key={list.id}
-              list={list}
-              user={user}
-              deleteList={deleteList}
-              updateList={updateList}
-            />
-          ))
+          <Reorder.Group
+            axis="y"
+            values={localLists}
+            onReorder={handleReorder}
+            className="flex flex-col gap-5 md:contents"
+          >
+            {localLists.map((list) => (
+              <Reorder.Item
+                key={list.id}
+                value={list}
+                className="list-none"
+              >
+                <ListCard
+                  list={list}
+                  user={user}
+                  deleteList={deleteList}
+                  updateList={updateList}
+                  showDragHandle={list.owner_id === user?.id}
+                />
+              </Reorder.Item>
+            ))}
+          </Reorder.Group>
         )}
       </div>
 

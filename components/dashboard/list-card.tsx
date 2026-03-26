@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useHaptic } from "@/hooks/use-haptic"
-import { Trash2, LogOut, Check, X, Loader2 } from "lucide-react"
+import { Trash2, LogOut, Check, X, Loader2, GripVertical } from "lucide-react"
 import { useState } from "react"
 import { useLeaveList } from "@/hooks/use-lists"
 
@@ -11,13 +11,15 @@ interface ListCardProps {
   user: any
   deleteList?: any
   updateList?: any
+  showDragHandle?: boolean
 }
 
 export function ListCard({
   list,
   user,
   deleteList,
-  updateList
+  updateList,
+  showDragHandle
 }: ListCardProps) {
   const router = useRouter()
   const { trigger } = useHaptic()
@@ -63,18 +65,25 @@ export function ListCard({
       }}
       className="glass-panel card-hover rounded-[2rem] p-6 flex flex-col justify-between min-h-[160px] cursor-pointer border-zinc-100 dark:border-white/5 bg-white dark:bg-zinc-900/40 relative overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500"
     >
-      <div className="flex items-start justify-between gap-2 bg-red">
-        <div className="flex flex-col min-w-0">
-          <h3 className="font-black text-xl text-zinc-900 dark:text-white truncate group-hover:text-indigo-500 transition-colors leading-tight tracking-tight">
-            {list.title}
-          </h3>
-          <div className="flex items-center gap-1.5 mt-1">
-            <div
-              className={`w-1.5 h-1.5 rounded-full ${isOwner ? "bg-indigo-500" : "bg-emerald-500"}`}
-            />
-            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 opacity-80">
-              {isOwner ? "Sua Lista" : "Lista Compartilhada"}
-            </p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          {showDragHandle && (
+            <div className="p-1 text-zinc-300 dark:text-zinc-700 cursor-grab active:cursor-grabbing">
+              <GripVertical className="w-4 h-4" />
+            </div>
+          )}
+          <div className="flex flex-col min-w-0">
+            <h3 className="font-black text-xl text-zinc-900 dark:text-white truncate group-hover:text-indigo-500 transition-colors leading-tight tracking-tight">
+              {list.title}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div
+                className={`w-1.5 h-1.5 rounded-full ${isOwner ? "bg-indigo-500" : "bg-emerald-500"}`}
+              />
+              <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 opacity-80">
+                {isOwner ? "Sua Lista" : "Lista Compartilhada"}
+              </p>
+            </div>
           </div>
         </div>
 

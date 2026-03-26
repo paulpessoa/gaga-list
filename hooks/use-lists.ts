@@ -66,6 +66,7 @@ export function useCreateList() {
         description: newListData.description || null,
         color_theme: newListData.color_theme || 'blue',
         icon: '🛒',
+        position: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         deleted_at: null,
