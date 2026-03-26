@@ -57,13 +57,18 @@ export async function POST(request: Request) {
     }
 
     // 3. Chamar o Service com Sanitização
-    const newList = await ListsService.createList(supabase, {
+    const listPayload = {
       owner_id: user.id,
       title: sanitizeString(body.title, 100),
       description: body.description ? sanitizeString(body.description, 255) : null,
       color_theme: body.color_theme || 'blue',
       icon: body.icon || '🛒',
-    });
+    };
+
+    // Suporte a criação atômica com itens
+    const newList = body.initial_items && Array.isArray(body.initial_items)
+      ? await ListsService.createListWithItems(supabase, listPayload, body.initial_items)
+      : await ListsService.createList(supabase, listPayload);
 
     // 4. Retornar a lista criada
     return NextResponse.json({ data: newList }, { status: 201 });

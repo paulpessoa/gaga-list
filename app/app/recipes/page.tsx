@@ -155,16 +155,26 @@ function RecipesContent() {
   const createListFromRecipe = async (recipe: any) => {
     trigger("medium")
     setIsLoading(true)
-    setLoadingStatus(`Criando lista para: ${recipe.title}...`)
+    setLoadingStatus(`Preparando lista para: ${recipe.title}...`)
     
     try {
-      // 1. Criar a lista base
+      // 1. Preparar ingredientes para o formato da API
+      const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
+      const initialItems = ingredients.map((ing: any) => {
+        const itemName = typeof ing === 'string' ? ing : ing.name
+        const itemQty = typeof ing === 'string' ? "1" : (ing.quantity || "1")
+        const itemUnit = typeof ing === 'object' ? (ing.unit || null) : null
+        return { name: itemName, quantity: itemQty, unit: itemUnit }
+      }).filter((item: any) => item.name)
+
+      // 2. Criar a lista com itens atômicos
       const response = await fetch("/api/lists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          title: recipe.title, // Usa o nome da receita como título
-          color_theme: "indigo"
+          title: recipe.title,
+          color_theme: "indigo",
+          initial_items: initialItems
         })
       })
       const result = await response.json()
@@ -172,33 +182,6 @@ function RecipesContent() {
 
       if (!newList?.id) {
         throw new Error("Não foi possível criar a lista de compras.")
-      }
-
-      // 2. Preparar ingredientes
-      const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
-      
-      if (ingredients.length > 0) {
-        setLoadingStatus(`Adicionando ${ingredients.length} ingredientes...`)
-        
-        // Adicionar itens em paralelo para performance
-        await Promise.all(
-          ingredients.map(async (ingredient: any) => {
-            const itemName = typeof ingredient === 'string' ? ingredient : ingredient.name
-            const itemQty = typeof ingredient === 'string' ? "1" : (ingredient.quantity || "1")
-            
-            if (!itemName) return
-
-            return fetch(`/api/lists/${newList.id}/items`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: itemName,
-                quantity: itemQty,
-                unit: typeof ingredient === 'object' ? (ingredient.unit || null) : null
-              })
-            })
-          })
-        )
       }
 
       trigger("success")

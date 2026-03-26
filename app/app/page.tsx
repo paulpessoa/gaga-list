@@ -162,39 +162,33 @@ export default function AppPage() {
     
     const title = suggestedTitle || smartTitleFallback || "Nova Lista por Voz"
 
-    createList.mutate(
-      { title, color_theme: "indigo" },
-      {
-        onSuccess: async (newList) => {
-          try {
-            await Promise.all(
-              voiceItems.map((item) =>
-                fetch(`/api/lists/${newList.id}/items`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: item.name,
-                    quantity: item.quantity || "1",
-                    unit: item.unit || null,
-                    category: item.category || null,
-                    price: item.price || 0,
-                    notes: item.notes || null
-                  })
-                })
-              )
-            )
+    // Mapear itens para o formato da API
+    const initialItems = voiceItems.map(item => ({
+      name: item.name,
+      quantity: item.quantity || "1",
+      unit: item.unit || null,
+      category: item.category || null,
+      price: item.price || 0,
+      notes: item.notes || null
+    }))
 
-            trigger("success")
-            setIsCreateModalOpen(false)
-            setShowVoicePreview(false)
-            router.push(`/app/lists/${newList.id}`)
-          } catch (err) {
-            console.error("Erro ao salvar itens:", err)
-            alert("Lista criada, mas houve um erro ao salvar alguns itens.")
-            router.push(`/app/lists/${newList.id}`)
-          } finally {
-            setIsAiProcessing(false)
-          }
+    createList.mutate(
+      { 
+        title, 
+        color_theme: "indigo",
+        initial_items: initialItems 
+      } as any,
+      {
+        onSuccess: (newList) => {
+          trigger("success")
+          setIsCreateModalOpen(false)
+          setShowVoicePreview(false)
+          router.push(`/app/lists/${newList.id}`)
+          setIsAiProcessing(false)
+        },
+        onError: () => {
+          alert("Erro ao criar lista com itens.")
+          setIsAiProcessing(false)
         }
       }
     )
@@ -211,35 +205,29 @@ export default function AppPage() {
     
     const title = result.suggested_title || `Foto ${new Date().toLocaleDateString()}`
 
+    // Mapear itens OCR para o formato da API
+    const initialItems = items.map((item: any) => ({
+      name: item.name,
+      quantity: item.quantity || "1",
+      category: item.category || null
+    }))
+
     createList.mutate(
       {
         title: title,
-        color_theme: "indigo"
-      },
+        color_theme: "indigo",
+        initial_items: initialItems
+      } as any,
       {
-        onSuccess: async (newList) => {
-          try {
-            await Promise.all(
-              items.map((item: any) =>
-                fetch(`/api/lists/${newList.id}/items`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: item.name,
-                    quantity: item.quantity || "1",
-                    category: item.category
-                  })
-                })
-              )
-            )
-            trigger("success")
-            router.push(`/app/lists/${newList.id}`)
-          } catch (err) {
-            alert("Erro ao salvar itens da foto.")
-          } finally {
-            setIsAiProcessing(false)
-            setIsCreateModalOpen(false)
-          }
+        onSuccess: (newList) => {
+          trigger("success")
+          router.push(`/app/lists/${newList.id}`)
+          setIsAiProcessing(false)
+          setIsCreateModalOpen(false)
+        },
+        onError: () => {
+          alert("Erro ao salvar itens da foto.")
+          setIsAiProcessing(false)
         }
       }
     )

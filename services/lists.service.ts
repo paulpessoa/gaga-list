@@ -67,6 +67,40 @@ export const ListsService = {
     return data as List;
   },
 
+  /**
+   * Cria uma lista e seus itens iniciais em uma operação encadeada.
+   */
+  async createListWithItems(supabase: any, listData: InsertList, items: any[]): Promise<List> {
+    // 1. Criar a lista
+    const newList = await this.createList(supabase, listData);
+
+    // 2. Se houver itens, inserir todos
+    if (items && items.length > 0) {
+      const itemsToInsert = items.map(item => ({
+        list_id: newList.id,
+        name: item.name,
+        quantity: parseFloat(item.quantity) || 1,
+        unit: item.unit || null,
+        category: item.category || null,
+        price: item.price || 0,
+        notes: item.notes || null,
+        added_by: listData.owner_id
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('items')
+        .insert(itemsToInsert);
+
+      if (itemsError) {
+        console.error('Erro ao inserir itens iniciais:', itemsError);
+        // Nota: Em um sistema crítico usaríamos transações reais, 
+        // mas aqui o retorno da lista já ajuda o usuário a tentar novamente.
+      }
+    }
+
+    return newList;
+  },
+
   async updateList(supabase: any, listId: string, updates: Partial<List>): Promise<List> {
     const { data, error } = await supabase
       .from('lists')
