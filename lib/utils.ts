@@ -36,6 +36,30 @@ export function formatCurrency(value: number): string {
 }
 
 /**
+ * Máscara de preço: Transforma centavos (string de dígitos) em valor formatado (0,00).
+ * Ex: "125" -> "1,25"
+ */
+export function formatPriceMask(value: string): string {
+  const digits = value.replace(/\D/g, "")
+  if (!digits) return "0,00"
+  
+  const number = parseInt(digits) / 100
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(number)
+}
+
+/**
+ * Converte a string da máscara de preço em um float para o banco de dados.
+ */
+export function parsePriceFromMask(mask: string): number {
+  const digits = mask.replace(/\D/g, "")
+  if (!digits) return 0
+  return parseInt(digits) / 100
+}
+
+/**
  * Sanitiza uma string removendo tags HTML e scripts, prevenindo XSS básico.
  * Também limita o tamanho máximo para evitar abusos no banco de dados.
  */

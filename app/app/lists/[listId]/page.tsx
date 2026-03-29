@@ -53,7 +53,12 @@ import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { CreateItemModal } from "@/components/lists/create-item-modal"
-import { cn, formatCurrency } from "@/lib/utils"
+import { 
+  cn, 
+  formatCurrency, 
+  formatPriceMask, 
+  parsePriceFromMask 
+} from "@/lib/utils"
 
 export default function ListDetail({
   params
@@ -626,11 +631,15 @@ export default function ListDetail({
                         </label>
                         <div className="relative">
                           <input
-                            type="number"
-                            step="0.01"
+                            type="text"
+                            inputMode="numeric"
                             placeholder="0,00"
-                            value={item.price || ""}
-                            onChange={(e) => handleUpdateRichData(item.id, "price", parseFloat(e.target.value) || 0)}
+                            value={item.price > 0 ? formatPriceMask(Math.round(item.price * 100).toString()) : ""}
+                            onChange={(e) => {
+                              const rawValue = e.target.value.replace(/\D/g, "")
+                              const numericValue = parsePriceFromMask(rawValue)
+                              handleUpdateRichData(item.id, "price", numericValue)
+                            }}
                             className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold outline-none"
                           />
                           <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />

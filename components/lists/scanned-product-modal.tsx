@@ -1,8 +1,9 @@
 'use client';
 
-import { X, ShoppingBag, Zap, Save, Plus, Loader2, ListFilter } from 'lucide-react';
+import { X, ShoppingBag, Zap, Save, Plus, Loader2, ListFilter, Coins } from 'lucide-react';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useState } from 'react';
+import { formatPriceMask, parsePriceFromMask } from '@/lib/utils';
 
 interface ScannedProductModalProps {
   data: {
@@ -23,6 +24,8 @@ export function ScannedProductModal({ data, lists, activeListId, onClose, onSave
   const [suggestions, setSuggestions] = useState<{ benefits: string, suggested_uses: string[] } | null>(null);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [selectedListId, setSelectedListId] = useState<string>(activeListId || '');
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState(0);
 
   if (!data) return null;
 
@@ -72,6 +75,36 @@ export function ScannedProductModal({ data, lists, activeListId, onClose, onSave
             </div>
           )}
 
+          {/* Inputs de Quantidade e Preço */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Quantidade</label>
+              <input 
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-3 px-4 text-sm font-bold outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Preço Unitário</label>
+              <div className="relative">
+                <input 
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0,00"
+                  value={price > 0 ? formatPriceMask(Math.round(price * 100).toString()) : ""}
+                  onChange={(e) => {
+                    const rawValue = e.target.value.replace(/\D/g, "");
+                    setPrice(parsePriceFromMask(rawValue));
+                  }}
+                  className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-3 pl-10 px-4 text-sm font-bold outline-none"
+                />
+                <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+              </div>
+            </div>
+          </div>
+
           {suggestions ? (
             <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
               <div className="bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl p-5 border border-zinc-100 dark:border-white/5">
@@ -101,7 +134,7 @@ export function ScannedProductModal({ data, lists, activeListId, onClose, onSave
 
         <div className="mt-10 flex flex-col gap-3">
           <button
-            onClick={() => onAddToList(selectedListId, { ...data, ...suggestions })}
+            onClick={() => onAddToList(selectedListId, { ...data, ...suggestions, quantity, price })}
             disabled={isSaving || !selectedListId}
             className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
@@ -109,7 +142,7 @@ export function ScannedProductModal({ data, lists, activeListId, onClose, onSave
           </button>
           
           <button
-            onClick={() => onSaveToMyProducts({ ...data, ...suggestions })}
+            onClick={() => onSaveToMyProducts({ ...data, ...suggestions, price })}
             disabled={isSaving}
             className="w-full py-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border-2 border-zinc-100 dark:border-white/5 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all active:scale-95 flex items-center justify-center gap-2"
           >

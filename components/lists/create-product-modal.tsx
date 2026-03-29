@@ -1,9 +1,10 @@
 'use client';
 
-import { X, Save, Loader2, Tag, Package, Hash, Ruler } from 'lucide-react';
+import { X, Save, Loader2, Tag, Package, Hash, Ruler, Coins } from 'lucide-react';
 import { useHaptic } from '@/hooks/use-haptic';
 import { useState } from 'react';
 import { MyProduct, InsertProduct } from '@/services/my-products.service';
+import { formatPriceMask, parsePriceFromMask } from '@/lib/utils';
 
 interface CreateProductModalProps {
   onClose: () => void;
@@ -118,6 +119,25 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
                 <option value="Higiene">Higiene</option>
                 <option value="Bebidas">Bebidas</option>
               </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Preço Médio Estimado</label>
+            <div className="relative">
+              <Coins className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+              <input 
+                type="text"
+                inputMode="numeric"
+                value={(formData as any).price > 0 ? formatPriceMask(Math.round((formData as any).price * 100).toString()) : ""}
+                onChange={e => {
+                  const rawValue = e.target.value.replace(/\D/g, "");
+                  const numericValue = parsePriceFromMask(rawValue);
+                  setFormData(prev => ({ ...prev, price: numericValue } as any));
+                }}
+                placeholder="R$ 0,00"
+                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+              />
             </div>
           </div>
 
