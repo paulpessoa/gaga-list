@@ -2,21 +2,18 @@
 *Este arquivo é a caixa-preta do projeto. Atualizado a cada turn significante.*
 
 ## 📍 Estado Atual
-- **Data:** 22 de Março de 2026
-- **Status:** Sistema de Créditos funcional. Receitas com 3 abas ("Minha Lista", "Inspiração", "Meu Livro"). Chef IA Minimalista (Strict Ingredients) ativo. Central de Ajuda operacional.
-- **Ambiente:** Next.js 15, Supabase, OpenAI/Gemini, Recharts.
+- **Data:** 29 de Março de 2026
+- **Status:** UX Simplificada e Robusta (KISS).
+- **Recentes:** 
+    1. Máscara de preços inteligente (Apple Standard) em todos os inputs de valor.
+    2. Remoção do Drag & Drop manual para evitar bugs de sincronização.
+    3. Implementação de **Smart Sorting** automático (Listas por atualização, Itens por Status + Categoria).
+    4. **Tab Bar Contextual:** Botão de ação principal (Nova Lista / Novo Item) integrado na barra inferior, agora posicionado à **esquerda** (ajuste de ergonomia).
+    5. Dashboard com filtros (Todas, Minhas, Outros).
 
-## 🛠️ Últimas Alterações (Checkpoint)
-1. **Strict AI Chef:** Refinado o prompt da IA para usar EXCLUSIVAMENTE os ingredientes fornecidos, evitando alucinações com itens extras ou eletrônicos.
-2. **Recipe Tabs Refactor:** Página de receitas dividida em 3 abas claras para melhorar o fluxo de descoberta e eficiência.
-3. **Empty List Filter:** Dropdown de receitas agora oculta listas vazias para evitar erros de geração.
-4. **Help Center:** Implementada página `/app/help` com FAQ reativo e suporte via WhatsApp.
-5. **UI Consistency:** 'CreateItemModal' alinhado visualmente com o 'CreateListModal'.
-
-## 🚀 Próximos Passos Imediatos
-1. Refatoração de UX (Apple Standard) na página de Perfil.
-2. Implementação da Máscara de Preços nos itens da lista.
-3. Área Administrativa: Dashboards globais usando a mesma infraestrutura de Recharts.
+## 🎯 Próximos Passos (Resume point)
+1. **Nova Central de Itens (V2):** Repensar a gestão de produtos globais e personalizados.
+2. **Área Administrativa:** Dashboards globais de uso do sistema.
 
 ## 💾 Contexto de Recuperação
-Se a sessão cair, leia: `docs/HEARTBEAT.md`, `docs/product/VISION.md` e `app/app/recipes/page.tsx`.
+Se a sessão cair, leia: `docs/HEARTBEAT.md`, `docs/product/VISION.md`, `components/ui/tab-bar.tsx` e `app/app/page.tsx`.
