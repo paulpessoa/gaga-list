@@ -273,6 +273,9 @@ export default function ListDetail({
   const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
   const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
 
+  // Drag & Drop só é permitido se não houver filtros ativos
+  const isFiltering = filter !== "all" || sortBy !== "none"
+
   const pendingSum = useMemo(
     () =>
       localItems.filter(i => !i.is_purchased).reduce(
@@ -494,12 +497,14 @@ export default function ListDetail({
               <Reorder.Item
                 key={item.id}
                 value={item}
-                dragListener={isOwner && expandedItemId === null}
+                // Só arrasta se: Dono E Não expandido E Não filtrando
+                dragListener={isOwner && expandedItemId === null && !isFiltering}
                 className={cn(
                   "flex flex-col rounded-[1.5rem] transition-all duration-300 border list-none",
                   expandedItemId === item.id 
                     ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg scale-[1.02] z-10" 
-                    : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"
+                    : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm",
+                  !isOwner || isFiltering ? "cursor-default" : ""
                 )}
               >
                 <div className="flex items-center justify-between p-3 px-4">
@@ -565,7 +570,7 @@ export default function ListDetail({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {isOwner && expandedItemId === null && (
+                    {isOwner && expandedItemId === null && !isFiltering && (
                       <div className="p-2 text-zinc-300 dark:text-zinc-700 cursor-grab active:cursor-grabbing">
                         <GripVertical className="w-4 h-4" />
                       </div>

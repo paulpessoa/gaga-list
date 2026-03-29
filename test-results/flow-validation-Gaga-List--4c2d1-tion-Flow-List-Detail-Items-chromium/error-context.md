@@ -1,0 +1,59 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - img [ref=e9]
+    - generic [ref=e13]:
+      - heading "Experiência de Bolso Apenas Mobile" [level=2] [ref=e14]:
+        - text: Experiência de Bolso
+        - text: Apenas Mobile
+      - paragraph [ref=e15]: O Gaga List foi desenhado para ser usado no mercado, na palma da sua mão.
+    - generic [ref=e16]:
+      - paragraph [ref=e17]: "Como acessar agora:"
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]: "1"
+          - paragraph [ref=e21]: Abra este link no seu celular
+        - generic [ref=e22]:
+          - generic [ref=e23]: "2"
+          - paragraph [ref=e24]: Ou diminua a largura desta janela
+    - generic [ref=e25]:
+      - img [ref=e26]
+      - text: Mobile First Engine v1.0
+  - generic [ref=e28]:
+    - navigation [ref=e29]:
+      - generic [ref=e30]:
+        - img [ref=e31]
+        - generic [ref=e35]: Lista Pronta
+    - main [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - img [ref=e39]
+          - generic [ref=e41]: Sincronização em tempo real
+        - heading "Suas compras em perfeita sintonia." [level=1] [ref=e42]:
+          - text: Suas compras em
+          - text: perfeita sintonia.
+        - paragraph [ref=e43]: Crie, compartilhe e sincronize listas de compras com sua família e amigos.
+        - button "Acessar minhas listas" [ref=e45] [cursor=pointer]:
+          - text: Acessar minhas listas
+          - img [ref=e46]
+      - generic [ref=e48]:
+        - link "Privacidade" [ref=e49] [cursor=pointer]:
+          - /url: /privacy
+          - img [ref=e50]
+          - text: Privacidade
+        - link "Termos" [ref=e52] [cursor=pointer]:
+          - /url: /terms
+          - img [ref=e53]
+          - text: Termos
+  - generic [ref=e56]:
+    - img [ref=e58]
+    - button "Open Tanstack query devtools" [ref=e106] [cursor=pointer]:
+      - img [ref=e107]
+  - button "Open Next.js Dev Tools" [ref=e160] [cursor=pointer]:
+    - img [ref=e161]
+  - alert [ref=e164]: Suas compras em perfeita sintonia.
+```

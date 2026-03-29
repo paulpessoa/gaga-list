@@ -284,17 +284,14 @@ export default function AppPage() {
         <button
           onClick={handleCreateList}
           disabled={createList.isPending}
-          className="glass-panel rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 min-h-[180px] border-dashed border-2 border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/20 hover:bg-zinc-100 dark:hover:bg-zinc-900/40 transition-all group cursor-pointer"
+          className="glass-panel rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 min-h-[140px] border-dashed border-2 border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/20 hover:bg-zinc-100 dark:hover:bg-zinc-900/40 transition-all group cursor-pointer"
         >
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
-            <Plus className="w-7 h-7 text-indigo-600 dark:text-indigo-400 group-hover:text-white transition-colors" />
+          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
+            <Plus className="w-6 h-6 text-indigo-600 dark:text-indigo-400 group-hover:text-white transition-colors" />
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
               {createList.isPending ? "Criando..." : "Nova Lista"}
-            </span>
-            <span className="text-xs text-zinc-500 font-medium mt-1 text-center">
-              Crie via voz, foto ou manual
             </span>
           </div>
         </button>
