@@ -17,14 +17,12 @@ import {
   X,
   Loader2,
 } from "lucide-react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { VisionScanner } from "@/components/ui/vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
-
-import { Reorder } from "framer-motion"
 
 export default function AppPage() {
   const router = useRouter()
@@ -50,15 +48,15 @@ export default function AppPage() {
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
 
+  // Filtros e Ordenação
+  const [filter, setFilter] = useState<"all" | "mine" | "shared">("all")
+
   // Estados para Preview de Voz
   const [voiceTranscription, setVoiceTranscription] = useState("")
   const [voiceItems, setVoiceItems] = useState<any[]>([])
   const [suggestedTitle, setSuggestedTitle] = useState("")
   const [voiceHint, setVoiceHint] = useState<string | null>(null)
   const [showVoicePreview, setShowVoicePreview] = useState(false)
-
-  // Estado local para Reordenação (Drag & Drop)
-  const [localLists, setLocalLists] = useState<any[]>([])
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false)
@@ -71,28 +69,23 @@ export default function AppPage() {
     }
   }, [])
 
-  // Sincroniza estado local com os dados do React Query
-  useEffect(() => {
-    if (lists) {
-      const sorted = [...lists].sort((a, b) => (a.position || 0) - (b.position || 0))
-      setLocalLists(sorted) // eslint-disable-line react-hooks/set-state-in-effect
-    }
-  }, [lists])
-
-  const handleReorder = (newOrder: any[]) => {
-    setLocalLists(newOrder)
+  const filteredLists = useMemo(() => {
+    if (!lists) return []
     
-    // Atualiza posições no banco
-    newOrder.forEach((list, index) => {
-      if (list.position !== index) {
-        updateList.mutate({
-          listId: list.id,
-          updates: { position: index } as any
-        })
-      }
-    })
-    trigger("light")
-  }
+    let result = [...lists]
+
+    // Filtragem
+    if (filter === "mine") {
+      result = result.filter(l => l.owner_id === user?.id)
+    } else if (filter === "shared") {
+      result = result.filter(l => l.owner_id !== user?.id)
+    }
+
+    // Ordenação Automática: Últimas atualizadas primeiro
+    return result.sort((a, b) => 
+      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    )
+  }, [lists, filter, user?.id])
 
   const handleProcessVoice = useCallback(
     async (blob: Blob) => {
@@ -258,73 +251,83 @@ export default function AppPage() {
     )
   }
 
+  useEffect(() => {
+    const handleOpenModal = () => setIsCreateModalOpen(true)
+    window.addEventListener("open-create-list", handleOpenModal)
+    return () => window.removeEventListener("open-create-list", handleOpenModal)
+  }, [])
+
   return (
     <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl py-4 -mx-5 px-5 flex items-start justify-between border-b border-zinc-100/50 dark:border-white/5 transition-all">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
-            Minhas Listas
-          </h1>
-          <p className="text-sm text-zinc-500 font-medium">
-            {localLists.length} listas ativas • Gerencie seus itens
-          </p>
+      <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl py-4 -mx-5 px-5 flex flex-col gap-6 border-b border-zinc-100/50 dark:border-white/5 transition-all">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+              Minhas Listas
+            </h1>
+            <p className="text-sm text-zinc-500 font-medium">
+              {filteredLists.length} listas ativas • Gerencie seus itens
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {isOffline && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
+                <WifiOff className="w-3 h-3" />
+                <span>OFFLINE</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isOffline && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
-              <WifiOff className="w-3 h-3" />
-              <span>OFFLINE</span>
-            </div>
-          )}
+        {/* Filtros de Abas */}
+        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl w-fit">
+          <button
+            onClick={() => { setFilter("all"); trigger("light"); }}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+          >
+            Todas
+          </button>
+          <button
+            onClick={() => { setFilter("mine"); trigger("light"); }}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+          >
+            Minhas
+          </button>
+          <button
+            onClick={() => { setFilter("shared"); trigger("light"); }}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+          >
+            Outros
+          </button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr">
-        <button
-          onClick={handleCreateList}
-          disabled={createList.isPending}
-          className="glass-panel rounded-[2rem] p-6 flex flex-col items-center justify-center gap-3 min-h-[140px] border-dashed border-2 border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/20 hover:bg-zinc-100 dark:hover:bg-zinc-900/40 transition-all group cursor-pointer"
-        >
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300">
-            <Plus className="w-6 h-6 text-indigo-600 dark:text-indigo-400 group-hover:text-white transition-colors" />
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              {createList.isPending ? "Criando..." : "Nova Lista"}
-            </span>
-          </div>
-        </button>
-
         {isLoading ? (
           [1, 2].map((i) => (
             <div key={i} className="h-[180px] bg-zinc-50 dark:bg-zinc-900 rounded-[2rem] animate-pulse" />
           ))
         ) : isError ? (
           <div className="col-span-full py-12 text-center text-rose-500 font-bold">Erro ao carregar listas.</div>
+        ) : filteredLists.length === 0 ? (
+          <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-3xl flex items-center justify-center text-zinc-200 dark:text-zinc-800">
+              <Plus className="w-8 h-8" />
+            </div>
+            <p className="text-zinc-400 font-bold">Nenhuma lista encontrada.</p>
+          </div>
         ) : (
-          <Reorder.Group
-            axis="y"
-            values={localLists}
-            onReorder={handleReorder}
-            className="flex flex-col gap-5 md:contents"
-          >
-            {localLists.map((list) => (
-              <Reorder.Item
-                key={list.id}
-                value={list}
-                className="list-none"
-              >
-                <ListCard
-                  list={list}
-                  user={user}
-                  deleteList={deleteList}
-                  updateList={updateList}
-                  showDragHandle={list.owner_id === user?.id}
-                />
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
+          filteredLists.map((list) => (
+            <ListCard
+              key={list.id}
+              list={list}
+              user={user}
+              deleteList={deleteList}
+              updateList={updateList}
+              showDragHandle={false}
+            />
+          ))
         )}
       </div>
 

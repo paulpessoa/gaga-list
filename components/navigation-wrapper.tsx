@@ -91,9 +91,26 @@ export function NavigationWrapper() {
 
   if (shouldHide) return null
 
+  // Contextual Button Logic
+  let actionButton = undefined
+  if (pathname === "/app") {
+    actionButton = {
+      label: "Nova Lista",
+      onClick: () => window.dispatchEvent(new CustomEvent("open-create-list"))
+    }
+  } else if (listId) {
+    actionButton = {
+      label: "Novo Item",
+      onClick: () => window.dispatchEvent(new CustomEvent("open-create-item"))
+    }
+  }
+
   return (
     <>
-      <TabBar onScanClick={() => setIsScannerOpen(true)} />
+      <TabBar 
+        onScanClick={() => setIsScannerOpen(true)} 
+        actionButton={actionButton}
+      />
 
       <VisionScanner
         isOpen={isScannerOpen}

@@ -35,8 +35,7 @@ import {
   Mic,
   Camera,
   Loader2,
-  Filter,
-  GripVertical
+  Filter
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -47,7 +46,6 @@ import { ListChat } from "@/components/lists/list-chat"
 import { Collaborator } from "@/types"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Reorder } from "framer-motion"
 
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 import { VisionScanner } from "@/components/ui/vision-scanner"
@@ -91,34 +89,7 @@ export default function ListDetail({
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState("")
 
-  // Estado local para Reordenação (Drag & Drop)
-  const [localItems, setLocalItems] = useState<any[]>([])
-
   const isOwner = list?.owner_id === user?.id
-
-  // Sincroniza estado local com os dados do React Query
-  useEffect(() => {
-    if (items) {
-      const sorted = [...items].sort((a, b) => (a.position || 0) - (b.position || 0))
-      setLocalItems(sorted) // eslint-disable-line react-hooks/set-state-in-effect
-    }
-  }, [items])
-
-  const handleReorder = (newOrder: any[]) => {
-    if (!isOwner) return
-    setLocalItems(newOrder)
-    
-    // Atualiza posições no banco
-    newOrder.forEach((item, index) => {
-      if (item.position !== index) {
-        updateItem.mutate({
-          itemId: item.id,
-          updates: { position: index } as any
-        })
-      }
-    })
-    trigger("light")
-  }
 
   const handleUpdateTitle = useCallback(() => {
     if (editTitle.trim() && editTitle !== list?.title) {
@@ -278,32 +249,52 @@ export default function ListDetail({
   const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
   const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
 
-  // Drag & Drop só é permitido se não houver filtros ativos
-  const isFiltering = filter !== "all" || sortBy !== "none"
-
   const pendingSum = useMemo(
     () =>
-      localItems.filter(i => !i.is_purchased).reduce(
+      (items || []).filter(i => !i.is_purchased).reduce(
         (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
         0
       ),
-    [localItems]
+    [items]
   )
 
   const purchasedSum = useMemo(
     () =>
-      localItems.filter(i => i.is_purchased).reduce(
+      (items || []).filter(i => i.is_purchased).reduce(
         (acc, item) => acc + (item.price || 0) * (item.quantity || 1),
         0
       ),
-    [localItems]
+    [items]
   )
 
   const filteredItems = useMemo(() => {
-    let result = [...localItems]
+    if (!items) return []
+    
+    let result = [...items]
+
+    // Filtros de UI
     if (filter === "pending") result = result.filter((i) => !i.is_purchased)
     if (filter === "purchased") result = result.filter((i) => i.is_purchased)
 
+    // ORDENAÇÃO INTELIGENTE AUTOMÁTICA
+    result.sort((a, b) => {
+      // 1. Status: Pendentes primeiro
+      if (a.is_purchased !== b.is_purchased) {
+        return a.is_purchased ? 1 : -1
+      }
+
+      // 2. Categoria (Agrupar por corredor)
+      const catA = a.category || "Z-Geral"
+      const catB = b.category || "Z-Geral"
+      if (catA !== catB) {
+        return catA.localeCompare(catB)
+      }
+
+      // 3. Nome (Alfabético)
+      return a.name.localeCompare(b.name)
+    })
+
+    // Se houver uma ordenação explícita de A-Z via botão
     if (sortBy === "name") {
       result.sort((a, b) => a.name.localeCompare(b.name))
     } else if (sortBy === "recent") {
@@ -312,14 +303,21 @@ export default function ListDetail({
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
     }
+    
     return result
-  }, [localItems, filter, sortBy])
+  }, [items, filter, sortBy])
 
   const handleClearFilters = () => {
     setFilter("all")
     setSortBy("none")
     trigger("light")
   }
+
+  useEffect(() => {
+    const handleOpenModal = () => setIsCreateItemModalOpen(true)
+    window.addEventListener("open-create-item", handleOpenModal)
+    return () => window.removeEventListener("open-create-item", handleOpenModal)
+  }, [])
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col pb-32 transition-colors duration-300">
@@ -397,7 +395,7 @@ export default function ListDetail({
                   Itens
                 </span>
                 <span className="text-sm font-black text-indigo-500 leading-none mt-1">
-                  {localItems.length}
+                  {(items || []).length}
                 </span>
               </div>
               <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
@@ -492,24 +490,15 @@ export default function ListDetail({
             <p className="text-zinc-400 font-bold">Nenhum item encontrado</p>
           </div>
         ) : (
-          <Reorder.Group
-            axis="y"
-            values={localItems}
-            onReorder={handleReorder}
-            className="flex flex-col gap-4"
-          >
+          <div className="flex flex-col gap-4">
             {filteredItems.map((item) => (
-              <Reorder.Item
+              <div
                 key={item.id}
-                value={item}
-                // Só arrasta se: Dono E Não expandido E Não filtrando
-                dragListener={isOwner && expandedItemId === null && !isFiltering}
                 className={cn(
-                  "flex flex-col rounded-[1.5rem] transition-all duration-300 border list-none",
+                  "flex flex-col rounded-[1.5rem] transition-all duration-300 border",
                   expandedItemId === item.id 
                     ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg scale-[1.02] z-10" 
-                    : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm",
-                  !isOwner || isFiltering ? "cursor-default" : ""
+                    : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"
                 )}
               >
                 <div className="flex items-center justify-between p-3 px-4">
@@ -565,7 +554,12 @@ export default function ListDetail({
                         <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tight">
                           {item.quantity} {item.unit || "un"}
                         </span>
-                        {item.price > 0 && (
+                        {item.category && (
+                          <span className="text-[9px] font-black text-indigo-400 dark:text-indigo-600 uppercase tracking-tight">
+                            • {item.category}
+                          </span>
+                        )}
+                        {item.price && item.price > 0 && (
                           <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tight">
                             • {formatCurrency(item.price * item.quantity)}
                           </span>
@@ -575,12 +569,6 @@ export default function ListDetail({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {isOwner && expandedItemId === null && !isFiltering && (
-                      <div className="p-2 text-zinc-300 dark:text-zinc-700 cursor-grab active:cursor-grabbing">
-                        <GripVertical className="w-4 h-4" />
-                      </div>
-                    )}
-                    
                     <button
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
@@ -634,7 +622,7 @@ export default function ListDetail({
                             type="text"
                             inputMode="numeric"
                             placeholder="0,00"
-                            value={item.price > 0 ? formatPriceMask(Math.round(item.price * 100).toString()) : ""}
+                            value={(item.price && item.price > 0) ? formatPriceMask(Math.round(item.price * 100).toString()) : ""}
                             onChange={(e) => {
                               const rawValue = e.target.value.replace(/\D/g, "")
                               const numericValue = parsePriceFromMask(rawValue)
@@ -647,46 +635,53 @@ export default function ListDetail({
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
-                        Observações
-                      </label>
-                      <textarea
-                        placeholder="Ex: Marca preferida..."
-                        value={item.notes || ""}
-                        onChange={(e) => handleUpdateRichData(item.id, "notes", e.target.value)}
-                        className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3 px-4 text-sm font-medium outline-none h-16 resize-none"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                          Categoria / Corredor
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: Hortifruti, Limpeza..."
+                          value={item.category || ""}
+                          onChange={(e) => handleUpdateRichData(item.id, "category", e.target.value)}
+                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                          Observações
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ex: Marca preferida..."
+                          value={item.notes || ""}
+                          onChange={(e) => handleUpdateRichData(item.id, "notes", e.target.value)}
+                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                        />
+                      </div>
                     </div>
 
-                    {item.is_purchased && item.checked_by_profile && (
+                    {item.is_purchased && (item as any).checked_by_profile && (
                       <div className="flex items-center gap-2 pt-1">
                         <div className="w-5 h-5 rounded-full bg-zinc-100 overflow-hidden">
                           <Image
-                            src={item.checked_by_profile.avatar_url || `https://ui-avatars.com/api/?name=${item.checked_by_profile.full_name}&background=6366f1&color=fff`}
+                            src={(item as any).checked_by_profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((item as any).checked_by_profile.full_name || "U")}&background=6366f1&color=fff`}
                             width={20} height={20} alt="Avatar"
                           />
                         </div>
-                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">
-                          Pegado por {item.checked_by_profile.full_name}
+                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
+                          Pegado por {(item as any).checked_by_profile.full_name}
                         </p>
                       </div>
                     )}
                   </div>
                 )}
-              </Reorder.Item>
+              </div>
             ))}
-          </Reorder.Group>
+          </div>
         )}
       </div>
-
-      {/* FAB */}
-      <button
-        onClick={() => setIsCreateItemModalOpen(true)}
-        className="fixed bottom-32 left-8 w-16 h-16 bg-indigo-600 dark:bg-white text-white dark:text-indigo-600 rounded-[2rem] flex items-center justify-center shadow-2xl z-40 border-4 border-white dark:border-indigo-900"
-      >
-        <Plus className="w-8 h-8" />
-      </button>
 
       <CreateItemModal
         isOpen={isCreateItemModalOpen}
