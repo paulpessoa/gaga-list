@@ -168,14 +168,14 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
           <>
             <button 
               onClick={() => { setCapturedImage(null); startCamera(); }} 
-              className="p-4 rounded-full bg-zinc-900 text-zinc-500 active:scale-95 transition-all pointer-events-auto"
+              className="p-4 rounded-full bg-zinc-900 text-zinc-500 active:scale-95 transition-all pointer-events-auto touch-manipulation"
             >
               <RefreshCw className="w-6 h-6" />
             </button>
             
             <button 
               onClick={capturePhoto} 
-              className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)] active:scale-90 transition-all pointer-events-auto"
+              className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)] active:scale-90 transition-all pointer-events-auto touch-manipulation"
             >
               <div className="w-20 h-20 rounded-full border-[6px] border-black flex items-center justify-center">
                 <div className="w-14 h-14 rounded-full bg-indigo-500 shadow-inner" />
@@ -189,14 +189,14 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
             <button 
               onClick={processImage}
               disabled={isAiProcessing}
-              className="w-full py-6 bg-white text-black rounded-[2rem] font-black uppercase tracking-[0.2em] text-[12px] flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all pointer-events-auto"
+              className="w-full py-6 bg-white text-black rounded-[2rem] font-black uppercase tracking-[0.2em] text-[12px] flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all pointer-events-auto touch-manipulation"
             >
               <Send className="w-5 h-5 fill-black" />
               Enviar para IA
             </button>
             <button 
               onClick={() => { setCapturedImage(null); startCamera(); }}
-              className="w-full py-4 text-zinc-500 font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all pointer-events-auto"
+              className="w-full py-4 text-zinc-500 font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all pointer-events-auto touch-manipulation"
             >
               Tirar Outra Foto
             </button>
