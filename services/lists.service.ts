@@ -136,7 +136,7 @@ export const ListsService = {
     // 1. Buscar a lista para identificar o dono
     const { data: listInfo, error: listError } = await supabase
       .from('lists')
-      .select('owner_id, profiles!owner_id (id, email, full_name, avatar_url, phone, last_lat, last_lng, last_seen_at)')
+      .select('owner_id, profiles!owner_id (id, email, full_name, avatar_url, phone)')
       .eq('id', listId)
       .single();
 
@@ -155,10 +155,7 @@ export const ListsService = {
           email,
           full_name,
           avatar_url,
-          phone,
-          last_lat,
-          last_lng,
-          last_seen_at
+          phone
         )
       `)
       .eq('list_id', listId);

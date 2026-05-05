@@ -15,7 +15,6 @@ import {
   RefreshCw,
   Bell
 } from "lucide-react"
-import { useLists, useCollaborators } from "@/hooks/use-lists"
 import Link from "next/link"
 import { useState, useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
@@ -83,7 +82,6 @@ export default function CadeTuPage() {
   const { listId } = useParams() as { listId: string }
   const { data: user } = useUser()
   const { onlineUsers, myLocation, sendNudge } = usePresence(listId, user)
-  const { data: listCollaborators } = useCollaborators(listId)
   const { trigger } = useHaptic()
 
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null)
@@ -121,42 +119,19 @@ export default function CadeTuPage() {
   }
 
   const colleagues = useMemo(() => {
-    // 1. Pegar todos os colaboradores da lista (incluindo o dono)
-    if (!listCollaborators) return []
-
-    const allCollabs = listCollaborators.map((c: any) => ({
-      user_id: c.profiles.id,
-      full_name: c.profiles.full_name,
-      avatar_url: c.profiles.avatar_url,
-      phone: c.profiles.phone,
-      lat: c.profiles.last_lat,
-      lng: c.profiles.last_lng,
-      last_seen: c.profiles.last_seen_at,
-      is_online: !!onlineUsers[c.profiles.id]
-    }))
-
-    // 2. Mesclar com dados em tempo real (que são mais frescos)
-    const merged = allCollabs.map((u: any) => {
-      const online = onlineUsers[u.user_id]
-      if (online && online.lat && online.lng) {
-        return { ...u, lat: online.lat, lng: online.lng, is_online: true }
-      }
-      return u
-    })
-
-    // 3. Filtrar a si mesmo e quem não tem localização nenhuma
-    const list = merged.filter((u: any) => u.user_id !== user?.id && u.lat && u.lng)
-
+    const list = Object.values(onlineUsers).filter(
+      (u) => u.user_id !== user?.id && u.lat && u.lng
+    )
     if (!myLocation) return list
 
     return list
-      .map((u: any) => {
-        const dist = getDistance(myLocation.lat, myLocation.lng, u.lat, u.lng)
-        const bear = getBearing(myLocation.lat, myLocation.lng, u.lat, u.lng)
-        return { ...u, distance: dist, bearing: bear }
+      .map((u) => {
+        const dist = getDistance(myLocation.lat, myLocation.lng, u.lat!, u.lng!)
+        const bear = getBearing(myLocation.lat, myLocation.lng, u.lat!, u.lng!)
+        return { ...u, distance: dist, bearing: bear, is_online: true }
       })
       .sort((a, b) => (a.distance || 999) - (b.distance || 999))
-  }, [onlineUsers, listCollaborators, myLocation, user?.id])
+  }, [onlineUsers, myLocation, user?.id])
 
   const focusUser = (lat: number, lng: number) => {
     setMapCenter([lat, lng])
@@ -331,10 +306,8 @@ export default function CadeTuPage() {
                           {u.full_name}
                         </h3>
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${u.is_online ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}
-                          >
-                            {u.is_online ? "Online" : "Visto por último"}
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400">
+                            Ao vivo
                           </span>
                           <span className="text-[10px] font-bold text-zinc-500">
                             {u.distance ? `${Math.round(u.distance)}m` : ""}
