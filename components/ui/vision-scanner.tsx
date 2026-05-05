@@ -50,6 +50,10 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
 
   useEffect(() => {
     if (isOpen) {
+      // Reset total de estados ao abrir para evitar bloqueios
+      setIsAiProcessing(false);
+      setCapturedImage(null);
+      setRawAiResponse(null);
       startCamera();
     } else {
       stopCamera();
