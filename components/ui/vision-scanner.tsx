@@ -66,14 +66,20 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const maxWidth = 1600;
-      const scale = maxWidth / video.videoWidth;
-      canvas.width = maxWidth;
-      canvas.height = video.videoHeight * scale;
 
+      // Proteção crucial: se o vídeo não estiver pronto, não captura
+      if (video.videoWidth === 0) {
+        console.warn('Vídeo ainda não carregou as dimensões.');
+        return;
+      }
+
+      // Lógica idêntica à página de debug que funcionou
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setCapturedImage(dataUrl);
         trigger('medium');
