@@ -156,12 +156,12 @@ export function ShareModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white dark:bg-zinc-950 w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
+      <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 bg-[#131313]/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="bg-white dark:bg-[#131313] w-full h-full sm:h-auto sm:max-w-md sm:rounded-[2.5rem] p-6 sm:p-10 relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300 overflow-y-auto scrollbar-hide">
           <div className="absolute top-8 right-8 flex items-center gap-2">
             <button
               onClick={onClose}
-              className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-white/5"
+              className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2 bg-zinc-100 dark:bg-[#1c1b1b] rounded-xl border border-zinc-200 dark:border-[#3d4a3d]/60"
             >
               <X className="w-6 h-6" />
             </button>
@@ -169,10 +169,10 @@ export function ShareModal({
 
           <div className="mt-8 sm:mt-0">
             <div className="flex flex-col mb-8">
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+              <h2 className="text-3xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2 tracking-tight">
                 Compartilhar
               </h2>
-              <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+              <p className="text-zinc-500 dark:text-[#bccbb9] text-sm">
                 Convide amigos e família para a lista.
               </p>
             </div>
@@ -181,7 +181,7 @@ export function ShareModal({
               <button
                 onClick={handleGenerateInvite}
                 disabled={isLoading}
-                className="w-full py-4.5 bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-dashed border-indigo-500/20 rounded-[1.25rem] flex items-center justify-center gap-3 text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all active:scale-[0.98] disabled:opacity-50"
+                className="w-full py-4.5 bg-[#1DB954]/5 dark:bg-[#1DB954]/10 border-2 border-dashed border-[#53E076]/20 rounded-[1.25rem] flex items-center justify-center gap-3 text-indigo-600 dark:text-[#53E076] font-black text-xs uppercase tracking-widest hover:bg-[#1DB954] hover:text-white transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -209,7 +209,7 @@ export function ShareModal({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-[1.25rem] py-4.5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
+                  className="w-full bg-zinc-100 dark:bg-[#1c1b1b]/50 border-2 border-transparent focus:border-[#53E076] rounded-[1.25rem] py-4.5 px-6 text-zinc-900 dark:text-[#e5e2e1] placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
                 />
                 <Mail className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-300 dark:text-zinc-700" />
               </div>
@@ -237,7 +237,7 @@ export function ShareModal({
                 {showInviteButton && (
                   <button
                     onClick={handleInvite}
-                    className="w-full py-3 px-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-black transition-all text-[9px] uppercase tracking-widest shadow-lg shadow-indigo-500/20"
+                    className="w-full py-3 px-4 bg-[#1DB954] hover:bg-indigo-600 text-white rounded-xl font-black transition-all text-[9px] uppercase tracking-widest shadow-lg shadow-[#53E076]/20"
                   >
                     Enviar convite oficial do App
                   </button>
@@ -253,7 +253,7 @@ export function ShareModal({
 
               <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide pb-10">
                 {otherMembers.length === 0 ? (
-                  <div className="py-8 text-center bg-zinc-50 dark:bg-zinc-900/30 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-900">
+                  <div className="py-8 text-center bg-zinc-50 dark:bg-[#1c1b1b]/30 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-900">
                     <p className="text-sm text-zinc-400 font-medium">
                       Você ainda está sozinho nesta lista.
                     </p>
@@ -266,11 +266,11 @@ export function ShareModal({
                         collab.profiles?.id ||
                         `collab-${index}`
                       }
-                      className="flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 shadow-sm"
+                      className="flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white dark:bg-[#1c1b1b]/30 border border-zinc-100 dark:border-zinc-800 shadow-sm"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 shadow-sm">
+                          <div className="relative w-11 h-11 rounded-2xl overflow-hidden border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-[#201f1f] shadow-sm">
                             <Image
                               src={
                                 collab.profiles?.avatar_url ||
@@ -291,7 +291,7 @@ export function ShareModal({
                                   "Usuário"}
                               </span>
                               {collab.role === "owner" && (
-                                <span className="bg-indigo-500/10 text-indigo-500 text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-indigo-500/20">
+                                <span className="bg-[#1DB954]/10 text-[#53E076] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest border border-[#53E076]/20">
                                   Dono
                                 </span>
                               )}
@@ -316,7 +316,7 @@ export function ShareModal({
                               if (idToRemove && confirm(`Remover este membro?`))
                                 onRemoveCollaborator(idToRemove)
                             }}
-                            className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-red-500 transition-all"
+                            className="p-2.5 rounded-xl bg-zinc-50 dark:bg-[#1c1b1b] text-zinc-400 hover:text-red-500 transition-all"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -337,7 +337,7 @@ export function ShareModal({
                               !collab.profiles?.id ||
                               !isOnline(collab.profiles.id)
                             }
-                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${isOnline(collab.profiles?.id || "") ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-500 hover:text-white" : "bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-300 dark:text-zinc-800 opacity-40 cursor-not-allowed"}`}
+                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${isOnline(collab.profiles?.id || "") ? "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500 hover:bg-amber-500 hover:text-white" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 border-transparent text-zinc-300 dark:text-zinc-800 opacity-40 cursor-not-allowed"}`}
                           >
                             <Bell
                               className={`w-4 h-4 ${isOnline(collab.profiles?.id || "") ? "animate-shake" : ""}`}
@@ -355,7 +355,7 @@ export function ShareModal({
                             }
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${collab.profiles?.phone ? "bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-500 hover:text-white" : "bg-zinc-50 dark:bg-zinc-900/50 border-transparent text-zinc-200 dark:text-zinc-800 cursor-not-allowed"}`}
+                            className={`flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] transition-all active:scale-95 border ${collab.profiles?.phone ? "bg-emerald-500/5 dark:bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-500 hover:bg-emerald-500 hover:text-white" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 border-transparent text-zinc-200 dark:text-zinc-800 cursor-not-allowed"}`}
                             onClick={() =>
                               collab.profiles?.phone && trigger("light")
                             }
@@ -383,7 +383,7 @@ export function ShareModal({
                                 })
                               }
                             }}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95"
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-[#1DB954]/5 dark:bg-[#1DB954]/10 border border-[#53E076]/20 text-indigo-600 dark:text-[#53E076] hover:bg-[#1DB954] hover:text-white transition-all active:scale-95"
                           >
                             <MessageSquare className="w-4 h-4" />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
@@ -394,7 +394,7 @@ export function ShareModal({
                           <Link
                             href={`/app/lists/${listId}/map`}
                             onClick={() => trigger("light")}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-white/5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95"
+                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-zinc-50 dark:bg-[#1c1b1b]/50 border border-zinc-200 dark:border-[#3d4a3d]/60 text-zinc-500 dark:text-[#bccbb9] hover:bg-zinc-900 dark:hover:bg-white hover:text-white dark:hover:text-black transition-all active:scale-95"
                           >
                             <MapIcon className="w-4 h-4" />
                             <span className="text-[8px] font-black uppercase tracking-tighter">
@@ -414,8 +414,8 @@ export function ShareModal({
 
       {/* QR Code Modal Overlay */}
       {isQrModalOpen && inviteToken && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-zinc-950 w-full max-w-sm rounded-[3rem] p-12 flex flex-col items-center text-center relative shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#131313]/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#131313] w-full max-w-sm rounded-[3rem] p-12 flex flex-col items-center text-center relative shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setIsQrModalOpen(false)}
               className="absolute top-10 right-10 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
@@ -423,7 +423,7 @@ export function ShareModal({
               <X className="w-7 h-7" />
             </button>
 
-            <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2">
               Convite Rápido
             </h2>
             <p className="text-zinc-500 text-sm mb-10 leading-relaxed">
@@ -455,3 +455,4 @@ export function ShareModal({
     </>
   )
 }
+

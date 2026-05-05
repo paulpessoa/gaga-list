@@ -32,63 +32,63 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
   };
 
   return (
-    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-zinc-950 w-full max-w-md rounded-[2.5rem] p-8 relative shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-[#1c1b1b] w-full max-w-md rounded-[2.5rem] p-8 relative shadow-2xl border border-[#53E076]/10 animate-in zoom-in-95 duration-200">
         <button 
           onClick={onClose} 
-          className="absolute top-6 right-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-white p-2 transition-colors"
+          className="absolute top-6 right-6 text-[#bccbb9]/50 hover:text-[#e5e2e1] p-2 transition-colors"
         >
           <X className="w-6 h-6" />
         </button>
 
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-500/10 rounded-3xl flex items-center justify-center mb-4">
-            <Package className="w-8 h-8 text-indigo-500" />
+          <div className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4" style={{ background: "rgba(83,224,118,0.10)" }}>
+            <Package className="w-8 h-8 text-[#53E076]" />
           </div>
-          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight leading-tight">
+          <h2 className="text-2xl font-black text-[#e5e2e1] tracking-tight leading-tight">
             Novo Produto
           </h2>
-          <p className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mt-1">
+          <p className="text-[#bccbb9]/60 font-bold text-[10px] uppercase tracking-widest mt-1">
             Cadastre no seu catálogo pessoal
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Nome do Produto *</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#bccbb9]/60 ml-1">Nome do Produto *</label>
             <div className="relative">
-              <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bccbb9]/50" />
               <input 
                 required
                 value={formData.name}
                 onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Ex: Arroz Integral"
-                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full bg-zinc-100 dark:bg-[#201f1f] border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-[#53E076]/40 outline-none transition-all"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Marca</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#bccbb9]/60 ml-1">Marca</label>
               <div className="relative">
-                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bccbb9]/50" />
                 <input 
                   value={formData.brand || ''}
                   onChange={e => setFormData(prev => ({ ...prev, brand: e.target.value }))}
                   placeholder="Ex: Tio João"
-                  className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  className="w-full bg-zinc-100 dark:bg-[#201f1f] border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-[#53E076]/40 outline-none transition-all"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Unidade Padrão</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#bccbb9]/60 ml-1">Unidade Padrão</label>
               <div className="relative">
-                <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <Ruler className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bccbb9]/50" />
                 <select 
                   value={formData.default_unit || 'un'}
                   onChange={e => setFormData(prev => ({ ...prev, default_unit: e.target.value }))}
-                  className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                  className="w-full bg-zinc-100 dark:bg-[#201f1f] border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-[#53E076]/40 outline-none transition-all appearance-none"
                 >
                   <option value="un">UN</option>
                   <option value="kg">KG</option>
@@ -102,13 +102,13 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Categoria</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#bccbb9]/60 ml-1">Categoria</label>
             <div className="relative">
-              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bccbb9]/50" />
               <select 
                 value={formData.category || 'Geral'}
                 onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                className="w-full bg-zinc-100 dark:bg-[#201f1f] border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-[#53E076]/40 outline-none transition-all appearance-none"
               >
                 <option value="Geral">Geral</option>
                 <option value="Mercearia">Mercearia</option>
@@ -123,7 +123,7 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Preço Médio Estimado</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-[#bccbb9]/60 ml-1">Preço Médio Estimado</label>
             <div className="relative">
               <Coins className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
               <input 
@@ -136,7 +136,7 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
                   setFormData(prev => ({ ...prev, price: numericValue } as any));
                 }}
                 placeholder="R$ 0,00"
-                className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full bg-zinc-100 dark:bg-[#201f1f] border-none rounded-2xl py-3.5 pl-11 pr-4 text-sm font-bold focus:ring-2 focus:ring-[#53E076]/40 outline-none transition-all"
               />
             </div>
           </div>
@@ -144,7 +144,7 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
           <button
             type="submit"
             disabled={isSaving || !formData.name}
-            className="w-full mt-6 py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full mt-6 py-4.5  bg-[#1DB954]  hover:bg-[#53E076] text-white rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-[#53E076]/20 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} 
             Salvar Produto
@@ -154,3 +154,4 @@ export function CreateProductModal({ onClose, onSave, isSaving }: CreateProductM
     </div>
   );
 }
+
