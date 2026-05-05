@@ -14,7 +14,8 @@ import {
   QrCode,
   Mail,
   UserPlus,
-  LogOut
+  LogOut,
+  Link as LinkIcon
 } from "lucide-react"
 import { Collaborator } from "@/types"
 import { usePresence } from "@/hooks/use-presence"
@@ -408,13 +409,27 @@ export function ShareModal({
               />
             </div>
 
-            <div className="bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
-              Válido por 24 horas
+            <div className="flex flex-col items-center gap-4 w-full mt-2">
+              <div className="bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
+                Válido por 24 horas
+              </div>
+
+              <button
+                onClick={() => {
+                  trigger("medium")
+                  const url = `${window.location.origin}/join/${inviteToken}`
+                  navigator.clipboard.writeText(url)
+                  alert("Link de convite copiado!")
+                }}
+                className="w-full py-4 border-2 border-[#53E076]/20 bg-[#53E076]/5 text-[#53E076] hover:bg-[#53E076] hover:text-[#131313] rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <LinkIcon className="w-4 h-4" /> Copiar Link de Convite
+              </button>
             </div>
 
             <button
               onClick={() => setIsQrModalOpen(false)}
-              className="mt-10 w-full py-4.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.25rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+              className="mt-6 w-full py-4.5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-[1.25rem] font-black text-xs uppercase tracking-widest transition-all active:scale-95"
             >
               Concluído
             </button>
