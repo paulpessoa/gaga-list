@@ -1,6 +1,6 @@
 {
-  "name": "Lista Pronta",
-  "short_name": "Lista Pronta",
+  "name": "Gaga List",
+  "short_name": "Gaga List",
   "description": "Listas de compras colaborativas em tempo real.",
   "start_url": "/",
   "display": "standalone",
