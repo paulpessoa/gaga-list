@@ -1,110 +1,81 @@
 # 🧺 Gaga List | AI-Powered Smart Grocery Shopping
 
-![Gaga List Banner](https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1000)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deploy-000000?style=flat-square&logo=vercel)](https://vercel.com/)
 
-**Gaga List** is a premium, Mobile-First Progressive Web App (PWA) designed to transform how families and individuals handle grocery shopping. By leveraging cutting-edge Artificial Intelligence (Gemini, OpenAI, Groq) and Real-time Synchronization (Supabase), Gaga List makes shopping collaborative, intelligent, and incredibly fast.
-
----
-
-## 📱 User Experience (UX) Philosophy
-
-Gaga List is built with a **Pocket-First** mentality. We believe grocery lists belong in your hand, not on a desktop screen.
-
-- **Mobile-First Design**: Optimized for one-handed use while walking through supermarket aisles.
-- **PWA Ready**: Install it on your phone for a native app feel with offline support.
-- **Micro-Interactions**: Haptic feedback (on supported devices) and smooth Framer Motion animations provide a high-end tactile experience.
-- **Desktop Guardrail**: To preserve the intended experience, desktop users are prompted to switch to mobile or resize their windows.
+**Gaga List** é um Progressive Web App (PWA) de alto padrão, desenvolvido com foco em performance extrema e experiência mobile-first. Ele transforma listas de compras em ferramentas inteligentes usando IA (Gemini, OpenAI, Groq) e sincronização em tempo real.
 
 ---
 
-## 🤖 AI Features (The "Grains" System)
-
-Gaga List uses a credit-based system called **Grains** to power its advanced AI capabilities:
-
-### 1. 🎙️ Voice-to-List (Groq & Whisper)
-Just speak. Our integration with **Whisper (via Groq)** transcribes your speech with ultra-low latency, and **Gemini** extracts products, quantities, and categories instantly.
-
-### 2. 📸 Photo-to-List (OpenAI Vision)
-Found an old handwritten list or a recipe in a magazine? Snap a photo. **OpenAI GPT-4o** will parse the image and populate your digital list in seconds.
-
-### 3. 👨‍🍳 Smart Chef Recipes (Gemini 1.5 Flash)
-Got random ingredients at home? Ask the **Smart Chef**. It suggests 3 realistic recipes based strictly on what you have, including prep time and difficulty levels.
-
-### 4. 👁️ Vision Scanner
-Point your camera at a product in the pantry. The AI identifies it and suggests if it's time to add it to your shopping list.
+## 📺 Demo Video
+> [!IMPORTANT]
+> Assista ao vídeo de demonstração capturado diretamente do smartphone para ver a fluidez e os feedbacks hápticos em ação:
+> **[LINK PARA O SEU VÍDEO AQUI]**
 
 ---
 
-## 🗺️ Advanced Functionality
+## 💎 Diferenciais Técnicos (Recruiter's Quick Look)
 
-### 📍 Smart Maps
-Integration with **Leaflet** allows users to visualize where items were added or where they usually shop, optimizing the route within the city or the store.
+Para recrutadores e engenheiros sêniores, aqui estão os pontos de destaque na arquitetura deste projeto:
 
-### 💬 Real-time Collaborative Chat
-Every list has a built-in chat. Coordinate with your family in real-time. Know exactly who is buying what, as it happens.
-
-### 👥 Collaborative Synchronization
-Shared lists update instantly across all devices. No more double-buying the same gallon of milk.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router, Server Components)
-- **Backend/Database**: [Supabase](https://supabase.com/) (PostgreSQL, Real-time, Auth, Storage)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **AI Models**: 
-  - Google Gemini 1.5 Flash
-  - OpenAI GPT-4o-mini
-  - Groq (Whisper-large-v3)
-- **Payments**: [Stripe](https://stripe.com/)
-- **Maps**: [Leaflet](https://leafletjs.org/)
+- **Arquitetura Limpa (Clean Architecture):** Separação clara entre camadas de interface (`components`), lógica de negócio (`services`) e gerenciamento de estado (`hooks`).
+- **Next.js 15 + React 19:** Uso de **React Server Components (RSC)** por padrão para minimizar o bundle size no cliente.
+- **Tailwind CSS 4.0:** Implementação de um Design System customizado ("Electric Sophistication") usando a nova engine v4.
+- **Observabilidade:** Integrado com **Microsoft Clarity** para análise de UX e preparado para **Sentry**.
+- **IA Multi-Model:**
+  - **Voz:** Whisper (via Groq) para latência < 500ms.
+  - **Visão:** GPT-4o-mini para extração de itens de fotos.
+  - **Lógica:** Gemini 1.5 Flash para geração de receitas e categorização inteligente.
+- **PWA Avançado:** Suporte offline com service workers, sincronização em tempo real via Supabase Realtime e feedback háptico (vibration API).
 
 ---
 
-## 📸 Screenshots & Demo
+## 🎨 Design System: "Electric Sophistication"
 
-> [PLACEHOLDER FOR GIF DEMO]
-
-| Dashboard | List View | Smart Chef |
-| :---: | :---: | :---: |
-| ![Screen 1](https://via.placeholder.com/300x600?text=Dashboard) | ![Screen 2](https://via.placeholder.com/300x600?text=List+Items) | ![Screen 3](https://via.placeholder.com/300x600?text=AI+Recipes) |
+O projeto utiliza uma paleta proprietária focada em ambientes de baixa luminosidade (supermercados):
+- **Primary:** Neon Green (`#53E076`)
+- **Base:** Obsidian Black (`#131313`)
+- **Efeito:** Glassmorphism com haptic feedback em cada interação.
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Tech Stack & Ferramentas
 
-1. **Clone the repository**:
+| Categoria | Tecnologia |
+| :--- | :--- |
+| **Frontend** | Next.js 15 (App Router), TypeScript, Tailwind 4, Framer Motion |
+| **Backend** | Supabase (Auth, Postgres, Realtime, Edge Functions) |
+| **IA** | Google Gemini, OpenAI GPT-4o, Groq (Whisper) |
+| **Payments** | Stripe Integration |
+| **PWA** | Workbox, Web Manifest, Push Notifications |
+| **Testes** | Playwright (E2E) |
+
+---
+
+## 🚀 Como Executar
+
+1. **Clone & Install:**
    ```bash
    git clone https://github.com/paulpessoa/gaga-list.git
-   ```
-
-2. **Install dependencies**:
-   ```bash
    npm install
    ```
 
-3. **Configure Environment Variables**:
-   Create a `.env.local` file with:
-   - Supabase Credentials
-   - AI API Keys (Google, OpenAI, Groq)
-   - Stripe Keys
+2. **Env Config:**
+   Renomeie `.env.example` para `.env.local` e preencha as chaves do Supabase e APIs de IA.
 
-4. **Run the development server**:
+3. **Dev Mode:**
    ```bash
    npm run dev
    ```
 
 ---
 
-## 👔 Approach
+## 👔 Autor
 
-This project follows **Clean Architecture** principles simplified for high-velocity startups. 
-- **Services Layer**: Business logic isolated from components.
-- **RSC Default**: Utilizing React Server Components for maximum performance.
-- **Dynamic Settings**: AI costs and Plan pricing are centralized and easily adjustable via environment variables.
+**Paul Pessoa** - Staff Software Engineer
+> Focado em construir produtos escaláveis que resolvem problemas reais com IA e UX de ponta.
 
 ---
-
-Developed with ☕ and 🧪 by **Paul Pessoa** (Staff Engineer).
+*Este projeto segue os princípios SOLID e DRY, priorizando manutenibilidade e performance (Core Web Vitals).*
