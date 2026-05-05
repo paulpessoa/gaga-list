@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, RefreshCw, Loader2, Camera, Send, ShieldCheck } from 'lucide-react';
 import { useHaptic } from '@/hooks/use-haptic';
 
@@ -12,6 +13,13 @@ interface VisionScannerProps {
 }
 
 export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product' }: VisionScannerProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -111,15 +119,15 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-[99999] bg-black flex flex-col pointer-events-auto overflow-hidden">
+  return createPortal(
+    <div className="fixed inset-0 z-[999999] bg-black flex flex-col pointer-events-auto overflow-hidden">
       {/* Header com Badge de Versão */}
       <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-20">
         <button 
           onClick={onClose} 
-          className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white active:scale-95 transition-all pointer-events-auto"
+          className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white active:scale-95 transition-all pointer-events-auto touch-manipulation"
         >
           <X className="w-6 h-6" />
         </button>
@@ -205,6 +213,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
       </div>
       
       <canvas ref={canvasRef} className="hidden" />
-    </div>
+    </div>,
+    document.body
   );
 }
