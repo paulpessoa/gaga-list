@@ -20,7 +20,9 @@ import {
   Camera,
   Check,
   CreditCard,
-  Trash2
+  X,
+  Trash2,
+  Pencil
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -38,6 +40,9 @@ export default function ProfilePage() {
   const [credits, setCredits] = useState(0)
   const [profile, setProfile] = useState<any>(null)
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [newName, setNewName] = useState("")
+  const [isUpdatingName, setIsUpdatingName] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -49,6 +54,7 @@ export default function ProfilePage() {
           .single()
         if (data) {
           setProfile(data)
+          setNewName(data.full_name || "")
           setCredits(data.credits || 0)
           setIsPushEnabled(!!data.push_subscription)
         }
@@ -159,6 +165,29 @@ export default function ProfilePage() {
     }
   }
 
+  const handleUpdateName = async () => {
+    if (!newName.trim() || !user) return
+    setIsUpdatingName(true)
+    trigger("medium")
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: newName.trim() })
+        .eq("id", user.id)
+
+      if (error) throw error
+      
+      setProfile((prev: any) => ({ ...prev, full_name: newName.trim() }))
+      setIsEditingName(false)
+      trigger("success")
+    } catch (err) {
+      console.error(err)
+      alert("Erro ao atualizar nome.")
+    } finally {
+      setIsUpdatingName(false)
+    }
+  }
+
   if (userLoading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#131313]">
@@ -210,10 +239,38 @@ export default function ProfilePage() {
               />
             </label>
           </div>
-          <div>
-            <h3 className="text-xl font-black text-zinc-900 dark:text-[#e5e2e1]">
-              {profile?.full_name || "Usuário"}
-            </h3>
+          <div className="flex flex-col items-center gap-2">
+            {isEditingName ? (
+              <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                <input
+                  autoFocus
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  className="bg-zinc-100 dark:bg-[#1c1b1b] border-2 border-[#53E076] rounded-xl py-2 px-4 text-center font-black text-zinc-900 dark:text-[#e5e2e1] outline-none"
+                />
+                <button
+                  onClick={handleUpdateName}
+                  disabled={isUpdatingName}
+                  className="p-2 bg-[#53E076] text-white rounded-xl active:scale-90 transition-all disabled:opacity-50"
+                >
+                  {isUpdatingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={() => { setIsEditingName(false); setNewName(profile?.full_name || ""); }}
+                  className="p-2 bg-zinc-100 dark:bg-[#201f1f] text-zinc-400 rounded-xl active:scale-90 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingName(true)}>
+                <h3 className="text-xl font-black text-zinc-900 dark:text-[#e5e2e1]">
+                  {profile?.full_name || "Usuário"}
+                </h3>
+                <Pencil className="w-3.5 h-3.5 text-zinc-300 group-hover:text-[#53E076] transition-colors" />
+              </div>
+            )}
             <p className="text-sm text-zinc-500 font-medium">
               {profile?.email || user?.email}
             </p>
