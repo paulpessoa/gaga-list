@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { useRouter } from "next/navigation"
 import {
   ShoppingBag,
   Loader2,
@@ -9,7 +11,9 @@ import {
   CheckCircle2,
   RotateCcw,
   Check,
-  Plus
+  Plus,
+  UploadCloud,
+  AlertCircle
 } from "lucide-react"
 import { Drawer } from "vaul"
 import { useAICosts } from "@/hooks/use-ai-costs"
@@ -62,6 +66,47 @@ export function CreateListModal({
 }: CreateListModalProps) {
   const { costs } = useAICosts()
   const { checkAndAct } = useAICreditCheck()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validação de 3MB
+    if (file.size > 3 * 1024 * 1024) {
+      alert("Arquivo muito grande! O limite é de 3MB para processamento de imagem.")
+      return
+    }
+
+    trigger("medium")
+    
+    // Converter para Base64
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = reader.result as string
+      // Chamar o processamento (reutilizando a lógica do VisionScanner)
+      try {
+        const response = await fetch('/api/ai/ocr', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64 })
+        })
+        const data = await response.json()
+        if (data.items) {
+          // Reutilizar o handleOcrSuccess da página principal (Dashboard)
+          // Como este componente é burro, vamos precisar passar uma prop onOcrSuccess
+          // Mas wait, o AppPage já tem handleOcrSuccess.
+          // Vou disparar um evento customizado ou passar a função via props.
+          window.dispatchEvent(new CustomEvent('ocr-success', { detail: data }))
+        } else {
+          alert(data.error || "Erro ao processar imagem")
+        }
+      } catch (err) {
+        alert("Erro na conexão com a IA.")
+      }
+    }
+    reader.readAsDataURL(file)
+  }
   return (
     <Drawer.Root 
       open={isOpen} 
@@ -134,6 +179,32 @@ export function CreateListModal({
                           <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_ocr} {costs.cost_ocr === 1 ? 'grão' : 'grãos'}</span>
                         </div>
                       </button>
+                    </div>
+
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => checkAndAct(costs.cost_ocr, () => fileInputRef.current?.click())}
+                        disabled={isAiProcessing}
+                        className="w-full py-4 bg-zinc-100 dark:bg-[#1c1b1b] text-zinc-600 dark:text-[#bccbb9] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-200 dark:hover:bg-zinc-900 transition-all border border-zinc-200 dark:border-[#3d4a3d]/60 active:scale-95"
+                      >
+                        <UploadCloud className="w-4 h-4 text-[#53E076]" />
+                        Ou suba um arquivo de imagem
+                      </button>
+                      <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                        <AlertCircle className="w-3 h-3 text-amber-500" />
+                        <span className="text-[9px] text-amber-600/70 dark:text-amber-500/50 font-black uppercase tracking-widest">
+                          Máximo de 3MB • Suporta PNG, JPG e WEBP
+                        </span>
+                      </div>
                     </div>
 
                     <form onSubmit={submitCreateList} className="space-y-6">

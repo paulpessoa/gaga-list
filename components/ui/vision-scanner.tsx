@@ -64,7 +64,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const maxWidth = 800;
+      const maxWidth = 1600;
       const scale = maxWidth / video.videoWidth;
       canvas.width = maxWidth;
       canvas.height = video.videoHeight * scale;
