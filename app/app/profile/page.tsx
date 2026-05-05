@@ -39,6 +39,7 @@ export default function ProfilePage() {
   const [isUpdatingPush, setIsUpdatingPush] = useState(false)
   const [credits, setCredits] = useState(0)
   const [profile, setProfile] = useState<any>(null)
+  
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [isEditingName, setIsEditingName] = useState(false)
   const [newName, setNewName] = useState("")
@@ -78,7 +79,6 @@ export default function ProfilePage() {
         await unsubscribeUser()
         setIsPushEnabled(false)
       } else {
-        // Registrar Service Worker e obter assinatura
         const registration = await navigator.serviceWorker.ready
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -89,13 +89,12 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error(err)
-      alert("Erro ao ajustar notificações. Verifique se o site está em HTTPS.")
+      alert("Erro ao ajustar notificações. Verifique se o site está em HTTPS e se as chaves VAPID estão configuradas.")
     } finally {
       setIsUpdatingPush(false)
     }
   }
 
-  // Estados de Exclusão
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("")
   const [isDeleting, setIsDeleting] = useState(false)
@@ -105,22 +104,17 @@ export default function ProfilePage() {
     setIsDeleting(true)
     trigger("heavy")
     try {
-      // Aqui dispararíamos uma Edge Function ou Rota de API para marcar exclusão em 30 dias
-      const { error } = await (supabase
-        .from('profiles') as any)
-        .update({
-          deleted_at: new Date().toISOString(),
-          // Adicionar flag ou nota para o admin se necessário
-        })
+      const { error } = await (supabase.from('profiles') as any)
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', user?.id)
 
       if (error) throw error
 
-      alert("Sua solicitação foi registrada. Sua conta e dados serão removidos definitivamente em 30 dias. Você será deslogado agora.")
+      alert("Sua solicitação foi registrada. Sua conta será removida em 30 dias.")
       await supabase.auth.signOut()
       router.push("/")
     } catch (err) {
-      alert("Erro ao processar solicitação. Tente novamente.")
+      alert("Erro ao processar solicitação.")
     } finally {
       setIsDeleting(false)
       setIsDeleteModalOpen(false)
@@ -159,7 +153,7 @@ export default function ProfilePage() {
       trigger("success")
     } catch (err: any) {
       console.error(err)
-      alert("Erro ao enviar foto: " + (err.message || "Verifique as permissões do bucket 'avatars'"))
+      alert("Erro ao enviar foto: " + (err.message || "Verifique o bucket 'avatars'"))
     } finally {
       setIsUploadingPhoto(false)
     }
@@ -239,6 +233,7 @@ export default function ProfilePage() {
               />
             </label>
           </div>
+          
           <div className="flex flex-col items-center gap-2">
             {isEditingName ? (
               <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
@@ -400,7 +395,7 @@ export default function ProfilePage() {
           <Trash2 className="w-4 h-4" /> Excluir Minha Conta
         </button>
 
-        {/* Modal de Exclusão (Danger Zone) */}
+        {/* Modal de Exclusão */}
         <AnimatePresence>
           {isDeleteModalOpen && (
             <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
@@ -418,51 +413,33 @@ export default function ProfilePage() {
                 className="relative w-full max-w-sm bg-white dark:bg-[#131313] rounded-[3rem] p-10 shadow-2xl border border-rose-500/20 text-center overflow-hidden"
               >
                 <div className="absolute top-0 left-0 w-full h-2 bg-rose-500" />
-
                 <div className="w-20 h-20 bg-rose-500/10 rounded-[2.5rem] flex items-center justify-center mb-8 mx-auto">
                   <Shield className="w-10 h-10 text-rose-500" />
                 </div>
-
                 <h2 className="text-2xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-4 tracking-tight">
                   Zona de Perigo
                 </h2>
-
                 <div className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium space-y-4 mb-10 text-left">
                   <p>Ao confirmar a exclusão:</p>
                   <ul className="list-disc pl-5 space-y-2 text-xs">
                     <li>Sua conta será desativada imediatamente.</li>
-                    <li>Todos os seus dados (listas, receitas, grãos) serão **removidos definitivamente em 30 dias**.</li>
-                    <li>Este processo é **irreversível** após o prazo.</li>
+                    <li>Dados removidos definitivamente em 30 dias.</li>
                   </ul>
                 </div>
-
                 <div className="space-y-4">
-                  <div className="space-y-2 text-left">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 ml-1">
-                      Confirme seu e-mail para prosseguir
-                    </label>
-                    <input
-                      type="email"
-                      placeholder={user?.email}
-                      value={deleteConfirmEmail}
-                      onChange={(e) => setDeleteConfirmEmail(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-rose-500 rounded-2xl py-4 px-5 text-sm font-bold outline-none transition-all shadow-inner"
-                    />
-                  </div>
-
+                  <input
+                    type="email"
+                    placeholder={user?.email}
+                    value={deleteConfirmEmail}
+                    onChange={(e) => setDeleteConfirmEmail(e.target.value)}
+                    className="w-full bg-zinc-50 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-rose-500 rounded-2xl py-4 px-5 text-sm font-bold outline-none transition-all shadow-inner"
+                  />
                   <button
                     onClick={handleDeleteAccount}
                     disabled={isDeleting || deleteConfirmEmail !== (profile?.email || user?.email)}
-                    className="w-full py-5 bg-rose-500 hover:bg-rose-600 disabled:bg-zinc-100 dark:disabled:bg-zinc-900 disabled:text-zinc-400 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-rose-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-5 bg-rose-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar Exclusão"}
-                  </button>
-
-                  <button
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    className="w-full py-2 text-zinc-400 font-black uppercase tracking-widest text-[9px] hover:text-zinc-900 dark:hover:text-white transition-colors"
-                  >
-                    Cancelar
                   </button>
                 </div>
               </motion.div>
@@ -474,12 +451,8 @@ export default function ProfilePage() {
           <p className="text-[10px] text-zinc-400 dark:text-zinc-600 uppercase font-black tracking-widest">
             Gaga List v1.1.0
           </p>
-          <p className="text-[8px] text-zinc-300 dark:text-zinc-700 font-bold uppercase tracking-tighter">
-            Feito para Casais em Harmonia
-          </p>
         </footer>
       </section>
     </main>
   )
 }
-
