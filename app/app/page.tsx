@@ -258,14 +258,14 @@ export default function AppPage() {
   }, [])
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl py-4 -mx-5 px-5 flex flex-col gap-6 border-b border-zinc-100/50 dark:border-white/5 transition-all">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
+      <header className="sticky top-0 z-30 py-4 -mx-5 px-5 flex flex-col gap-6 border-b border-[#3d4a3d]/50 backdrop-blur-xl transition-all" style={{ background: "rgba(19,19,19,0.85)" }}>
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+            <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
               Minhas Listas
             </h1>
-            <p className="text-sm text-zinc-500 font-medium">
+            <p className="text-sm text-[#bccbb9] font-medium">
               {filteredLists.length} listas ativas • Gerencie seus itens
             </p>
           </div>
@@ -281,22 +281,22 @@ export default function AppPage() {
         </div>
 
         {/* Filtros de Abas */}
-        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-2xl w-fit">
+        <div className="flex items-center gap-1 bg-[#201f1f] border border-[#3d4a3d] p-1 rounded-2xl w-fit">
           <button
             onClick={() => { setFilter("all"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
           >
             Todas
           </button>
           <button
             onClick={() => { setFilter("mine"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
           >
             Minhas
           </button>
           <button
             onClick={() => { setFilter("shared"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-white dark:bg-zinc-800 text-indigo-500 shadow-sm" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"}`}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
           >
             Outros
           </button>
@@ -306,13 +306,13 @@ export default function AppPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr">
         {isLoading ? (
           [1, 2].map((i) => (
-            <div key={i} className="h-[180px] bg-zinc-50 dark:bg-zinc-900 rounded-[2rem] animate-pulse" />
+            <div key={i} className="h-[180px] bg-zinc-50 dark:bg-[#201f1f] rounded-[2rem] animate-pulse" />
           ))
         ) : isError ? (
           <div className="col-span-full py-12 text-center text-rose-500 font-bold">Erro ao carregar listas.</div>
         ) : filteredLists.length === 0 ? (
           <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-center">
-            <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-3xl flex items-center justify-center text-zinc-200 dark:text-zinc-800">
+            <div className="w-16 h-16 bg-zinc-50 dark:bg-[#201f1f] rounded-3xl flex items-center justify-center text-zinc-200 dark:text-zinc-800">
               <Plus className="w-8 h-8" />
             </div>
             <p className="text-zinc-400 font-bold">Nenhuma lista encontrada.</p>
@@ -362,3 +362,4 @@ export default function AppPage() {
     </main>
   )
 }
+

@@ -128,15 +128,15 @@ export default function PeoplePage() {
 
   if (userLoading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#131313]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#53E076]" />
       </div>
     )
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
           Pessoas
         </h1>
         <p className="text-sm text-zinc-500 font-medium">
@@ -145,20 +145,20 @@ export default function PeoplePage() {
       </header>
 
       {/* Convite Viral (Referral) */}
-      <section className="glass-panel p-8 rounded-[2.5rem] bg-indigo-500/5 border-2 border-indigo-500/10 flex flex-col gap-6 relative overflow-hidden">
+      <section className="glass-panel p-8 rounded-[2.5rem] bg-[#1DB954]/5 border-2 border-[#53E076]/10 flex flex-col gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
-          <Zap className="w-32 h-32 text-indigo-500" />
+          <Zap className="w-32 h-32 text-[#53E076]" />
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-2xl bg-[#1DB954] text-white flex items-center justify-center shadow-lg">
               <UserPlus className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+            <h2 className="text-lg font-black text-zinc-900 dark:text-[#e5e2e1] uppercase tracking-tight">
               Convidar Amigos
             </h2>
           </div>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 font-medium mb-6 leading-relaxed">
+          <p className="text-sm text-zinc-600 dark:text-[#bccbb9] font-medium mb-6 leading-relaxed">
             Convide alguém para o app. Quando eles entrarem, você ganha{" "}
             <strong>{costs.referral_bonus} grãos mágicos</strong>! 🌾
           </p>
@@ -172,11 +172,11 @@ export default function PeoplePage() {
               required
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 bg-white dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-sm font-bold outline-none shadow-inner"
+              className="flex-1 bg-white dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076] rounded-2xl py-4 px-6 text-sm font-bold outline-none shadow-inner"
             />
             <button
               disabled={isInviting}
-              className="px-8 py-4 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+              className="px-8 py-4 bg-[#1DB954] hover:bg-[#1DB954] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-[#53E076]/20 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
             >
               {isInviting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -197,7 +197,7 @@ export default function PeoplePage() {
             placeholder="Buscar nos seus contatos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-[1.5rem] py-4 pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner"
+            className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-none rounded-[1.5rem] py-4 pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-[#53E076] outline-none shadow-inner"
           />
         </div>
 
@@ -214,12 +214,12 @@ export default function PeoplePage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-20 bg-zinc-100 dark:bg-zinc-900 rounded-[1.5rem] animate-pulse"
+                  className="h-20 bg-zinc-100 dark:bg-[#1c1b1b] rounded-[1.5rem] animate-pulse"
                 />
               ))}
             </div>
           ) : filteredFriends.length === 0 ? (
-            <div className="py-20 text-center space-y-4 bg-zinc-50 dark:bg-zinc-900/20 rounded-[3rem] border-2 border-dashed border-zinc-100 dark:border-white/5">
+            <div className="py-20 text-center space-y-4 bg-zinc-50 dark:bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-zinc-100 dark:border-[#3d4a3d]/60">
               <Users className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto" />
               <p className="text-zinc-500 text-sm font-medium">
                 Nenhum contato encontrado.
@@ -230,10 +230,10 @@ export default function PeoplePage() {
               {filteredFriends.map((friend) => (
                 <div
                   key={friend.id}
-                  className="glass-panel p-4 px-5 rounded-[2rem] flex items-center justify-between bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 hover:border-indigo-500/20 transition-all group"
+                  className="glass-panel p-4 px-5 rounded-[2rem] flex items-center justify-between bg-white dark:bg-[#1c1b1b]/40 border border-zinc-100 dark:border-[#3d4a3d]/60 hover:border-[#53E076]/20 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl border-2 border-white dark:border-zinc-900 overflow-hidden bg-zinc-100 dark:bg-zinc-800 relative shadow-sm">
+                    <div className="w-12 h-12 rounded-2xl border-2 border-white dark:border-zinc-900 overflow-hidden bg-zinc-100 dark:bg-[#201f1f] relative shadow-sm">
                       <Image
                         src={
                           friend.avatar_url ||
@@ -267,7 +267,7 @@ export default function PeoplePage() {
                     <Link
                       href={`/app?openChat=true&targetId=${friend.id}`}
                       onClick={() => trigger("light")}
-                      className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-indigo-500 transition-all shadow-inner"
+                      className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-[#201f1f] flex items-center justify-center text-zinc-400 hover:text-[#53E076] transition-all shadow-inner"
                     >
                       <MessageCircle className="w-5 h-5" />
                     </Link>
@@ -286,7 +286,7 @@ export default function PeoplePage() {
         friendName={selectedFriend?.full_name || selectedFriend?.email || ""}
       />
 
-      <footer className="mt-10 pt-10 border-t border-zinc-100 dark:border-white/5 text-center">
+      <footer className="mt-10 pt-10 border-t border-zinc-100 dark:border-[#3d4a3d]/60 text-center">
         <p className="text-[8px] text-zinc-300 dark:text-zinc-700 font-bold uppercase tracking-tighter">
           Conexão é a chave para a harmonia nas compras
         </p>
@@ -294,3 +294,4 @@ export default function PeoplePage() {
     </main>
   )
 }
+

@@ -30,10 +30,10 @@ export default function TrashPage() {
         </Link>
 
         <div className="flex flex-col">
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-[#e5e2e1]">
             Lixeira
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+          <p className="text-zinc-500 dark:text-[#bccbb9] text-sm">
             Listas aqui serão excluídas permanentemente após 30 dias.
           </p>
         </div>
@@ -75,7 +75,7 @@ export default function TrashPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 shrink-0 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-2xl grayscale opacity-50">
+                    <div className="w-12 h-12 shrink-0 rounded-2xl bg-zinc-100 dark:bg-[#1c1b1b] flex items-center justify-center text-2xl grayscale opacity-50">
                       {list.icon || "🛒"}
                     </div>
                     <div className="flex flex-col">
@@ -92,7 +92,7 @@ export default function TrashPage() {
                   <button
                     onClick={() => handleRestore(list.id)}
                     disabled={restoreList.isPending}
-                    className="p-3 rounded-2xl bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-all active:scale-95 disabled:opacity-50"
+                    className="p-3 rounded-2xl bg-[#1DB954] text-white shadow-lg shadow-[#53E076]/20 hover:bg-[#1DB954] transition-all active:scale-95 disabled:opacity-50"
                     title="Restaurar Lista"
                   >
                     <RefreshCcw
@@ -108,3 +108,4 @@ export default function TrashPage() {
     </main>
   )
 }
+

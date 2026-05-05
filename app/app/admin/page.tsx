@@ -31,7 +31,7 @@ import Image from "next/image"
 import { MyProductsService, MyProduct } from "@/services/my-products.service"
 import { CuratorProductModal } from "@/components/dashboard/curator-product-modal"
 
-// Configuração de custos das APIs
+// Configura��o de custos das APIs
 const API_COSTS: Record<string, { model: string; estimated_brl: number }> = {
   recipe: { model: "Gemini 1.5 Flash", estimated_brl: 0.005 },
   ocr: { model: "GPT-4o-mini", estimated_brl: 0.02 },
@@ -147,7 +147,7 @@ export default function AdminPage() {
   if (!isAdmin) return null
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white p-6 md:p-12 pb-32">
+    <main className="min-h-screen bg-[#131313] text-white p-6 md:p-12 pb-32">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -194,7 +194,7 @@ export default function AdminPage() {
               onClick={() => trigger("light")}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
             >
-              <Settings className="w-4 h-4" /> Configurações
+              <Settings className="w-4 h-4" /> Configura��es
             </Link>
           </div>
         </header>
@@ -203,12 +203,12 @@ export default function AdminPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#1DB954]/10 text-[#53E076] flex items-center justify-center">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
                   <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">
-                    Total Usuários
+                    Total Usu�rios
                   </p>
                   <h3 className="text-3xl font-black tracking-tighter">
                     {stats.totalUsers}
@@ -222,7 +222,7 @@ export default function AdminPage() {
                 </div>
                 <div>
                   <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">
-                    Grãos Consumidos
+                    Gr�os Consumidos
                   </p>
                   <h3 className="text-3xl font-black tracking-tighter">
                     {stats.totalGrainsUsed}
@@ -270,17 +270,17 @@ export default function AdminPage() {
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-zinc-500" />
                   <h2 className="text-lg font-black uppercase tracking-widest">
-                    Financeiro e Operações
+                    Financeiro e Opera��es
                   </h2>
                 </div>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input
                     type="text"
-                    placeholder="Buscar usuário ou plano..."
+                    placeholder="Buscar usu�rio ou plano..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-zinc-900 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-full md:w-64"
+                    className="bg-zinc-900 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#53E076] outline-none w-full md:w-64"
                   />
                 </div>
               </div>
@@ -291,13 +291,13 @@ export default function AdminPage() {
                     <thead>
                       <tr className="bg-white/5">
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                          Usuário
+                          Usu�rio
                         </th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                          Ação / Feature
+                          A��o / Feature
                         </th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                          Grãos
+                          Gr�os
                         </th>
                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
                           Custo API (Est.)
@@ -311,7 +311,7 @@ export default function AdminPage() {
                       {isLoading ? (
                         <tr>
                           <td colSpan={5} className="px-6 py-12 text-center">
-                            <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500" />
+                            <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#53E076]" />
                           </td>
                         </tr>
                       ) : recentLogs.length === 0 ? (
@@ -320,7 +320,7 @@ export default function AdminPage() {
                             colSpan={5}
                             className="px-6 py-12 text-center text-zinc-500 italic"
                           >
-                            Nenhuma transação registrada.
+                            Nenhuma transa��o registrada.
                           </td>
                         </tr>
                       ) : (
@@ -338,7 +338,7 @@ export default function AdminPage() {
                               <td className="px-6 py-4">
                                 <div className="flex flex-col">
                                   <span className="text-sm font-bold">
-                                    {log.profiles?.full_name || "Usuário Anon"}
+                                    {log.profiles?.full_name || "Usu�rio Anon"}
                                   </span>
                                   <span className="text-[10px] text-zinc-500">
                                     {log.profiles?.email}
@@ -415,7 +415,7 @@ export default function AdminPage() {
                         Produto Sugerido
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-                        Usuário
+                        Usu�rio
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500">
                         Categoria
@@ -424,7 +424,7 @@ export default function AdminPage() {
                         Data
                       </th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 text-right">
-                        Ações
+                        A��es
                       </th>
                     </tr>
                   </thead>
@@ -471,7 +471,7 @@ export default function AdminPage() {
                                     {prod.name}
                                   </span>
                                   <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-black">
-                                    {prod.brand || "Marca Genérica"}
+                                    {prod.brand || "Marca Gen�rica"}
                                   </span>
                                 </div>
                               </div>
@@ -512,12 +512,12 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Rodapé de Referência */}
-        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-3xl p-8 mt-12">
+        {/* Rodap� de Refer�ncia */}
+        <div className="bg-[#1DB954]/5 border border-[#53E076]/10 rounded-3xl p-8 mt-12">
           <div className="flex items-center gap-2 mb-6">
-            <TrendingUp className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400">
-              Referência de Margem Staff
+            <TrendingUp className="w-5 h-5 text-[#53E076]" />
+            <h3 className="text-sm font-black uppercase tracking-widest text-[#53E076]">
+              Refer�ncia de Margem Staff
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-6">
@@ -527,7 +527,7 @@ export default function AdminPage() {
                   {key}
                 </p>
                 <p className="text-xs font-bold">{info.model}</p>
-                <p className="text-[10px] font-mono text-indigo-400">
+                <p className="text-[10px] font-mono text-[#53E076]">
                   R$ {info.estimated_brl.toFixed(3)} / req
                 </p>
               </div>
@@ -547,3 +547,4 @@ export default function AdminPage() {
     </main>
   )
 }
+

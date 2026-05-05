@@ -23,10 +23,10 @@ export default function NotificationsPage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
       <header className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
             Central de Avisos
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
@@ -36,7 +36,7 @@ export default function NotificationsPage() {
         {notifications.length > 0 && (
           <button
             onClick={handleClear}
-            className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-500 hover:text-red-500 transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-zinc-200 dark:border-white/5"
+            className="p-3 rounded-2xl bg-zinc-100 dark:bg-[#1c1b1b] text-zinc-500 hover:text-red-500 transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border border-zinc-200 dark:border-[#3d4a3d]/60"
           >
             <Trash2 className="w-4 h-4" />
             Limpar
@@ -47,27 +47,27 @@ export default function NotificationsPage() {
       <div className="flex flex-col gap-3">
         {notifications.length === 0 ? (
           <div className="flex flex-col gap-6">
-            <div className="glass-panel rounded-[3rem] p-16 flex flex-col items-center justify-center text-center gap-6 bg-zinc-50/50 dark:bg-zinc-900/20 border-2 border-dashed border-zinc-100 dark:border-white/5">
-              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-zinc-900 flex items-center justify-center text-zinc-200 dark:text-zinc-800 shadow-xl border border-zinc-100 dark:border-white/5">
+            <div className="glass-panel rounded-[3rem] p-16 flex flex-col items-center justify-center text-center gap-6 bg-zinc-50/50 dark:bg-[#1c1b1b]/20 border-2 border-dashed border-zinc-100 dark:border-[#3d4a3d]/60">
+              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-[#1c1b1b] flex items-center justify-center text-zinc-200 dark:text-zinc-800 shadow-xl border border-zinc-100 dark:border-[#3d4a3d]/60">
                 <Bell className="w-10 h-10" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-zinc-900 dark:text-white font-black text-xl tracking-tight">
+                <h2 className="text-zinc-900 dark:text-[#e5e2e1] font-black text-xl tracking-tight">
                   Tudo limpo por aqui
                 </h2>
-                <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-[240px] leading-relaxed">
+                <p className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium max-w-[240px] leading-relaxed">
                   Você não tem avisos pendentes. Que tal convidar alguém para
                   sua próxima lista?
                 </p>
               </div>
             </div>
 
-            <div className="glass-panel p-8 rounded-[2.5rem] bg-indigo-500/5 border-2 border-indigo-500/10 flex flex-col items-center text-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shadow-inner">
+            <div className="glass-panel p-8 rounded-[2.5rem] bg-[#1DB954]/5 border-2 border-[#53E076]/10 flex flex-col items-center text-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-[#1DB954]/10 text-[#53E076] flex items-center justify-center shadow-inner">
                 <Plus className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
+                <h3 className="text-lg font-black text-zinc-900 dark:text-[#e5e2e1] uppercase tracking-tight">
                   Chame sua Dupla
                 </h3>
                 <p className="text-xs text-zinc-500 font-medium mt-1">
@@ -80,7 +80,7 @@ export default function NotificationsPage() {
                   navigator.clipboard.writeText(`${window.location.origin}/app`)
                   alert("Link de convite copiado!")
                 }}
-                className="w-full py-4.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-indigo-500/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                className="w-full py-4.5 bg-[#1DB954] hover:bg-[#1DB954] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-[#53E076]/20 active:scale-95 transition-all flex items-center justify-center gap-3"
               >
                 Copiar Link de Convite
               </button>
@@ -102,10 +102,10 @@ export default function NotificationsPage() {
                 key={notif.id}
                 href={destinationUrl}
                 onClick={() => trigger("light")}
-                className="glass-panel p-6 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-right-4 duration-300 hover:border-indigo-500/30 dark:hover:border-indigo-500/20 transition-all group relative active:scale-[0.98]"
+                className="glass-panel p-6 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-right-4 duration-300 hover:border-[#53E076]/30 dark:hover:border-[#53E076]/20 transition-all group relative active:scale-[0.98]"
               >
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110 duration-300 ${notif.type === "dm" ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" : "bg-amber-500/10 text-amber-600 dark:text-amber-500"}`}
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110 duration-300 ${notif.type === "dm" ? "bg-[#1DB954]/10 text-indigo-600 dark:text-[#53E076]" : "bg-amber-500/10 text-amber-600 dark:text-amber-500"}`}
                 >
                   {notif.type === "dm" ? (
                     <MessageSquare className="w-7 h-7" />
@@ -121,7 +121,7 @@ export default function NotificationsPage() {
                         ? "Nova Mensagem"
                         : "Chamada no Radar"}
                     </h3>
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-lg">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-zinc-100 dark:bg-[#201f1f] px-2 py-1 rounded-lg">
                       <Clock className="w-3 h-3" />
                       {new Date(notif.time).toLocaleTimeString([], {
                         hour: "2-digit",
@@ -129,8 +129,8 @@ export default function NotificationsPage() {
                       })}
                     </span>
                   </div>
-                  <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed pr-8 line-clamp-2">
-                    <span className="text-zinc-900 dark:text-white font-black">
+                  <p className="text-zinc-600 dark:text-[#bccbb9] text-sm leading-relaxed pr-8 line-clamp-2">
+                    <span className="text-zinc-900 dark:text-[#e5e2e1] font-black">
                       {notif.senderName}
                     </span>
                     {notif.type === "dm"
@@ -138,15 +138,15 @@ export default function NotificationsPage() {
                       : " está tentando chamar sua atenção agora!"}
                   </p>
                   {notif.listTitle && (
-                    <div className="inline-flex items-center gap-1.5 mt-3 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/10">
-                      <span className="text-[9px] text-indigo-500 font-black uppercase tracking-widest">
+                    <div className="inline-flex items-center gap-1.5 mt-3 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1DB954]/10 border border-indigo-100 dark:border-[#53E076]/10">
+                      <span className="text-[9px] text-[#53E076] font-black uppercase tracking-widest">
                         {notif.listTitle}
                       </span>
                     </div>
                   )}
                 </div>
 
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-800 group-hover:text-indigo-500 transition-colors">
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-800 group-hover:text-[#53E076] transition-colors">
                   <ChevronRight className="w-6 h-6" />
                 </div>
               </Link>
@@ -155,8 +155,8 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      <div className="mt-4 p-8 rounded-[2.5rem] bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/10 dark:border-indigo-500/5">
-        <p className="text-[10px] text-indigo-500/60 dark:text-indigo-400/40 text-center font-black uppercase tracking-[0.2em] leading-relaxed">
+      <div className="mt-4 p-8 rounded-[2.5rem] bg-[#1DB954]/5 dark:bg-[#1DB954]/10 border border-[#53E076]/10 dark:border-[#53E076]/5">
+        <p className="text-[10px] text-[#53E076]/60 dark:text-[#53E076]/40 text-center font-black uppercase tracking-[0.2em] leading-relaxed">
           Dica: Mensagens individuais são privadas e não ficam salvas após
           limpar esta lista.
         </p>
@@ -164,3 +164,4 @@ export default function NotificationsPage() {
     </main>
   )
 }
+

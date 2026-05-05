@@ -30,8 +30,8 @@ const PLANS_DATA = [
   {
     id: "broto",
     icon: Wheat,
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-500/10",
+    color: "text-[#53E076]",
+    bgColor: "bg-[#1DB954]/10",
     features: [
       "500 Receitas IA",
       "250 Leituras de Foto",
@@ -111,7 +111,7 @@ export default function PlansPage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <main className="min-h-screen p-6 md:p-12 max-w-5xl mx-auto flex flex-col gap-10 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
       <header className="flex flex-col gap-4">
         <Link
           href="/app/credits"
@@ -125,10 +125,10 @@ export default function PlansPage() {
         </Link>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white leading-tight">
-            Escolha sua <span className="text-indigo-500">Colheita</span>
+          <h1 className="text-4xl font-black tracking-tighter text-zinc-900 dark:text-[#e5e2e1] leading-tight">
+            Escolha sua <span className="text-[#53E076]">Colheita</span>
           </h1>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-medium max-w-md">
+          <p className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium max-w-md">
             Adquira pacotes de grãos e libere o poder total da Inteligência
             Artificial em suas compras.
           </p>
@@ -143,10 +143,10 @@ export default function PlansPage() {
           return (
             <div
               key={plan.id}
-              className={`relative glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 transition-all duration-300 border-2 ${plan.popular ? "border-indigo-500 shadow-2xl shadow-indigo-500/20 scale-105 z-10" : "border-transparent hover:border-zinc-200 dark:hover:border-white/10"}`}
+              className={`relative glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 transition-all duration-300 border-2 ${plan.popular ? "border-[#53E076] shadow-2xl shadow-[#53E076]/20 scale-105 z-10" : "border-transparent hover:border-zinc-200 dark:hover:border-white/10"}`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#1DB954] text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                   <Star className="w-3 h-3 fill-current" /> Recomendado
                 </div>
               )}
@@ -158,11 +158,11 @@ export default function PlansPage() {
                   <Icon className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-zinc-900 dark:text-white">
+                  <h3 className="text-xl font-black text-zinc-900 dark:text-[#e5e2e1]">
                     {plan.name}
                   </h3>
                   <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-2xl font-black text-indigo-500">
+                    <span className="text-2xl font-black text-[#53E076]">
                       {plan.priceLabel}
                     </span>
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
@@ -172,9 +172,9 @@ export default function PlansPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 py-3 px-4 bg-zinc-100 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-white/5">
+              <div className="flex items-center gap-2 py-3 px-4 bg-zinc-100 dark:bg-[#1c1b1b]/50 rounded-2xl border border-zinc-200 dark:border-[#3d4a3d]/60">
                 <Zap className="w-4 h-4 text-amber-500" />
-                <span className="text-xs font-black text-zinc-900 dark:text-white">
+                <span className="text-xs font-black text-zinc-900 dark:text-[#e5e2e1]">
                   {plan.grains} Grãos
                 </span>
               </div>
@@ -183,7 +183,7 @@ export default function PlansPage() {
                 {plan.features.map((feature, i) => (
                   <li
                     key={i}
-                    className="flex items-start gap-2.5 text-[11px] font-bold text-zinc-500 dark:text-zinc-400"
+                    className="flex items-start gap-2.5 text-[11px] font-bold text-zinc-500 dark:text-[#bccbb9]"
                   >
                     <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                     {feature}
@@ -194,7 +194,7 @@ export default function PlansPage() {
               <button
                 onClick={() => handleSelectPlan(plan.id)}
                 disabled={!!loadingPlan}
-                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${plan.popular ? "bg-indigo-500 text-white hover:bg-indigo-600" : "bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-90"} disabled:opacity-50`}
+                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${plan.popular ? "bg-[#1DB954] text-white hover:bg-[#1DB954]" : "bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-90"} disabled:opacity-50`}
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -207,14 +207,14 @@ export default function PlansPage() {
         })}
       </div>
 
-      <div className="mt-8 p-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/10 dark:border-indigo-500/5 text-center">
-        <div className="flex items-center justify-center gap-3 text-indigo-500 mb-4">
+      <div className="mt-8 p-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-[#53E076]/10 dark:border-[#53E076]/5 text-center">
+        <div className="flex items-center justify-center gap-3 text-[#53E076] mb-4">
           <Sparkles className="w-6 h-6" />
           <h4 className="font-black uppercase tracking-widest text-xs">
             Garantia Staff
           </h4>
         </div>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm text-zinc-500 dark:text-[#bccbb9] font-medium max-w-2xl mx-auto leading-relaxed">
           Nossos grãos não expiram. Compre agora e use quando precisar. Ao
           adquirir um pacote, você ajuda a manter o projeto ativo e livre de
           anúncios irritantes.
@@ -223,3 +223,4 @@ export default function PlansPage() {
     </main>
   )
 }
+

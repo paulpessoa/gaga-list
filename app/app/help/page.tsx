@@ -38,7 +38,7 @@ const FAQ_DATA = [
   {
     category: "Listas e Colaboração",
     icon: Users,
-    color: "text-indigo-500 bg-indigo-500/10",
+    color: "text-[#53E076] bg-[#1DB954]/10",
     questions: [
       {
         q: "Como convidar alguém para minha lista?",
@@ -90,17 +90,17 @@ export default function HelpPage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-zinc-950 transition-colors duration-300">
+    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
       <header className="flex items-center gap-4">
         <Link
           href="/app/profile"
           onClick={() => trigger("light")}
-          className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-white/5 shadow-sm active:scale-95"
+          className="p-2.5 rounded-xl bg-zinc-100 dark:bg-[#1c1b1b] transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-[#3d4a3d]/60 shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-white leading-tight">
+          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
             Central de Ajuda
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
@@ -117,7 +117,7 @@ export default function HelpPage() {
           placeholder="Como eu ganho grãos?..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-sm"
+          className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076] rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-[#e5e2e1] placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-sm"
         />
         {search && (
           <button
@@ -131,7 +131,7 @@ export default function HelpPage() {
 
       <div className="flex flex-col gap-8">
         {filteredFaq.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-50 dark:bg-zinc-900/20 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-white/5">
+          <div className="text-center py-20 bg-zinc-50 dark:bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-[#3d4a3d]/60">
             <HelpCircle className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
             <p className="text-zinc-500 text-sm font-medium">
               Nenhum resultado encontrado para sua busca.
@@ -153,19 +153,19 @@ export default function HelpPage() {
                   return (
                     <div
                       key={qIdx}
-                      className={`glass-panel rounded-[2rem] border transition-all duration-300 ${isOpen ? "bg-indigo-50/30 dark:bg-indigo-500/5 border-indigo-500/20 shadow-lg" : "bg-white dark:bg-zinc-900/40 border-zinc-100 dark:border-white/5"}`}
+                      className={`glass-panel rounded-[2rem] border transition-all duration-300 ${isOpen ? "bg-indigo-50/30 dark:bg-[#1DB954]/5 border-[#53E076]/20 shadow-lg" : "bg-white dark:bg-[#1c1b1b]/40 border-zinc-100 dark:border-[#3d4a3d]/60"}`}
                     >
                       <button
                         onClick={() => toggleQuestion(id)}
                         className="w-full p-6 flex items-center justify-between text-left"
                       >
                         <span
-                          className={`text-sm font-black tracking-tight uppercase ${isOpen ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-700 dark:text-zinc-300"}`}
+                          className={`text-sm font-black tracking-tight uppercase ${isOpen ? "text-indigo-600 dark:text-[#53E076]" : "text-zinc-700 dark:text-[#e5e2e1]"}`}
                         >
                           {q.q}
                         </span>
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen ? "bg-indigo-500 text-white rotate-180" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400"}`}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen ? "bg-[#1DB954] text-white rotate-180" : "bg-zinc-100 dark:bg-[#201f1f] text-zinc-400"}`}
                         >
                           <Plus
                             className={`w-4 h-4 transition-transform ${isOpen ? "rotate-45" : ""}`}
@@ -180,7 +180,7 @@ export default function HelpPage() {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="px-6 pb-6 text-sm font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            <div className="px-6 pb-6 text-sm font-medium text-zinc-500 dark:text-[#bccbb9] leading-relaxed">
                               {q.a}
                             </div>
                           </motion.div>
@@ -204,8 +204,8 @@ export default function HelpPage() {
           <h3 className="text-lg font-black text-white dark:text-zinc-900 mb-1">
             Ainda com dúvidas?
           </h3>
-          <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            Fale diretamente com o time do Lista Pronta.
+          <p className="text-xs font-medium text-zinc-500 dark:text-[#bccbb9]">
+            Fale diretamente com o time do Gaga List.
           </p>
         </div>
         <a
@@ -213,7 +213,7 @@ export default function HelpPage() {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trigger("medium")}
-          className="relative z-10 w-full py-5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
+          className="relative z-10 w-full py-5 bg-[#1DB954] hover:bg-[#1DB954] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-[#53E076]/20"
         >
           <MessageCircle className="w-4 h-4" /> Chamar no WhatsApp
         </a>
@@ -221,3 +221,4 @@ export default function HelpPage() {
     </main>
   )
 }
+

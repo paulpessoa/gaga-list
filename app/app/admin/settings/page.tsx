@@ -73,8 +73,8 @@ export default function AdminSettingsPage() {
 
   if (!isAdmin || isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      <div className="min-h-screen bg-[#131313] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#53E076]" />
       </div>
     )
   }
@@ -89,7 +89,7 @@ export default function AdminSettingsPage() {
   ]
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white p-6 md:p-12 pb-32">
+    <main className="min-h-screen bg-[#131313] text-white p-6 md:p-12 pb-32">
       <div className="max-w-4xl mx-auto space-y-10">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
             </Link>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Settings className="w-5 h-5 text-indigo-500" />
+                <Settings className="w-5 h-5 text-[#53E076]" />
                 <h1 className="text-2xl font-black uppercase tracking-tighter">
                   Configurações do Sistema
                 </h1>
@@ -115,7 +115,7 @@ export default function AdminSettingsPage() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-all text-sm font-black uppercase tracking-widest shadow-xl shadow-indigo-500/20"
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#1DB954] hover:bg-[#1DB954] disabled:opacity-50 transition-all text-sm font-black uppercase tracking-widest shadow-xl shadow-[#53E076]/20"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Salvar
@@ -126,7 +126,7 @@ export default function AdminSettingsPage() {
           {costItems.map((item) => {
             const Icon = item.icon
             return (
-              <div key={item.key} className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4 hover:border-indigo-500/30 transition-colors">
+              <div key={item.key} className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] space-y-4 hover:border-[#53E076]/30 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${item.color}`}>
                     <Icon className="w-5 h-5" />
@@ -137,7 +137,7 @@ export default function AdminSettingsPage() {
                       type="number"
                       value={costs[item.key as keyof typeof costs]}
                       onChange={(e) => setCosts({ ...costs, [item.key]: Number(e.target.value) })}
-                      className="w-20 bg-zinc-800 border border-white/10 rounded-lg px-3 py-1.5 text-center font-black text-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                      className="w-20 bg-zinc-800 border border-white/10 rounded-lg px-3 py-1.5 text-center font-black text-lg focus:ring-2 focus:ring-[#53E076] outline-none"
                     />
                   </div>
                 </div>
@@ -163,3 +163,4 @@ export default function AdminSettingsPage() {
     </main>
   )
 }
+
