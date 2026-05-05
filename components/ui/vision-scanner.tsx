@@ -131,24 +131,17 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col animate-in fade-in duration-300">
-      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-10 pointer-events-none">
-        <button onClick={onClose} className="p-3 rounded-2xl bg-zinc-900/50 backdrop-blur-md border border-white/10 text-white pointer-events-auto active:scale-95 transition-all"><X className="w-6 h-6" /></button>
-        <div className="bg-zinc-900/50 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white">
-          <span className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            {mode === 'product' ? 'AI Scanner' : 'Lista via Foto'}
-          </span>
-        </div>
-        <div className="w-12" />
+      <div className="absolute top-6 left-6 z-10">
+        <button onClick={onClose} className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white active:scale-95 transition-all"><X className="w-6 h-6" /></button>
       </div>
 
-      <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+      <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-zinc-950">
         {isAiProcessing ? (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4 text-white p-8 text-center z-20">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-white p-8 text-center z-20 animate-in fade-in duration-500">
              <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
              <div className="space-y-1">
-                <h3 className="text-xl font-black">Analisando com IA</h3>
-                <p className="text-zinc-400 text-sm font-medium">{mode === 'product' ? 'Identificando produto...' : 'Lendo lista de papel...'}</p>
+                <h3 className="text-xl font-black">Processando</h3>
+                <p className="text-zinc-400 text-sm font-medium">Extraindo itens com IA...</p>
              </div>
           </div>
         ) : rawAiResponse ? (
@@ -191,19 +184,11 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
         ) : (
           <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
         )}
-
-        {!capturedImage && !isAiProcessing && !rawAiResponse && (
-          <div className="absolute bottom-32 left-0 right-0 flex justify-center">
-            <p className="text-white/60 text-[10px] font-black uppercase tracking-widest bg-black/40 px-6 py-3 rounded-full backdrop-blur-md border border-white/5">
-              {mode === 'product' ? 'Aponte para o produto' : 'Aponte para a lista'}
-            </p>
-          </div>
-        )}
       </div>
 
-      <div className="p-10 bg-zinc-950 flex items-center justify-center gap-8 relative">
+      <div className="p-10 bg-black flex items-center justify-center gap-8 relative">
         <button onClick={() => { setRawAiResponse(null); setCapturedImage(null); setIsAiProcessing(false); startCamera(); }} className="p-4 rounded-full bg-zinc-900 text-zinc-500 active:scale-95 transition-all"><RefreshCw className="w-6 h-6" /></button>
-        <button onClick={capturePhoto} disabled={!!capturedImage || isAiProcessing || !!rawAiResponse} className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] active:scale-90 transition-all disabled:opacity-50"><div className="w-16 h-16 rounded-full border-4 border-zinc-950 flex items-center justify-center"><div className="w-12 h-12 rounded-full bg-indigo-500" /></div></button>
+        <button onClick={capturePhoto} disabled={!!capturedImage || isAiProcessing || !!rawAiResponse} className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-90 transition-all disabled:opacity-50"><div className="w-16 h-16 rounded-full border-4 border-black flex items-center justify-center"><div className="w-12 h-12 rounded-full bg-indigo-500" /></div></button>
         <div className="w-14" />
       </div>
       <canvas ref={canvasRef} className="hidden" />
