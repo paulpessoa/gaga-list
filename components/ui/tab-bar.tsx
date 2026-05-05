@@ -2,11 +2,7 @@
 
 import {
   LayoutGrid,
-  Settings,
-  Bell,
-  ScanLine,
   UtensilsCrossed,
-  ShoppingBag,
   Users,
   User,
   Plus
@@ -26,6 +22,11 @@ interface TabBarProps {
   }
 }
 
+/**
+ * TabBar — Navegação principal do GagaList Pro.
+ * Design: Glassmorphism com identidade "Electric Sophistication".
+ * Cor ativa: Neon Green (#53E076) com glow effect.
+ */
 export function TabBar({ onScanClick, actionButton }: TabBarProps) {
   const pathname = usePathname()
   const { unreadCount } = useNotifications()
@@ -33,10 +34,18 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
 
   const isActive = (path: string) => pathname === path
 
+  const navItems = [
+    { href: "/app",          icon: LayoutGrid,      label: "Listas"   },
+    { href: "/app/recipes",  icon: UtensilsCrossed, label: "Receitas" },
+    { href: "/app/people",   icon: Users,           label: "Pessoas"  },
+    { href: "/app/profile",  icon: User,            label: "Perfil"   },
+  ]
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 md:hidden pointer-events-none">
       <div className="max-w-md mx-auto flex items-end gap-3 pointer-events-auto">
-        {/* Contextual Action Button - Left Side */}
+
+        {/* FAB — Botão Contextual de Ação */}
         <AnimatePresence mode="popLayout">
           {actionButton && (
             <motion.button
@@ -46,70 +55,85 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
               exit={{ scale: 0, x: -20, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
               onClick={() => {
-                trigger("medium");
-                actionButton.onClick();
+                trigger("medium")
+                actionButton.onClick()
               }}
-              className="w-16 h-16 bg-indigo-500 dark:bg-white text-white dark:text-indigo-600 rounded-[1.75rem] flex items-center justify-center shadow-2xl shadow-indigo-500/30 dark:shadow-white/10 active:scale-90 transition-transform flex-shrink-0"
+              className="
+                w-16 h-16 rounded-[1.75rem] flex items-center justify-center
+                bg-[#1DB954] text-[#003914]
+                shadow-2xl neon-glow
+                active:scale-90 transition-transform flex-shrink-0
+                relative overflow-hidden
+              "
+              aria-label={actionButton.label}
             >
-              {actionButton.icon || <Plus className="w-8 h-8" />}
+              {/* Shimmer interno */}
+              <span
+                className="absolute inset-0 bg-gradient-to-br from-[#53E076]/30 to-transparent pointer-events-none"
+                aria-hidden
+              />
+              {actionButton.icon || <Plus className="w-8 h-8 relative z-10" />}
             </motion.button>
           )}
         </AnimatePresence>
 
-        {/* Main Navigation Bar */}
-        <motion.nav 
+        {/* Nav Principal — Glass */}
+        <motion.nav
           layout
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className={`flex-1 h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-white/5 rounded-[2rem] flex items-center justify-around px-2 shadow-2xl shadow-black/10 transition-colors duration-300`}
+          className="
+            flex-1 h-16
+            glass-panel
+            rounded-[2rem]
+            flex items-center justify-around px-2
+          "
+          role="navigation"
+          aria-label="Navegação principal"
         >
-          <Link
-            href="/app"
-            aria-current={isActive("/app") ? "page" : undefined}
-            onClick={() => trigger("medium")}
-            className={`flex-1 flex flex-col items-center gap-0.5 transition-all active:scale-90 ${isActive("/app") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
-          >
-            <LayoutGrid className={`w-5 h-5 ${isActive("/app") ? "fill-indigo-500/20" : ""}`} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">
-              Listas
-            </span>
-          </Link>
-
-          <Link
-            href="/app/recipes"
-            aria-current={isActive("/app/recipes") ? "page" : undefined}
-            onClick={() => trigger("light")}
-            className={`flex-1 flex flex-col items-center gap-0.5 transition-all active:scale-90 ${isActive("/app/recipes") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
-          >
-            <UtensilsCrossed className={`w-5 h-5 ${isActive("/app/recipes") ? "fill-indigo-500/20" : ""}`} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">
-              Receitas
-            </span>
-          </Link>
-
-          <Link
-            href="/app/people"
-            aria-current={isActive("/app/people") ? "page" : undefined}
-            onClick={() => trigger("light")}
-            className={`flex-1 flex flex-col items-center gap-0.5 transition-all active:scale-90 ${isActive("/app/people") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
-          >
-            <Users className={`w-5 h-5 ${isActive("/app/people") ? "fill-indigo-500/20" : ""}`} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">
-              Pessoas
-            </span>
-          </Link>
-
-          <Link
-            href="/app/profile"
-            aria-current={isActive("/app/profile") ? "page" : undefined}
-            onClick={() => trigger("light")}
-            className={`flex-1 flex flex-col items-center gap-0.5 transition-all active:scale-90 ${isActive("/app/profile") ? "text-indigo-500 dark:text-indigo-400" : "text-zinc-400 dark:text-zinc-500 hover:text-indigo-500"}`}
-          >
-            <User className={`w-5 h-5 ${isActive("/app/profile") ? "fill-indigo-500/20" : ""}`} />
-            <span className="text-[8px] font-black uppercase tracking-tighter">
-              Perfil
-            </span>
-          </Link>
+          {navItems.map(({ href, icon: Icon, label }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                onClick={() => trigger("medium")}
+                className={`
+                  flex-1 flex flex-col items-center gap-0.5
+                  transition-all duration-200 active:scale-90
+                  ${active
+                    ? "text-[#53E076] tab-active-glow"
+                    : "text-[#bccbb9]/60 hover:text-[#bccbb9]"
+                  }
+                `}
+              >
+                <Icon
+                  className={`w-5 h-5 transition-all ${
+                    active ? "scale-110" : ""
+                  }`}
+                  strokeWidth={active ? 2.5 : 1.8}
+                />
+                <span
+                  className={`
+                    text-[8px] font-black uppercase tracking-tighter
+                    ${active ? "opacity-100" : "opacity-70"}
+                  `}
+                >
+                  {label}
+                </span>
+                {/* Indicador ativo — dot neon */}
+                {active && (
+                  <motion.span
+                    layoutId="tab-indicator"
+                    className="absolute bottom-1 w-1 h-1 rounded-full bg-[#53E076] neon-glow-sm"
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                )}
+              </Link>
+            )
+          })}
         </motion.nav>
+
       </div>
     </div>
   )
