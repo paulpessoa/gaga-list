@@ -31,6 +31,7 @@ interface CreateItemModalProps {
   stopRecording: () => void
   isAiProcessing: boolean
   setIsOcrScannerOpen: (val: boolean) => void
+  onOcrSuccess: (data: any) => void
   voiceItems: any[]
   showAiPreview: boolean
   setShowAiPreview: (val: boolean) => void
@@ -47,6 +48,7 @@ export function CreateItemModal({
   stopRecording,
   isAiProcessing,
   setIsOcrScannerOpen,
+  onOcrSuccess,
   voiceItems,
   showAiPreview,
   setShowAiPreview,
@@ -79,7 +81,7 @@ export function CreateItemModal({
         })
         const data = await response.json()
         if (data.items) {
-          window.dispatchEvent(new CustomEvent('ocr-success', { detail: data }))
+          onOcrSuccess(data)
         } else {
           alert(data.error || "Erro ao processar imagem")
         }

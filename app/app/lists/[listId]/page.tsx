@@ -674,6 +674,7 @@ export default function ListDetail({
         stopRecording={stopRecording}
         isAiProcessing={isAiProcessing}
         setIsOcrScannerOpen={setIsOcrScannerOpen}
+        onOcrSuccess={handleOcrSuccess}
         voiceItems={voiceItems}
         showAiPreview={showAiPreview}
         setShowAiPreview={setShowAiPreview}

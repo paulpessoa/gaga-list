@@ -345,6 +345,7 @@ export default function AppPage() {
         stopRecording={stopRecording}
         trigger={trigger}
         setIsOcrScannerOpen={setIsOcrScannerOpen}
+        onOcrSuccess={handleOcrSuccess}
         voiceTranscription={voiceTranscription}
         setVoiceTranscription={setVoiceTranscription}
         voiceItems={voiceItems}

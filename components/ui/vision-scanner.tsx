@@ -32,12 +32,9 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
 
   const startCamera = useCallback(async () => {
     try {
+      // Requisitos mínimos para evitar conflitos de hardware
       const s = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }, 
+        video: { facingMode: 'environment' }, 
         audio: false 
       });
       streamRef.current = s;
@@ -46,7 +43,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
       }
     } catch (err) {
       console.error('Erro ao acessar câmera:', err);
-      alert('Permissão de câmera negada.');
+      alert('Não conseguimos acessar sua câmera. Verifique as permissões do navegador ou use a opção de "Upload de Arquivo".');
       onClose();
     }
   }, [onClose]);

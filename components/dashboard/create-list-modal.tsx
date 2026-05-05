@@ -33,6 +33,7 @@ interface CreateListModalProps {
   stopRecording: () => void
   trigger: (type?: any) => void
   setIsOcrScannerOpen: (val: boolean) => void
+  onOcrSuccess: (data: any) => void
   voiceTranscription: string
   setVoiceTranscription: (val: string) => void
   voiceItems: any[]
@@ -56,6 +57,7 @@ export function CreateListModal({
   stopRecording,
   trigger,
   setIsOcrScannerOpen,
+  onOcrSuccess,
   voiceTranscription,
   setVoiceTranscription,
   voiceItems,
@@ -84,7 +86,6 @@ export function CreateListModal({
     const reader = new FileReader()
     reader.onload = async () => {
       const base64 = reader.result as string
-      // Chamar o processamento (reutilizando a lógica do VisionScanner)
       try {
         const response = await fetch('/api/ai/ocr', {
           method: 'POST',
@@ -93,11 +94,7 @@ export function CreateListModal({
         })
         const data = await response.json()
         if (data.items) {
-          // Reutilizar o handleOcrSuccess da página principal (Dashboard)
-          // Como este componente é burro, vamos precisar passar uma prop onOcrSuccess
-          // Mas wait, o AppPage já tem handleOcrSuccess.
-          // Vou disparar um evento customizado ou passar a função via props.
-          window.dispatchEvent(new CustomEvent('ocr-success', { detail: data }))
+          onOcrSuccess(data)
         } else {
           alert(data.error || "Erro ao processar imagem")
         }
