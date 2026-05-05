@@ -38,7 +38,7 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
   const navItems = [
     { href: "/app",          icon: LayoutGrid,      label: "Listas"   },
     { href: "/app/recipes",  icon: UtensilsCrossed, label: "Receitas" },
-    { href: "/app/notifications", icon: Bell,       label: "Avisos"   },
+    { href: "/app/notifications", icon: Bell,       label: "Mensagens" },
     { href: "/app/people",   icon: Users,           label: "Pessoas"  },
     { href: "/app/profile",  icon: User,            label: "Perfil"   },
   ]

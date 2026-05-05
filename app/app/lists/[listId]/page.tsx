@@ -686,6 +686,7 @@ export default function ListDetail({
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         listId={listId}
+        listTitle={list?.title}
         collaborators={(collaborators || []) as Collaborator[]}
         isOwner={isOwner}
         currentUser={user}
@@ -702,6 +703,8 @@ export default function ListDetail({
 
       <ListChat
         listId={listId}
+        listTitle={list?.title}
+        collaborators={collaborators as any}
         currentUser={user}
         isOpen={isChatOpen}
         onClose={() => {

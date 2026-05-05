@@ -30,25 +30,25 @@ export function useHaptic() {
     try {
       switch (type) {
         case "light":
-          window.navigator.vibrate(10)
+          window.navigator.vibrate(30)
           break
         case "medium":
-          window.navigator.vibrate(20)
+          window.navigator.vibrate(60)
           break
         case "heavy":
-          window.navigator.vibrate(40)
+          window.navigator.vibrate(120)
           break
         case "success":
-          // Vibração dupla rápida
-          window.navigator.vibrate([15, 50, 15])
+          // Vibração dupla rápida e clara
+          window.navigator.vibrate([40, 60, 40])
           break
         case "warning":
-          // Vibração dupla mais longa
-          window.navigator.vibrate([30, 50, 30])
+          // Vibração dupla mais longa e tensa
+          window.navigator.vibrate([80, 100, 80])
           break
         case "error":
-          // Três vibrações
-          window.navigator.vibrate([20, 40, 20, 40, 20])
+          // Três vibrações fortes
+          window.navigator.vibrate([100, 50, 100, 50, 150])
           break
         default:
           window.navigator.vibrate([

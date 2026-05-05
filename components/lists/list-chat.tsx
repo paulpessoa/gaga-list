@@ -26,6 +26,8 @@ interface Message {
 
 interface ListChatProps {
   listId: string
+  listTitle?: string
+  collaborators?: any[]
   currentUser: any
   isOpen: boolean
   onClose: () => void
@@ -33,6 +35,8 @@ interface ListChatProps {
 
 export function ListChat({
   listId,
+  listTitle,
+  collaborators,
   currentUser,
   isOpen,
   onClose
@@ -146,6 +150,33 @@ export function ListChat({
     if (error) {
       console.error("Erro ao enviar mensagem:", error)
       setNewMessage(content)
+    } else {
+      // Broadcast para os outros colaboradores
+      const others = (collaborators || []).filter(c => c.user_id !== currentUser.id)
+      
+      others.forEach(collab => {
+        const targetId = collab.user_id
+        const inbox = supabase.channel(`user_inbox_${targetId}`)
+        inbox.subscribe(async (status) => {
+          if (status === "SUBSCRIBED") {
+            await inbox.send({
+              type: "broadcast",
+              event: "dm",
+              payload: {
+                content,
+                profiles: { 
+                  full_name: currentUser.user_metadata?.full_name || "Alguém",
+                  avatar_url: currentUser.user_metadata?.avatar_url
+                },
+                user_id: currentUser.id,
+                listId,
+                listTitle: listTitle || "Lista"
+              }
+            })
+            supabase.removeChannel(inbox)
+          }
+        })
+      })
     }
     setIsSending(false)
     scrollToBottom()

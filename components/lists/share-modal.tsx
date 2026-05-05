@@ -30,6 +30,7 @@ interface ShareModalProps {
   isOpen: boolean
   onClose: () => void
   listId: string
+  listTitle?: string
   collaborators: Collaborator[]
   isOwner: boolean
   currentUser: any
@@ -48,6 +49,7 @@ export function ShareModal({
   isOpen,
   onClose,
   listId,
+  listTitle,
   collaborators,
   isOwner,
   currentUser,
@@ -63,7 +65,7 @@ export function ShareModal({
   const [inviteToken, setInviteToken] = useState<string | null>(null)
 
   const supabase = createClient()
-  const { onlineUsers, sendNudge } = usePresence(listId, currentUser)
+  const { onlineUsers, sendNudge } = usePresence(listId, currentUser, listTitle)
   const { trigger } = useHaptic()
 
   const otherMembers = useMemo(() => {

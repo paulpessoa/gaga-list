@@ -16,7 +16,7 @@ if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { type, targetUserId, senderName, email, invitedBy } = body
+    const { type, targetUserId, senderName, email, invitedBy, listId } = body
     const supabase = await createClient()
 
     // FLUXO 1: Buzinada (Nudge)
@@ -36,9 +36,14 @@ export async function POST(request: Request) {
         body: `${senderName} está te chamando na lista!`,
         icon: '/appstore-images/android/launchericon-192x192.png',
         badge: '/appstore-images/android/launchericon-48x48.png',
+        vibrate: [200, 100, 200],
+        url: `/app/lists/${listId}?openChat=true`
       })
 
-      await webpush.sendNotification(profile.push_subscription as any, payload)
+      await webpush.sendNotification(profile.push_subscription as any, payload, {
+        TTL: 60,
+        urgency: 'high'
+      })
       return NextResponse.json({ success: true })
     }
 

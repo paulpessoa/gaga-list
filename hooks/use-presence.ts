@@ -16,7 +16,7 @@ export interface PresenceUser {
   bearing?: number | null // em graus (0-360)
 }
 
-export function usePresence(listId: string, currentUser: any) {
+export function usePresence(listId: string, currentUser: any, listTitle?: string) {
   const [onlineUsers, setOnlineUsers] = useState<Record<string, PresenceUser>>(
     {}
   )
@@ -163,7 +163,7 @@ export function usePresence(listId: string, currentUser: any) {
         fetch("/api/push/nudge", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ targetUserId: targetId, senderName })
+          body: JSON.stringify({ targetUserId: targetId, senderName, listId })
         })
       } catch (err) {
         console.error("Erro ao disparar push nudge:", err)
@@ -176,7 +176,12 @@ export function usePresence(listId: string, currentUser: any) {
           await targetInbox.send({
             type: "broadcast",
             event: "nudge",
-            payload: { targetId, senderName }
+            payload: { 
+              targetId, 
+              senderName,
+              listId,
+              listTitle: listTitle || "uma lista"
+            }
           })
           supabase.removeChannel(targetInbox)
         }

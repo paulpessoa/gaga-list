@@ -25,10 +25,10 @@ export default function NotificationsPage() {
       <header className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
-            Central de Avisos
+            Mensagens
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
-            Clique para abrir a conversa ou fixar
+            Acompanhe o que as suas duplas estão falando
           </p>
         </div>
         {notifications.length > 0 && (
@@ -99,7 +99,9 @@ export default function NotificationsPage() {
                     <span className="text-zinc-900 dark:text-[#e5e2e1] font-black">
                       {notif.senderName}
                     </span>
-                    {" está tentando chamar sua atenção agora!"}
+                    {notif.type === "dm" 
+                      ? `: "${notif.message}"` 
+                      : " está tentando chamar sua atenção agora!"}
                   </p>
                   {notif.listTitle && (
                     <div className="inline-flex items-center gap-1.5 mt-3 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1DB954]/10 border border-indigo-100 dark:border-[#53E076]/10">
