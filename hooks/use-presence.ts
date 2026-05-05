@@ -118,6 +118,7 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           setMyLocation(coords)
 
+          // 1. Atualizar Realtime Presence
           channel.track({
             full_name:
               userProfile?.full_name ||
@@ -132,9 +133,22 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
             lng: coords.lng,
             online_at: new Date().toISOString()
           })
+
+          // 2. Persistir no Banco de Dados (Last Location)
+          supabase
+            .from("profiles")
+            .update({
+              last_lat: coords.lat,
+              last_lng: coords.lng,
+              last_seen_at: new Date().toISOString()
+            })
+            .eq("id", currentUser.id)
+            .then(({ error }) => {
+              if (error) console.error("Erro ao persistir localização:", error)
+            })
         },
         (err) => console.error("Erro GPS:", err),
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
       )
     }
 

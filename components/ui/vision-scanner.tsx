@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, RefreshCw, Loader2, Camera, Send, ShieldCheck } from 'lucide-react';
+import { X, RefreshCw, Loader2, Camera, Send } from 'lucide-react';
 import { useHaptic } from '@/hooks/use-haptic';
 
 interface VisionScannerProps {
@@ -123,7 +123,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
 
   return createPortal(
     <div className="fixed inset-0 z-[999999] bg-black flex flex-col pointer-events-auto overflow-hidden">
-      {/* Header com Badge de Versão */}
+      {/* Header Limpo */}
       <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-20">
         <button 
           onClick={onClose} 
@@ -131,12 +131,6 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
         >
           <X className="w-6 h-6" />
         </button>
-        
-        <div className="bg-indigo-500 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-indigo-500/40">
-          <ShieldCheck className="w-4 h-4 text-white" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Motor V3 - Ativo</span>
-        </div>
-        
         <div className="w-12" />
       </div>
 

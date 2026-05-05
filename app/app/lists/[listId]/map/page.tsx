@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Bell
 } from "lucide-react"
+import { useLists, useCollaborators } from "@/hooks/use-lists"
 import Link from "next/link"
 import { useState, useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
@@ -82,6 +83,7 @@ export default function CadeTuPage() {
   const { listId } = useParams() as { listId: string }
   const { data: user } = useUser()
   const { onlineUsers, myLocation, sendNudge } = usePresence(listId, user)
+  const { data: listCollaborators } = useCollaborators(listId)
   const { trigger } = useHaptic()
 
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null)
@@ -119,25 +121,42 @@ export default function CadeTuPage() {
   }
 
   const colleagues = useMemo(() => {
-    const list = Object.values(onlineUsers).filter(
-      (u) => u.user_id !== user?.id
-    )
+    // 1. Pegar todos os colaboradores da lista (incluindo o dono)
+    if (!listCollaborators) return []
+
+    const allCollabs = listCollaborators.map((c: any) => ({
+      user_id: c.profiles.id,
+      full_name: c.profiles.full_name,
+      avatar_url: c.profiles.avatar_url,
+      phone: c.profiles.phone,
+      lat: c.profiles.last_lat,
+      lng: c.profiles.last_lng,
+      last_seen: c.profiles.last_seen_at,
+      is_online: !!onlineUsers[c.profiles.id]
+    }))
+
+    // 2. Mesclar com dados em tempo real (que são mais frescos)
+    const merged = allCollabs.map((u: any) => {
+      const online = onlineUsers[u.user_id]
+      if (online && online.lat && online.lng) {
+        return { ...u, lat: online.lat, lng: online.lng, is_online: true }
+      }
+      return u
+    })
+
+    // 3. Filtrar a si mesmo e quem não tem localização nenhuma
+    const list = merged.filter((u: any) => u.user_id !== user?.id && u.lat && u.lng)
+
     if (!myLocation) return list
 
     return list
-      .map((u) => {
-        const dist =
-          u.lat && u.lng
-            ? getDistance(myLocation.lat, myLocation.lng, u.lat, u.lng)
-            : null
-        const bear =
-          u.lat && u.lng
-            ? getBearing(myLocation.lat, myLocation.lng, u.lat, u.lng)
-            : null
+      .map((u: any) => {
+        const dist = getDistance(myLocation.lat, myLocation.lng, u.lat, u.lng)
+        const bear = getBearing(myLocation.lat, myLocation.lng, u.lat, u.lng)
         return { ...u, distance: dist, bearing: bear }
       })
       .sort((a, b) => (a.distance || 999) - (b.distance || 999))
-  }, [onlineUsers, myLocation, user?.id])
+  }, [onlineUsers, listCollaborators, myLocation, user?.id])
 
   const focusUser = (lat: number, lng: number) => {
     setMapCenter([lat, lng])
@@ -228,7 +247,14 @@ export default function CadeTuPage() {
                     position={[u.lat, u.lng]}
                     icon={L.divIcon({
                       className: "custom-icon",
-                      html: `<div class="group relative flex flex-col items-center"><div class="w-10 h-10 rounded-full border-4 border-emerald-500 bg-zinc-900 shadow-2xl flex items-center justify-center overflow-hidden"><img src="${u.avatar_url || `https://ui-avatars.com/api/?name=${u.full_name}&background=10b981&color=fff`}" class="w-full h-full object-cover" alt="${u.full_name}" /></div><div class="mt-1 px-2 py-0.5 bg-black/80 rounded-full text-[8px] font-bold whitespace-nowrap border border-white/10 shadow-lg">${u.full_name.split(" ")[0]}</div></div>`,
+                      html: `<div class="group relative flex flex-col items-center">
+                        <div class="w-10 h-10 rounded-full border-4 ${u.is_online ? 'border-emerald-500 animate-pulse' : 'border-zinc-500 opacity-70'} bg-zinc-900 shadow-2xl flex items-center justify-center overflow-hidden">
+                          <img src="${u.avatar_url || `https://ui-avatars.com/api/?name=${u.full_name}&background=10b981&color=fff`}" class="w-full h-full object-cover" alt="${u.full_name}" />
+                        </div>
+                        <div class="mt-1 px-2 py-0.5 bg-black/80 rounded-full text-[8px] font-bold whitespace-nowrap border border-white/10 shadow-lg">
+                          ${u.full_name.split(" ")[0]} ${u.is_online ? '' : '(off)'}
+                        </div>
+                      </div>`,
                       iconSize: [40, 60],
                       iconAnchor: [20, 30]
                     })}
@@ -310,11 +336,12 @@ export default function CadeTuPage() {
                         </h3>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${u.distance && u.distance < 10 ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}
+                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${u.is_online ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"}`}
                           >
-                            {u.distance
-                              ? `${Math.round(u.distance)}m`
-                              : "Localizando..."}
+                            {u.is_online ? "Online" : "Visto por último"}
+                          </span>
+                          <span className="text-[10px] font-bold text-zinc-500">
+                            {u.distance ? `${Math.round(u.distance)}m` : ""}
                           </span>
                           {u.distance && u.distance < 10 && (
                             <span className="text-[10px] text-emerald-500 animate-pulse font-bold uppercase tracking-widest">

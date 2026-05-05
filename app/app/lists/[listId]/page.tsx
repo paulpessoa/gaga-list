@@ -41,6 +41,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useHaptic } from "@/hooks/use-haptic"
 import { useUser } from "@/hooks/use-user"
+import { usePresence } from "@/hooks/use-presence"
 import { ShareModal } from "@/components/lists/share-modal"
 import { ListChat } from "@/components/lists/list-chat"
 import { Collaborator } from "@/types"
@@ -124,6 +125,7 @@ export default function ListDetail({
 
   // Estados para IA (Voz/Foto)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
+  const { onlineUsers, myLocation } = usePresence(listId, user)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [voiceItems, setVoiceItems] = useState<any[]>([])
   const [showAiPreview, setShowAiPreview] = useState(false)
