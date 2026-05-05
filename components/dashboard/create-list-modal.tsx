@@ -74,21 +74,21 @@ export function CreateListModal({
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
-        <Drawer.Content className="bg-white dark:bg-zinc-950 flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-white/5 shadow-2xl">
-          <div className="p-4 bg-white dark:bg-zinc-950 rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-800 mb-8" />
+        <Drawer.Content className="bg-white dark:bg-[#131313] flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-[#3d4a3d]/60 shadow-2xl">
+          <div className="p-4 bg-white dark:bg-[#131313] rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-[#201f1f] mb-8" />
             
             <div className="max-w-md mx-auto">
               {!showVoicePreview ? (
                 <>
                   <div className="mb-8 text-center">
-                    <div className="w-16 h-16 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-3xl flex items-center justify-center mb-6 mx-auto">
-                      <ShoppingBag className="w-8 h-8 text-indigo-500" />
+                    <div className="w-16 h-16 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 rounded-3xl flex items-center justify-center mb-6 mx-auto">
+                      <ShoppingBag className="w-8 h-8 text-[#53E076]" />
                     </div>
-                    <Drawer.Title className="text-3xl font-black text-zinc-900 dark:text-white mb-2 leading-tight">
+                    <Drawer.Title className="text-3xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2 leading-tight">
                       Nova Lista
                     </Drawer.Title>
-                    <Drawer.Description className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">
+                    <Drawer.Description className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium">
                       Organize suas compras com amigos e família.
                     </Drawer.Description>
                   </div>
@@ -98,15 +98,15 @@ export function CreateListModal({
                         type="button"
                         onClick={() => checkAndAct(costs.cost_voice, () => (isRecording ? stopRecording() : startRecording()))}
                         disabled={isAiProcessing}
-                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 border-zinc-100 dark:border-white/5 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
+                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] border-zinc-100 dark:border-[#3d4a3d]/60 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-indigo-500/10 dark:bg-indigo-500/20'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-[#1DB954]/10 dark:bg-[#1DB954]/20'}`}>
                           {isAiProcessing ? (
                             <Loader2 className="w-6 h-6 animate-spin" />
                           ) : isRecording ? (
                             <Square className="w-5 h-5 fill-current text-white" />
                           ) : (
-                            <Mic className="w-6 h-6 text-indigo-500" />
+                            <Mic className="w-6 h-6 text-[#53E076]" />
                           )}
                         </div>
                         <div className="flex flex-col items-center gap-1">
@@ -124,10 +124,10 @@ export function CreateListModal({
                           checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
-                        className="p-6 w-full bg-zinc-50 dark:bg-zinc-900/50 text-zinc-600 dark:text-zinc-400 rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-white/5 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
-                          <Camera className="w-6 h-6 text-indigo-500" />
+                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-[#53E076]" />
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <span className="text-[11px] font-black">Via Foto</span>
@@ -148,10 +148,10 @@ export function CreateListModal({
                             required
                             value={newListTitle}
                             onChange={(e) => setNewListTitle(e.target.value)}
-                            className={`w-full bg-zinc-100 dark:bg-zinc-900 border-2 rounded-2xl py-5 px-6 text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base ${
+                            className={`w-full bg-zinc-100 dark:bg-[#1c1b1b] border-2 rounded-2xl py-5 px-6 text-zinc-900 dark:text-[#e5e2e1] placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base ${
                               !newListTitle.trim() && newListTitle.length > 0 
                                 ? "border-red-500" 
-                                : "border-transparent focus:border-indigo-500"
+                                : "border-transparent focus:border-[#53E076]/50"
                             }`}
                           />
                           {!newListTitle.trim() && (newListTitle?.length || 0) > 0 && (
@@ -183,7 +183,7 @@ export function CreateListModal({
               ) : (
                 <div className="animate-in fade-in zoom-in-95 duration-300">
                   <div className="mb-6 text-center">
-                    <h2 className="text-2xl font-black text-zinc-900 dark:text-white mb-2 tracking-tight">
+                    <h2 className="text-2xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2 tracking-tight">
                       Confirmar Lista
                     </h2>
                     <p className="text-zinc-500 text-sm font-medium">
@@ -200,12 +200,12 @@ export function CreateListModal({
                         <textarea
                           value={voiceTranscription}
                           onChange={(e) => setVoiceTranscription(e.target.value)}
-                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-5 text-sm font-bold text-zinc-700 dark:text-zinc-300 min-h-[100px] resize-none outline-none transition-all shadow-inner"
+                          className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-4 px-5 text-sm font-bold text-zinc-700 dark:text-[#bccbb9] min-h-[100px] resize-none outline-none transition-all shadow-inner"
                         />
                         <button
                           onClick={reprocessVoiceTranscription}
                           disabled={isAiProcessing}
-                          className="absolute right-3 bottom-3 p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors shadow-lg active:scale-95 disabled:opacity-50"
+                          className="absolute right-3 bottom-3 p-2 bg-[#1DB954] text-white rounded-lg hover:bg-indigo-600 transition-colors shadow-lg active:scale-95 disabled:opacity-50"
                           title="Reprocessar itens com este texto"
                         >
                           {isAiProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RotateCcw className="w-3 h-3" />}
@@ -222,7 +222,7 @@ export function CreateListModal({
                       </div>
                     )}
 
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-[2.5rem] p-6 max-h-64 overflow-y-auto border border-zinc-100 dark:border-white/5 shadow-inner">
+                    <div className="bg-zinc-50 dark:bg-[#1c1b1b] rounded-[2.5rem] p-6 max-h-64 overflow-y-auto border border-zinc-100 dark:border-[#3d4a3d]/60 shadow-inner">
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-4">
                         Itens Identificados ({voiceItems.length})
                       </p>
@@ -231,7 +231,7 @@ export function CreateListModal({
                           {voiceItems.map((item, i) => (
                             <li
                               key={i}
-                              className="flex items-center gap-3 text-sm font-bold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800/50 p-3 rounded-xl border border-zinc-100 dark:border-white/5"
+                              className="flex items-center gap-3 text-sm font-bold text-zinc-700 dark:text-[#bccbb9] bg-white dark:bg-[#201f1f]/50 p-3 rounded-xl border border-zinc-100 dark:border-[#3d4a3d]/60"
                             >
                               <CheckCircle2 className="w-5 h-5 text-emerald-500" />{" "}
                               <span className="flex-1">{item.name}</span>
@@ -256,7 +256,7 @@ export function CreateListModal({
                     <button
                       onClick={confirmVoiceList}
                       disabled={isAiProcessing || voiceItems.length === 0}
-                      className="w-full py-5 bg-indigo-500 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all disabled:opacity-50"
+                      className="w-full py-5 bg-[#1DB954] text-white rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all disabled:opacity-50"
                     >
                       {isAiProcessing ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -282,3 +282,4 @@ export function CreateListModal({
     </Drawer.Root>
   )
 }
+
