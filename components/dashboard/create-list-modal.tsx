@@ -69,6 +69,7 @@ export function CreateListModal({
   const { costs } = useAICosts()
   const { checkAndAct } = useAICreditCheck()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingLocal, setIsUploadingLocal] = useState(false)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -81,6 +82,7 @@ export function CreateListModal({
     }
 
     trigger("medium")
+    setIsUploadingLocal(true)
     
     // Converter para Base64
     const reader = new FileReader()
@@ -100,6 +102,8 @@ export function CreateListModal({
         }
       } catch (err) {
         alert("Erro na conexão com a IA.")
+      } finally {
+        setIsUploadingLocal(false)
       }
     }
     reader.readAsDataURL(file)
@@ -190,16 +194,24 @@ export function CreateListModal({
                       <button
                         type="button"
                         onClick={() => checkAndAct(costs.cost_ocr, () => fileInputRef.current?.click())}
-                        disabled={isAiProcessing}
+                        disabled={isAiProcessing || isUploadingLocal}
                         className="w-full py-4 bg-zinc-100 dark:bg-[#1c1b1b] text-zinc-600 dark:text-[#bccbb9] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-200 dark:hover:bg-zinc-900 transition-all border border-zinc-200 dark:border-[#3d4a3d]/60 active:scale-95"
                       >
-                        <UploadCloud className="w-4 h-4 text-[#53E076]" />
-                        Ou suba um arquivo de imagem
+                        {isUploadingLocal ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin text-[#53E076]" />
+                            Processando Imagem...
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud className="w-4 h-4 text-[#53E076]" />
+                            Ou suba um arquivo de imagem
+                          </>
+                        )}
                       </button>
-                      <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                        <AlertCircle className="w-3 h-3 text-amber-500" />
-                        <span className="text-[9px] text-amber-600/70 dark:text-amber-500/50 font-black uppercase tracking-widest">
-                          Máximo de 3MB • Suporta PNG, JPG e WEBP
+                      <div className="flex items-center justify-center gap-2 py-1">
+                        <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-widest opacity-60">
+                          Máximo de 3MB • PNG, JPG ou WEBP
                         </span>
                       </div>
                     </div>

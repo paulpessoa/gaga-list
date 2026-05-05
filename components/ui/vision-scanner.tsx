@@ -58,6 +58,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
   }, [isOpen, startCamera, stopCamera]);
 
   const capturePhoto = () => {
+    console.log('Tentando capturar foto...');
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -69,11 +70,15 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setCapturedImage(dataUrl);
         trigger('medium');
         processImage(dataUrl);
+      } else {
+        console.error('Falha ao obter contexto 2D do canvas');
       }
+    } else {
+      console.error('Video ou Canvas não encontrados no DOM');
     }
   };
 
@@ -121,7 +126,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] bg-black flex flex-col animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col animate-in fade-in duration-300">
       <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-10 pointer-events-none">
         <button onClick={onClose} className="p-3 rounded-2xl bg-zinc-900/50 backdrop-blur-md border border-white/10 text-white pointer-events-auto active:scale-95 transition-all"><X className="w-6 h-6" /></button>
         <div className="bg-zinc-900/50 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white">
