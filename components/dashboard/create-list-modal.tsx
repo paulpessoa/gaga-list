@@ -69,6 +69,7 @@ export function CreateListModal({
   const { costs } = useAICosts()
   const { checkAndAct } = useAICreditCheck()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const nativeCameraRef = useRef<HTMLInputElement>(null)
   const [isUploadingLocal, setIsUploadingLocal] = useState(false)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,17 +171,39 @@ export function CreateListModal({
                           checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
-                        className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        className="p-4 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[120px] shadow-sm shadow-inner"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
-                          <Camera className="w-6 h-6 text-[#53E076]" />
+                        <div className="w-10 h-10 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
+                          <Camera className="w-5 h-5 text-[#53E076]" />
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-[11px] font-black">Via Foto</span>
-                          <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_ocr} {costs.cost_ocr === 1 ? 'grão' : 'grãos'}</span>
+                          <span className="text-[10px] font-black leading-tight">Foto A<br/>(Scanner)</span>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => checkAndAct(costs.cost_ocr, () => nativeCameraRef.current?.click())}
+                        disabled={isAiProcessing || isUploadingLocal}
+                        className="p-4 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[120px] shadow-sm shadow-inner"
+                      >
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                          <Camera className="w-5 h-5 text-indigo-500" />
+                        </div>
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[10px] font-black leading-tight">Foto B<br/>(Nativa)</span>
                         </div>
                       </button>
                     </div>
+
+                    <input 
+                      type="file" 
+                      ref={nativeCameraRef}
+                      onChange={handleFileUpload}
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                    />
 
                     <input 
                       type="file" 

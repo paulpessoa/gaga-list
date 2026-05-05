@@ -59,6 +59,7 @@ export function CreateItemModal({
   const { checkAndAct } = useAICreditCheck()
   const { costs } = useAICosts()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const nativeCameraRef = useRef<HTMLInputElement>(null)
   const [isUploadingLocal, setIsUploadingLocal] = useState(false)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,33 +132,28 @@ export function CreateItemModal({
                       Novo Item
                     </Drawer.Title>
                     <Drawer.Description className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium">
-                      Use áudio, foto ou digite abaixo.
+                      Escolha uma opção para adicionar.
                     </Drawer.Description>
                   </div>
 
                   <div className="flex flex-col gap-8">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-3">
                       <button
                         type="button"
                         onClick={() => checkAndAct(costs.cost_voice, () => (isRecording ? stopRecording() : startRecording()))}
                         disabled={isAiProcessing}
-                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] border-zinc-100 dark:border-[#3d4a3d]/60 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
+                        className={`p-4 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all border active:scale-95 relative overflow-hidden min-h-[120px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] border-zinc-100 dark:border-[#3d4a3d]/60 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
                       >
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-[#1DB954]/10 dark:bg-[#1DB954]/20'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-[#1DB954]/10 dark:bg-[#1DB954]/20'}`}>
                           {isAiProcessing ? (
-                            <Loader2 className="w-6 h-6 animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin" />
                           ) : isRecording ? (
-                            <Square className="w-5 h-5 fill-current text-white" />
+                            <Square className="w-4 h-4 fill-current text-white" />
                           ) : (
-                            <Mic className="w-6 h-6 text-[#53E076]" />
+                            <Mic className="w-5 h-5 text-[#53E076]" />
                           )}
                         </div>
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[11px] font-black">{isAiProcessing ? "Processando..." : isRecording ? "Parar" : "Via Áudio"}</span>
-                          {!isAiProcessing && !isRecording && (
-                            <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_voice} {costs.cost_voice === 1 ? 'grão' : 'grãos'}</span>
-                          )}
-                        </div>
+                        <span className="text-[9px] font-black leading-tight text-center">Via<br/>Áudio</span>
                       </button>
                       
                       <button
@@ -167,17 +163,35 @@ export function CreateItemModal({
                           checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
-                        className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        className="p-4 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[120px] shadow-sm shadow-inner"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
-                          <Camera className="w-6 h-6 text-[#53E076]" />
+                        <div className="w-10 h-10 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
+                          <Camera className="w-5 h-5 text-[#53E076]" />
                         </div>
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[11px] font-black">Via Foto</span>
-                          <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_ocr} {costs.cost_ocr === 1 ? 'grão' : 'grãos'}</span>
+                        <span className="text-[9px] font-black leading-tight text-center">Foto A<br/>(Scanner)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => checkAndAct(costs.cost_ocr, () => nativeCameraRef.current?.click())}
+                        disabled={isAiProcessing || isUploadingLocal}
+                        className="p-4 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[120px] shadow-sm shadow-inner"
+                      >
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                          <Camera className="w-5 h-5 text-indigo-500" />
                         </div>
+                        <span className="text-[9px] font-black leading-tight text-center">Foto B<br/>(Nativa)</span>
                       </button>
                     </div>
+
+                    <input 
+                      type="file" 
+                      ref={nativeCameraRef}
+                      onChange={handleFileUpload}
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                    />
 
                     <input 
                       type="file" 
