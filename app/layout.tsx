@@ -1,19 +1,30 @@
 import type { Metadata, Viewport } from "next"
-import "./globals.css" // Global styles
-import "leaflet/dist/leaflet.css" // Leaflet styles
+import { Inter } from "next/font/google"
+import "./globals.css"
+import "leaflet/dist/leaflet.css"
 import Providers from "./providers"
 import Script from "next/script"
 import { NavigationWrapper } from "@/components/navigation-wrapper"
 import { DesktopBlocker } from "@/components/ui/desktop-blocker"
 
+/**
+ * Inter é a fonte oficial do Design System GagaList Pro.
+ * Carregamento otimizado via next/font para zero layout shift.
+ */
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap"
+})
+
 export const metadata: Metadata = {
-  title: "Lista Pronta",
-  description: "Listas de compras colaborativas em tempo real.",
+  title: "GagaList",
+  description: "Listas de compras colaborativas com sincronização em tempo real.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Lista Pronta"
+    title: "GagaList"
   },
   icons: {
     apple: "/icons/icon-192x192.png"
@@ -21,7 +32,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
+  themeColor: "#131313", // Obsidian — base do Design System GagaList Pro
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -35,30 +46,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <head>
-        {/* Script Crítico para Evitar Flash de Tema */}
+        {/*
+          Script crítico: garante dark mode desde o primeiro render.
+          O GagaList Pro é dark-first por design — sem flash de tema.
+        */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const theme = localStorage.getItem('theme');
-                  const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-                  if (theme === 'dark' || (theme === 'system' && supportDarkMode) || (!theme && supportDarkMode)) {
-                    document.documentElement.classList.add('dark');
-                  } else if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                  } else if (!theme) {
-                     // Default app preference is dark if no theme is set
-                     document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
-            `
+            __html: `document.documentElement.classList.add('dark');`
           }}
         />
-        {/* Microsoft Clarity Script */}
+        {/* Microsoft Clarity — Observability de UX */}
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
             (function(c,l,a,r,i,t,y){
@@ -69,7 +68,16 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen antialiased selection:bg-indigo-500/30 pb-20 md:pb-0 transition-colors duration-300">
+      <body
+        className={`
+          ${inter.variable}
+          font-[family-name:var(--font-inter)]
+          bg-[#131313] text-[#e5e2e1]
+          min-h-screen antialiased
+          selection:bg-[#53E076]/20 selection:text-[#53E076]
+          pb-20 md:pb-0
+        `}
+      >
         <Providers>
           <DesktopBlocker />
           {children}

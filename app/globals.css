@@ -1,41 +1,175 @@
 @import "tailwindcss";
 
+/* ============================================================
+   GAGALIST PRO — "Electric Sophistication" Design System
+   Tokens derivados do Stitch MCP: projects/3884342704772771895
+   ============================================================ */
+
 @theme {
-  --color-glass-bg: rgba(255, 255, 255, 0.8);
-  --color-glass-border: rgba(0, 0, 0, 0.05);
-  
-  --color-dark-glass-bg: rgba(24, 24, 27, 0.6);
-  --color-dark-glass-border: rgba(255, 255, 255, 0.08);
+  /* Brand Colors */
+  --color-brand-primary:        #53E076;   /* Neon Green — ações primárias */
+  --color-brand-primary-dim:    #1DB954;   /* Neon Green dim — hover, pressed */
+  --color-brand-primary-glow:   rgba(83, 224, 118, 0.25);
+  --color-brand-secondary:      #00E5FF;   /* Electric Blue — interativos */
+  --color-brand-tertiary:       #7D52FF;   /* Deep Purple — acentos terciários */
+
+  /* Surfaces — Obsidian Scale */
+  --color-surface-base:             #0e0e0e;   /* Nível 0 – canvas */
+  --color-surface:                  #131313;   /* Nível 1 – fundo padrão */
+  --color-surface-container-low:    #1c1b1b;
+  --color-surface-container:        #201f1f;   /* Cards */
+  --color-surface-container-high:   #2a2a2a;   /* Hover */
+  --color-surface-container-highest:#353534;
+  --color-surface-bright:           #393939;
+
+  /* Text */
+  --color-on-surface:         #e5e2e1;   /* Texto principal */
+  --color-on-surface-muted:   #bccbb9;   /* Texto secundário */
+
+  /* Borders */
+  --color-outline:            #3d4a3d;
+  --color-outline-muted:      rgba(255, 255, 255, 0.06);
+
+  /* Glass */
+  --color-glass-bg:           rgba(32, 31, 31, 0.72);
+  --color-glass-border:       rgba(83, 224, 118, 0.10);
+  --color-dark-glass-bg:      rgba(19, 19, 19, 0.80);
+  --color-dark-glass-border:  rgba(83, 224, 118, 0.08);
+
+  /* States */
+  --color-error:              #ffb4ab;
+  --color-error-container:    #93000a;
+  --color-success:            #53E076;
 }
 
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes pulse-neon {
+  0%, 100% { box-shadow: 0 0 8px rgba(83, 224, 118, 0.20); }
+  50%       { box-shadow: 0 0 20px rgba(83, 224, 118, 0.45), 0 0 40px rgba(83, 224, 118, 0.10); }
+}
+
+@keyframes slide-up-spring {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in-scale {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes glow-in {
+  from { opacity: 0; box-shadow: 0 0 0px rgba(83, 224, 118, 0); }
+  to   { opacity: 1; box-shadow: 0 0 16px rgba(83, 224, 118, 0.30); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-10deg); }
+  75%       { transform: rotate(10deg); }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
 @layer utilities {
+
+  /* --- Glassmorphism --- */
   .glass-panel {
-    @apply bg-white dark:bg-[var(--color-dark-glass-bg)] 
-           backdrop-blur-none dark:backdrop-blur-xl 
-           border border-zinc-200 dark:border-[var(--color-dark-glass-border)] 
-           shadow-sm dark:shadow-xl;
+    background-color: var(--color-glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40);
   }
 
   .glass-premium {
-    @apply bg-white/70 dark:bg-zinc-900/70 
-           backdrop-blur-md dark:backdrop-blur-2xl 
-           border border-white/20 dark:border-white/5 
-           shadow-xl dark:shadow-2xl;
+    background-color: rgba(20, 20, 20, 0.75);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(83, 224, 118, 0.12);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.60), inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
+  /* --- Neon Glow Effects --- */
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(83, 224, 118, 0.25),
+                0 0 40px rgba(83, 224, 118, 0.08);
+  }
+
+  .neon-glow-sm {
+    box-shadow: 0 0 10px rgba(83, 224, 118, 0.20);
+  }
+
+  .neon-pulse {
+    animation: pulse-neon 2.5s ease-in-out infinite;
+  }
+
+  /* --- Tab Bar --- */
+  .tab-active-glow {
+    text-shadow: 0 0 12px rgba(83, 224, 118, 0.60);
+    filter: drop-shadow(0 0 6px rgba(83, 224, 118, 0.40));
+  }
+
+  /* --- Cards --- */
   .card-hover {
-    @apply hover:border-zinc-300 dark:hover:border-zinc-700 
-           hover:shadow-md dark:hover:shadow-2xl 
-           transition-all duration-200;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-10deg); }
-    75% { transform: rotate(10deg); }
+  .card-hover:hover {
+    border-color: rgba(83, 224, 118, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba(83, 224, 118, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* --- Animations --- */
+  .animate-slide-up {
+    animation: slide-up-spring 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .animate-fade-scale {
+    animation: fade-in-scale 0.25s ease both;
+  }
+
+  .animate-glow-in {
+    animation: glow-in 0.4s ease both;
   }
 
   .animate-shake {
     animation: shake 0.4s ease-in-out infinite;
+  }
+
+  /* --- Brand Gradient --- */
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #e5e2e1 0%, #bccbb9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #53E076 0%, #1DB954 100%);
+  }
+
+  /* --- Input Focus --- */
+  .input-gaga {
+    background-color: var(--color-surface-container);
+    border: 1px solid var(--color-outline);
+    color: var(--color-on-surface);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .input-gaga:focus {
+    border-color: rgba(83, 224, 118, 0.50);
+    box-shadow: 0 0 0 3px rgba(83, 224, 118, 0.12);
+  }
+
+  .input-gaga::placeholder {
+    color: var(--color-on-surface-muted);
   }
 }
