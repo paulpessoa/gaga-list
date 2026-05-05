@@ -22,7 +22,7 @@ export default function TermsPage() {
             <FileText className="w-4 h-4 text-indigo-500" />
             <span>1. Uso Aceitável</span>
           </div>
-          <p>O <strong>Lista Pronta</strong> é uma plataforma para organização e colaboração de compras. Ao utilizar nossos serviços, você concorda em não utilizar a ferramenta para fins ilícitos, envio de spam através de convites ou assédio através das ferramentas de comunicação integrada.</p>
+          <p>O <strong>Gaga List</strong> é uma plataforma para organização e colaboração de compras. Ao utilizar nossos serviços, você concorda em não utilizar a ferramenta para fins ilícitos, envio de spam através de convites ou assédio através das ferramentas de comunicação integrada.</p>
         </section>
 
         <section className="space-y-4">

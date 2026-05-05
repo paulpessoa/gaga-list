@@ -22,7 +22,7 @@ export default function PrivacyPage() {
             <Shield className="w-4 h-4 text-indigo-500" />
             <span>1. Coleta de Dados</span>
           </div>
-          <p>O <strong>Lista Pronta</strong> coleta as informações estritamente necessárias para a experiência colaborativa: seu nome, e-mail, foto de perfil e dados de listas. Estes dados são armazenados de forma segura na infraestrutura da Supabase.</p>
+          <p>O <strong>Gaga List</strong> coleta as informações estritamente necessárias para a experiência colaborativa: seu nome, e-mail, foto de perfil e dados de listas. Estes dados são armazenados de forma segura na infraestrutura da Supabase.</p>
         </section>
 
         <section className="space-y-4">
