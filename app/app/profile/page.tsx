@@ -72,6 +72,13 @@ export default function ProfilePage() {
 
   const togglePush = async () => {
     if (!user) return
+
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    if (!vapidKey) {
+      alert("Configuração Pendente: A chave VAPID não foi encontrada. Se você estiver em desenvolvimento local, adicione NEXT_PUBLIC_VAPID_PUBLIC_KEY ao seu .env.local")
+      return
+    }
+
     setIsUpdatingPush(true)
     trigger("light")
     try {
@@ -80,16 +87,24 @@ export default function ProfilePage() {
         setIsPushEnabled(false)
       } else {
         const registration = await navigator.serviceWorker.ready
+        if (!registration.pushManager) {
+          throw new Error("Push Manager não disponível no navegador.")
+        }
+
         const sub = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          applicationServerKey: vapidKey
         })
         const result = await subscribeUser(sub as any)
         if (result.success) setIsPushEnabled(true)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      alert("Erro ao ajustar notificações. Verifique se o site está em HTTPS e se as chaves VAPID estão configuradas.")
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        alert("Erro de Segurança: Notificações Push exigem HTTPS. O navegador bloqueou a solicitação por segurança.")
+      } else {
+        alert("Erro ao ativar notificações: " + (err.message || "Verifique se você permitiu notificações no navegador."))
+      }
     } finally {
       setIsUpdatingPush(false)
     }
