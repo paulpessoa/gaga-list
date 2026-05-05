@@ -37,6 +37,7 @@ export default function ProfilePage() {
   const [isUpdatingPush, setIsUpdatingPush] = useState(false)
   const [credits, setCredits] = useState(0)
   const [profile, setProfile] = useState<any>(null)
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -120,6 +121,44 @@ export default function ProfilePage() {
     }
   }
 
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    setIsUploadingPhoto(true)
+    trigger("medium")
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const filePath = `${user.id}-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      setProfile((prev: any) => ({ ...prev, avatar_url: publicUrl }))
+      trigger("success")
+    } catch (err: any) {
+      console.error(err)
+      alert("Erro ao enviar foto: " + (err.message || "Verifique as permissões do bucket 'avatars'"))
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
+
   if (userLoading)
     return (
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#131313]">
@@ -148,7 +187,9 @@ export default function ProfilePage() {
         </div>
         <div className="glass-panel p-8 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border-2 border-[#53E076]/10 flex flex-col items-center text-center gap-4 relative overflow-hidden">
           <div className="w-24 h-24 rounded-[2rem] bg-[#1DB954]/10 border-4 border-white dark:border-zinc-900 shadow-2xl flex items-center justify-center relative group">
-            {profile?.avatar_url ? (
+            {isUploadingPhoto ? (
+              <Loader2 className="w-8 h-8 animate-spin text-[#53E076]" />
+            ) : profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.full_name || ""}
@@ -157,9 +198,17 @@ export default function ProfilePage() {
             ) : (
               <User className="w-10 h-10 text-[#53E076]" />
             )}
-            <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white dark:bg-[#201f1f] rounded-full shadow-lg border border-zinc-100 dark:border-[#3d4a3d]/60 flex items-center justify-center text-zinc-500 hover:text-[#53E076] transition-all active:scale-90">
+            
+            <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-white dark:bg-[#201f1f] rounded-full shadow-lg border border-zinc-100 dark:border-[#3d4a3d]/60 flex items-center justify-center text-zinc-500 hover:text-[#53E076] transition-all active:scale-90 cursor-pointer">
               <Camera className="w-4 h-4" />
-            </button>
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleUploadPhoto}
+                disabled={isUploadingPhoto}
+              />
+            </label>
           </div>
           <div>
             <h3 className="text-xl font-black text-zinc-900 dark:text-[#e5e2e1]">

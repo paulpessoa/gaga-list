@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useRouter } from "next/navigation"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -111,7 +111,7 @@ export function ListCard({
           ) : (
             <button
               onClick={handleAction}
-              className="w-9 h-9 rounded-xl bg-[#201f1f] border border-[#3d4a3d] text-[#bccbb9]/50 hover:text-[#ffb4ab] hover:border-[#ffb4ab]/30 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+              className="w-9 h-9 rounded-xl bg-[#201f1f] border border-[#3d4a3d] text-[#bccbb9] hover:text-[#ffb4ab] hover:border-[#ffb4ab]/30 flex items-center justify-center transition-all md:opacity-0 md:group-hover:opacity-100"
               title={isOwner ? "Apagar Lista" : "Sair da Lista"}
             >
               {isOwner ? (
