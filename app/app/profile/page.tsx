@@ -130,7 +130,7 @@ export default function ProfilePage() {
 
     try {
       const fileExt = file.name.split('.').pop()
-      const filePath = `${user.id}-${Date.now()}.${fileExt}`
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
