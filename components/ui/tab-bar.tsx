@@ -5,7 +5,8 @@ import {
   UtensilsCrossed,
   Users,
   User,
-  Plus
+  Plus,
+  Bell
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -37,6 +38,7 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
   const navItems = [
     { href: "/app",          icon: LayoutGrid,      label: "Listas"   },
     { href: "/app/recipes",  icon: UtensilsCrossed, label: "Receitas" },
+    { href: "/app/notifications", icon: Bell,       label: "Avisos"   },
     { href: "/app/people",   icon: Users,           label: "Pessoas"  },
     { href: "/app/profile",  icon: User,            label: "Perfil"   },
   ]
@@ -107,12 +109,19 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
                   }
                 `}
               >
-                <Icon
-                  className={`w-5 h-5 transition-all ${
-                    active ? "scale-110" : ""
-                  }`}
-                  strokeWidth={active ? 2.5 : 1.8}
-                />
+                <div className="relative">
+                  <Icon
+                    className={`w-5 h-5 transition-all ${
+                      active ? "scale-110" : ""
+                    }`}
+                    strokeWidth={active ? 2.5 : 1.8}
+                  />
+                  {href === "/app/notifications" && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[7px] font-black flex items-center justify-center rounded-full border-2 border-[#131313] animate-bounce">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
                 <span
                   className={`
                     text-[8px] font-black uppercase tracking-tighter
