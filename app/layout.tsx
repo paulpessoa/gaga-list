@@ -27,6 +27,7 @@ export const metadata: Metadata = {
     title: "GagaList"
   },
   icons: {
+    icon: "/favicon.png",
     apple: "/icons/icon-192x192.png"
   }
 }

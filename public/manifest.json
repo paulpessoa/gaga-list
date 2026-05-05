@@ -4,8 +4,8 @@
   "description": "Listas de compras colaborativas em tempo real.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#6366f1",
+  "background_color": "#131313",
+  "theme_color": "#131313",
   "orientation": "portrait",
   "scope": "/",
   "icons": [
