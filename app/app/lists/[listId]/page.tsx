@@ -49,6 +49,7 @@ import { useRouter } from "next/navigation"
 
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 import { VisionScanner } from "@/components/ui/vision-scanner"
+import { LegacyVisionScanner } from "@/components/ui/legacy-vision-scanner"
 import { useAudioRecorder } from "@/hooks/use-audio-recorder"
 import { CreateItemModal } from "@/components/lists/create-item-modal"
 import { 
@@ -124,6 +125,7 @@ export default function ListDetail({
 
   // Estados para IA (Voz/Foto)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
+  const [isLegacyOcrScannerOpen, setIsLegacyOcrScannerOpen] = useState(false)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [voiceItems, setVoiceItems] = useState<any[]>([])
   const [showAiPreview, setShowAiPreview] = useState(false)
@@ -674,6 +676,7 @@ export default function ListDetail({
         stopRecording={stopRecording}
         isAiProcessing={isAiProcessing}
         setIsOcrScannerOpen={setIsOcrScannerOpen}
+        setIsLegacyOcrScannerOpen={setIsLegacyOcrScannerOpen}
         onOcrSuccess={handleOcrSuccess}
         voiceItems={voiceItems}
         showAiPreview={showAiPreview}
@@ -716,6 +719,12 @@ export default function ListDetail({
         mode="ocr"
         isOpen={isOcrScannerOpen}
         onClose={() => setIsOcrScannerOpen(false)}
+        onScanSuccess={handleOcrSuccess}
+      />
+      <LegacyVisionScanner
+        mode="ocr"
+        isOpen={isLegacyOcrScannerOpen}
+        onClose={() => setIsLegacyOcrScannerOpen(false)}
         onScanSuccess={handleOcrSuccess}
       />
     </main>

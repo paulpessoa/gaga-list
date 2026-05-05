@@ -20,9 +20,11 @@ import {
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { VisionScanner } from "@/components/ui/vision-scanner"
+import { LegacyVisionScanner } from "@/components/ui/legacy-vision-scanner"
 import { ListCard } from "@/components/dashboard/list-card"
 import { CreateListModal } from "@/components/dashboard/create-list-modal"
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
+import { useAICosts } from "@/hooks/use-ai-costs"
 
 export default function AppPage() {
   const router = useRouter()
@@ -45,6 +47,7 @@ export default function AppPage() {
   const [isOffline, setIsOffline] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
+  const [isLegacyOcrScannerOpen, setIsLegacyOcrScannerOpen] = useState(false)
   const [isAiProcessing, setIsAiProcessing] = useState(false)
   const [newListTitle, setNewListTitle] = useState("")
 
@@ -345,6 +348,7 @@ export default function AppPage() {
         stopRecording={stopRecording}
         trigger={trigger}
         setIsOcrScannerOpen={setIsOcrScannerOpen}
+        setIsLegacyOcrScannerOpen={setIsLegacyOcrScannerOpen}
         onOcrSuccess={handleOcrSuccess}
         voiceTranscription={voiceTranscription}
         setVoiceTranscription={setVoiceTranscription}
@@ -358,6 +362,12 @@ export default function AppPage() {
         mode="ocr"
         isOpen={isOcrScannerOpen}
         onClose={() => setIsOcrScannerOpen(false)}
+        onScanSuccess={handleOcrSuccess}
+      />
+      <LegacyVisionScanner
+        mode="ocr"
+        isOpen={isLegacyOcrScannerOpen}
+        onClose={() => setIsLegacyOcrScannerOpen(false)}
         onScanSuccess={handleOcrSuccess}
       />
     </main>

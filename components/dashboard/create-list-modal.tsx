@@ -164,7 +164,7 @@ export function CreateListModal({
                         </div>
                       </button>
                       
-                      <div className="flex flex-col gap-2">
+                      <div className="relative group">
                         <button
                           type="button"
                           onClick={() => {
@@ -182,12 +182,19 @@ export function CreateListModal({
                             <span className="text-[8px] opacity-40 font-bold">Consome {costs.cost_ocr} {costs.cost_ocr === 1 ? 'grão' : 'grãos'}</span>
                           </div>
                         </button>
-                        <button 
+                        
+                        {/* Gatilho discreto para Motor Antigo */}
+                        <button
                           type="button"
-                          onClick={() => checkAndAct(costs.cost_ocr, () => nativeCameraRef.current?.click())}
-                          className="text-[9px] font-black text-indigo-500 uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            trigger("light");
+                            setIsLegacyOcrScannerOpen(true);
+                          }}
+                          className="absolute -top-1 -right-1 w-8 h-8 bg-white dark:bg-[#201f1f] rounded-full border border-zinc-100 dark:border-[#3d4a3d]/60 shadow-lg flex items-center justify-center text-zinc-400 hover:text-amber-500 transition-colors z-10 active:scale-90"
+                          title="Usar motor de Março (Legacy)"
                         >
-                          Câmera não abriu?
+                          <RotateCcw className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
