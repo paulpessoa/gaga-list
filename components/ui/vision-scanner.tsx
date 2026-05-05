@@ -1,9 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { X, RefreshCw, Loader2, ShoppingBag, ShieldAlert } from 'lucide-react';
+import { X, RefreshCw, Loader2, Camera, Send, ShieldCheck } from 'lucide-react';
 import { useHaptic } from '@/hooks/use-haptic';
-import { extractJSON } from '@/lib/ai-utils';
 
 interface VisionScannerProps {
   isOpen: boolean;
@@ -18,7 +17,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
   const streamRef = useRef<MediaStream | null>(null);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [rawAiResponse, setRawAiResponse] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>('Pronto');
   const { trigger } = useHaptic();
 
   const stopCamera = useCallback(() => {
@@ -32,7 +31,7 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
 
   const startCamera = useCallback(async () => {
     try {
-      // Requisitos mínimos para evitar conflitos de hardware
+      setStatus('Iniciando...');
       const s = await navigator.mediaDevices.getUserMedia({ 
         video: { facingMode: 'environment' }, 
         audio: false 
@@ -41,19 +40,19 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
       if (videoRef.current) {
         videoRef.current.srcObject = s;
       }
+      setStatus('Câmera Ativa');
     } catch (err) {
       console.error('Erro ao acessar câmera:', err);
-      alert('Não conseguimos acessar sua câmera. Verifique as permissões do navegador ou use a opção de "Upload de Arquivo".');
+      setStatus('Erro de Acesso');
+      alert('Não conseguimos acessar sua câmera. Verifique as permissões.');
       onClose();
     }
   }, [onClose]);
 
   useEffect(() => {
     if (isOpen) {
-      // Reset total de estados ao abrir para evitar bloqueios
       setIsAiProcessing(false);
       setCapturedImage(null);
-      setRawAiResponse(null);
       startCamera();
     } else {
       stopCamera();
@@ -62,20 +61,18 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
   }, [isOpen, startCamera, stopCamera]);
 
   const capturePhoto = () => {
-    console.log('Tentando capturar foto...');
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
 
-      // Proteção crucial: se o vídeo não estiver pronto, não captura
       if (video.videoWidth === 0) {
-        console.warn('Vídeo ainda não carregou as dimensões.');
+        setStatus('Vídeo não pronto');
         return;
       }
 
-      // Lógica idêntica à página de debug que funcionou
       const ctx = canvas.getContext('2d');
       if (ctx) {
+        // Usar dimensões nativas para máxima fidelidade
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
@@ -83,51 +80,32 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setCapturedImage(dataUrl);
         trigger('medium');
-        processImage(dataUrl);
-      } else {
-        console.error('Falha ao obter contexto 2D do canvas');
+        setStatus('Capturado');
       }
-    } else {
-      console.error('Video ou Canvas não encontrados no DOM');
     }
   };
 
-  const processImage = async (base64Image: string) => {
+  const processImage = async () => {
+    if (!capturedImage) return;
     setIsAiProcessing(true);
-    setRawAiResponse(null);
+    setStatus('Analisando...');
+    
     try {
       const endpoint = mode === 'product' ? '/api/ai/vision' : '/api/ai/ocr';
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: base64Image })
+        body: JSON.stringify({ image: capturedImage })
       });
-      
-      const textResponse = await response.text();
-      let result;
-      
-      try {
-        result = extractJSON(textResponse);
-        if (!result) {
-          setRawAiResponse(textResponse);
-          throw new Error("Não foi possível extrair dados válidos da IA.");
-        }
-      } catch (parseError) {
-        if (!rawAiResponse) setRawAiResponse(textResponse);
-        throw new Error("A IA retornou um formato inesperado.");
-      }
-
-      if (!response.ok) throw new Error(result.details || result.error || 'Falha na análise');
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Erro na IA');
       
       trigger('success' as any);
-      onScanSuccess(result);
+      onScanSuccess(data);
     } catch (err: any) {
-      console.error('Erro no Scanner:', err);
-      // Se não houver rawAiResponse setado (erro de rede, etc), mostra alerta
-      if (!rawAiResponse) {
-        alert(`Erro: ${err.message}`);
-        setCapturedImage(null);
-      }
+      alert(`Erro: ${err.message}`);
+      setCapturedImage(null);
+      setStatus('Erro na IA');
     } finally {
       setIsAiProcessing(false);
     }
@@ -136,67 +114,96 @@ export function VisionScanner({ isOpen, onClose, onScanSuccess, mode = 'product'
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex flex-col animate-in fade-in duration-300">
-      <div className="absolute top-6 left-6 z-10">
-        <button onClick={onClose} className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white active:scale-95 transition-all"><X className="w-6 h-6" /></button>
+    <div className="fixed inset-0 z-[99999] bg-black flex flex-col pointer-events-auto overflow-hidden">
+      {/* Header com Badge de Versão */}
+      <div className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-20">
+        <button 
+          onClick={onClose} 
+          className="p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 text-white active:scale-95 transition-all pointer-events-auto"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        
+        <div className="bg-indigo-500 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg shadow-indigo-500/40">
+          <ShieldCheck className="w-4 h-4 text-white" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Motor V3 - Ativo</span>
+        </div>
+        
+        <div className="w-12" />
       </div>
 
-      <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-zinc-950">
+      {/* Área do Vídeo */}
+      <div className="flex-1 relative flex items-center justify-center bg-zinc-950">
         {isAiProcessing ? (
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 text-white p-8 text-center z-20 animate-in fade-in duration-500">
-             <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-             <div className="space-y-1">
-                <h3 className="text-xl font-black">Processando</h3>
-                <p className="text-zinc-400 text-sm font-medium">Extraindo itens com IA...</p>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center gap-6 text-white p-8 text-center z-30">
+             <div className="relative">
+                <Loader2 className="w-16 h-16 text-indigo-500 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-indigo-500 rounded-full animate-pulse" />
+                </div>
              </div>
-          </div>
-        ) : rawAiResponse ? (
-          <div className="absolute inset-0 bg-zinc-950 p-8 flex flex-col gap-6 z-30 overflow-y-auto pt-24">
-             <div className="flex items-center gap-3 text-amber-500">
-                <ShieldAlert className="w-6 h-6" />
-                <h2 className="text-xl font-black uppercase tracking-tight text-white">Resposta Bruta da IA</h2>
-             </div>
-             <p className="text-zinc-400 text-xs font-medium leading-relaxed">
-               A IA retornou um formato inesperado. Você pode copiar o texto abaixo:
-             </p>
-             <div className="bg-zinc-900 rounded-2xl p-6 border border-white/5 font-mono text-[10px] text-zinc-300 whitespace-pre-wrap break-words shadow-inner max-h-48 overflow-y-auto">
-                {rawAiResponse}
-             </div>
-             
-             <div className="flex flex-col gap-3">
-               <button 
-                 onClick={() => {
-                   trigger('success' as any);
-                   onScanSuccess({ 
-                     items: [{ name: rawAiResponse.substring(0, 100) + (rawAiResponse.length > 100 ? '...' : '') }],
-                     isRaw: true 
-                   });
-                   setRawAiResponse(null);
-                 }}
-                 className="w-full py-4.5 bg-indigo-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
-               >
-                 Usar como Item Solto
-               </button>
-               <button 
-                 onClick={() => { setRawAiResponse(null); setCapturedImage(null); startCamera(); }}
-                 className="w-full py-4.5 bg-zinc-800 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all"
-               >
-                 Tentar Novamente
-               </button>
+             <div className="space-y-2">
+                <h3 className="text-2xl font-black tracking-tight italic">PROCESSANDO...</h3>
+                <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest opacity-60">Enviando para o motor de IA</p>
              </div>
           </div>
         ) : capturedImage ? (
-          <img src={capturedImage} className="w-full h-full object-cover" alt="Capturado" />
+          <div className="relative w-full h-full">
+            <img src={capturedImage} className="w-full h-full object-cover" alt="Capturado" />
+            <div className="absolute inset-0 bg-black/20" />
+          </div>
         ) : (
           <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
         )}
+        
+        {/* Status discreto */}
+        <div className="absolute bottom-32 left-0 right-0 flex justify-center pointer-events-none">
+          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30">{status}</span>
+        </div>
       </div>
 
-      <div className="p-10 bg-black flex items-center justify-center gap-8 relative">
-        <button onClick={() => { setRawAiResponse(null); setCapturedImage(null); setIsAiProcessing(false); startCamera(); }} className="p-4 rounded-full bg-zinc-900 text-zinc-500 active:scale-95 transition-all"><RefreshCw className="w-6 h-6" /></button>
-        <button onClick={capturePhoto} disabled={!!capturedImage || isAiProcessing || !!rawAiResponse} className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-90 transition-all disabled:opacity-50"><div className="w-16 h-16 rounded-full border-4 border-black flex items-center justify-center"><div className="w-12 h-12 rounded-full bg-indigo-500" /></div></button>
-        <div className="w-14" />
+      {/* Controles Inferiores */}
+      <div className="p-10 bg-black flex items-center justify-center gap-8 relative border-t border-white/5 pointer-events-auto">
+        {!capturedImage ? (
+          <>
+            <button 
+              onClick={() => { setCapturedImage(null); startCamera(); }} 
+              className="p-4 rounded-full bg-zinc-900 text-zinc-500 active:scale-95 transition-all pointer-events-auto"
+            >
+              <RefreshCw className="w-6 h-6" />
+            </button>
+            
+            <button 
+              onClick={capturePhoto} 
+              className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_50px_rgba(255,255,255,0.2)] active:scale-90 transition-all pointer-events-auto"
+            >
+              <div className="w-20 h-20 rounded-full border-[6px] border-black flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-indigo-500 shadow-inner" />
+              </div>
+            </button>
+            
+            <div className="w-14" />
+          </>
+        ) : (
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <button 
+              onClick={processImage}
+              disabled={isAiProcessing}
+              className="w-full py-6 bg-white text-black rounded-[2rem] font-black uppercase tracking-[0.2em] text-[12px] flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all pointer-events-auto"
+            >
+              <Send className="w-5 h-5 fill-black" />
+              Enviar para IA
+            </button>
+            <button 
+              onClick={() => { setCapturedImage(null); startCamera(); }}
+              className="w-full py-4 text-zinc-500 font-black uppercase tracking-widest text-[10px] active:scale-95 transition-all pointer-events-auto"
+            >
+              Tirar Outra Foto
+            </button>
+          </div>
+        )}
       </div>
+      
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );

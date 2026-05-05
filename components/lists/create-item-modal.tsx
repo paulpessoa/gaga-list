@@ -31,7 +31,6 @@ interface CreateItemModalProps {
   stopRecording: () => void
   isAiProcessing: boolean
   setIsOcrScannerOpen: (val: boolean) => void
-  setIsLegacyOcrScannerOpen: (val: boolean) => void
   onOcrSuccess: (data: any) => void
   voiceItems: any[]
   showAiPreview: boolean
@@ -49,7 +48,6 @@ export function CreateItemModal({
   stopRecording,
   isAiProcessing,
   setIsOcrScannerOpen,
-  setIsLegacyOcrScannerOpen,
   onOcrSuccess,
   voiceItems,
   showAiPreview,
@@ -158,35 +156,20 @@ export function CreateItemModal({
                         <span className="text-[9px] font-black leading-tight text-center">Via<br/>Áudio</span>
                       </button>
                       
-                      <div className="relative group">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            trigger("medium")
-                            checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
-                          }}
-                          disabled={isAiProcessing}
-                          className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
-                        >
-                          <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
-                            <Camera className="w-6 h-6 text-[#53E076]" />
-                          </div>
-                          <span className="text-[9px] font-black leading-tight text-center">Via Foto</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            trigger("light");
-                            setIsLegacyOcrScannerOpen(true);
-                          }}
-                          className="absolute -top-1 -right-1 w-8 h-8 bg-white dark:bg-[#201f1f] rounded-full border border-zinc-100 dark:border-[#3d4a3d]/60 shadow-lg flex items-center justify-center text-zinc-400 hover:text-amber-500 transition-colors z-10 active:scale-90"
-                          title="Usar motor de Março (Legacy)"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          trigger("medium")
+                          checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
+                        }}
+                        disabled={isAiProcessing}
+                        className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                      >
+                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
+                          <Camera className="w-6 h-6 text-[#53E076]" />
+                        </div>
+                        <span className="text-[9px] font-black leading-tight text-center">Via Foto</span>
+                      </button>
                     </div>
 
                     <input 
