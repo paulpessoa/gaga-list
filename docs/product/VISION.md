@@ -1,10 +1,10 @@
-# Documentação Estratégica: Lista Pronta 🚀
+# Documentação Estratégica: Gaga List 🚀
 
 _Versão 1.0 - Visão Multidisciplinar (Staff & Founder Insight)_
 
 ## 0. A Alma do Projeto (The Why)
 
-O **Lista Pronta** nasceu da frustração real de casais e famílias que tentam usar o WhatsApp para compras. O herói é o **Usuário Sincronizado**: aquele que limpa a lista sem ruído, sem "overbooking" de itens e sem perder o foco em chats infinitos.
+O **Gaga List** nasceu da frustração real de casais e famílias que tentam usar o WhatsApp para compras. O herói é o **Usuário Sincronizado**: aquele que limpa a lista sem ruído, sem "overbooking" de itens e sem perder o foco em chats infinitos.
 
 **Missão:** Transformar a corveia de fazer compras em uma tarefa de alta eficiência e harmonia familiar.
 

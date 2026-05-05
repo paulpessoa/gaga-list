@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 // Configuração do Web Push
 webpush.setVapidDetails(
-  'mailto:suporte@listapronta.com',
+  'mailto:suporte@gagalist.com',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 )

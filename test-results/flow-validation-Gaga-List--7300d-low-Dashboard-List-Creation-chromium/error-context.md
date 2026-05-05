@@ -27,7 +27,7 @@
     - navigation [ref=e29]:
       - generic [ref=e30]:
         - img [ref=e31]
-        - generic [ref=e35]: Lista Pronta
+        - generic [ref=e35]: Gaga List
     - main [ref=e36]:
       - generic [ref=e37]:
         - generic [ref=e38]:

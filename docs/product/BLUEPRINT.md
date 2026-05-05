@@ -1,4 +1,4 @@
-# Fluxograma de Navegação: Lista Pronta 🗺️
+# Fluxograma de Navegação: Gaga List 🗺️
 
 Este diagrama representa a arquitetura de informação e os fluxos de navegação propostos para o aplicativo, seguindo as diretrizes de "Native Feeling" e a organização solicitada.
 

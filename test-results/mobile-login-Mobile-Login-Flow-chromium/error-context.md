@@ -5,7 +5,7 @@
   - navigation [ref=e3]:
     - generic [ref=e4]:
       - img [ref=e5]
-      - generic [ref=e9]: Lista Pronta
+      - generic [ref=e9]: Gaga List
   - main [ref=e10]:
     - generic [ref=e11]:
       - generic [ref=e12]:
