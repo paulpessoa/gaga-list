@@ -6,8 +6,7 @@ import {
   Trash2,
   Clock,
   Smartphone,
-  ChevronRight,
-  Plus
+  ChevronRight
 } from "lucide-react"
 import { useHaptic } from "@/hooks/use-haptic"
 import Link from "next/link"
@@ -61,29 +60,6 @@ export default function NotificationsPage() {
               </div>
             </div>
 
-            <div className="glass-panel p-8 rounded-[2.5rem] bg-[#1DB954]/5 border-2 border-[#53E076]/10 flex flex-col items-center text-center gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-[#1DB954]/10 text-[#53E076] flex items-center justify-center shadow-inner">
-                <Plus className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-zinc-900 dark:text-[#e5e2e1] uppercase tracking-tight">
-                  Chame sua Dupla
-                </h3>
-                <p className="text-xs text-zinc-500 font-medium mt-1">
-                  Ganhe 50 Grãos Mágicos por cada amigo que entrar!
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  trigger("medium")
-                  navigator.clipboard.writeText(`${window.location.origin}/app`)
-                  alert("Link de convite copiado!")
-                }}
-                className="w-full py-4.5 bg-[#1DB954] hover:bg-[#1DB954] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-[#53E076]/20 active:scale-95 transition-all flex items-center justify-center gap-3"
-              >
-                Copiar Link de Convite
-              </button>
-            </div>
           </div>
         ) : (
           notifications.map((notif) => {
