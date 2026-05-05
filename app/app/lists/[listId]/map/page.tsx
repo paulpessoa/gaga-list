@@ -238,31 +238,27 @@ export default function CadeTuPage() {
               </Marker>
             )}
 
-            {colleagues.map(
-              (u) =>
-                u.lat &&
-                u.lng && (
-                  <Marker
-                    key={u.user_id}
-                    position={[u.lat, u.lng]}
-                    icon={L.divIcon({
-                      className: "custom-icon",
-                      html: `<div class="group relative flex flex-col items-center">
-                        <div class="w-10 h-10 rounded-full border-4 ${u.is_online ? 'border-emerald-500 animate-pulse' : 'border-zinc-500 opacity-70'} bg-zinc-900 shadow-2xl flex items-center justify-center overflow-hidden">
-                          <img src="${u.avatar_url || `https://ui-avatars.com/api/?name=${u.full_name}&background=10b981&color=fff`}" class="w-full h-full object-cover" alt="${u.full_name}" />
-                        </div>
-                        <div class="mt-1 px-2 py-0.5 bg-black/80 rounded-full text-[8px] font-bold whitespace-nowrap border border-white/10 shadow-lg">
-                          ${u.full_name.split(" ")[0]} ${u.is_online ? '' : '(off)'}
-                        </div>
-                      </div>`,
-                      iconSize: [40, 60],
-                      iconAnchor: [20, 30]
-                    })}
-                  >
-                    <Popup>{u.full_name}</Popup>
-                  </Marker>
-                )
-            )}
+            {Object.values(onlineUsers).filter(u => u.user_id !== user?.id && u.lat && u.lng).map((u) => (
+              <Marker
+                key={u.user_id}
+                position={[u.lat!, u.lng!]}
+                icon={L.divIcon({
+                  className: "custom-icon",
+                  html: `<div class="group relative flex flex-col items-center">
+                    <div class="w-10 h-10 rounded-full border-4 border-emerald-500 animate-pulse bg-zinc-900 shadow-2xl flex items-center justify-center overflow-hidden">
+                      <img src="${u.avatar_url || `https://ui-avatars.com/api/?name=${u.full_name}&background=10b981&color=fff`}" class="w-full h-full object-cover" alt="${u.full_name}" />
+                    </div>
+                    <div class="mt-1 px-2 py-0.5 bg-black/80 rounded-full text-[8px] font-bold whitespace-nowrap border border-white/10 shadow-lg">
+                      ${u.full_name.split(" ")[0]}
+                    </div>
+                  </div>`,
+                  iconSize: [40, 60],
+                  iconAnchor: [20, 30]
+                })}
+              >
+                <Popup>{u.full_name}</Popup>
+              </Marker>
+            ))}
           </MapContainer>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-zinc-950">

@@ -4,6 +4,12 @@ import { useEffect, useState, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useHaptic } from "./use-haptic"
 
+declare global {
+  interface Window {
+    lastDbUpdate?: number;
+  }
+}
+
 export interface PresenceUser {
   user_id: string
   full_name: string
@@ -79,15 +85,22 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
         const formatted: Record<string, PresenceUser> = {}
 
         Object.keys(state).forEach((key) => {
-          const userState = state[key][0] as any
+          // Pegar a sessão mais "rica" (que tem localização) ou a mais recente
+          const sessions = state[key] as any[]
+          const bestSession = sessions.reduce((prev, curr) => {
+            if (curr.lat && !prev.lat) return curr
+            if (curr.online_at > prev.online_at) return curr
+            return prev
+          }, sessions[0])
+
           formatted[key] = {
             user_id: key,
-            full_name: userState.full_name,
-            avatar_url: userState.avatar_url,
-            phone: userState.phone,
-            lat: userState.lat,
-            lng: userState.lng,
-            last_seen: new Date().toISOString()
+            full_name: bestSession.full_name,
+            avatar_url: bestSession.avatar_url,
+            phone: bestSession.phone,
+            lat: bestSession.lat,
+            lng: bestSession.lng,
+            last_seen: bestSession.online_at || new Date().toISOString()
           }
         })
         setOnlineUsers(formatted)
@@ -118,37 +131,29 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           setMyLocation(coords)
 
-          // 1. Atualizar Realtime Presence
+          // Sinal de Rádio (Realtime) - PRIORIDADE MÁXIMA
           channel.track({
-            full_name:
-              userProfile?.full_name ||
-              currentUser.user_metadata?.full_name ||
-              "Usuário",
-            avatar_url:
-              userProfile?.avatar_url ||
-              currentUser.user_metadata?.avatar_url ||
-              null,
+            full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || "Usuário",
+            avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
             phone: userProfile?.phone || null,
             lat: coords.lat,
             lng: coords.lng,
             online_at: new Date().toISOString()
           })
 
-          // 2. Persistir no Banco de Dados (Last Location)
-          supabase
-            .from("profiles")
-            .update({
+          // Persistência em Background (Sem bloquear a UI)
+          // Só atualiza o banco se houver uma mudança real, para não sobrecarregar
+          if (!window.lastDbUpdate || Date.now() - window.lastDbUpdate > 30000) {
+            window.lastDbUpdate = Date.now();
+            supabase.from("profiles").update({
               last_lat: coords.lat,
               last_lng: coords.lng,
               last_seen_at: new Date().toISOString()
-            })
-            .eq("id", currentUser.id)
-            .then(({ error }) => {
-              if (error) console.error("Erro ao persistir localização:", error)
-            })
+            }).eq("id", currentUser.id).then(() => {});
+          }
         },
         (err) => console.error("Erro GPS:", err),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       )
     }
 
