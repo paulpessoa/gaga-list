@@ -3,11 +3,15 @@ import webpush from 'web-push'
 import { createClient } from '@/lib/supabase/server'
 
 // Configuração do Web Push
-webpush.setVapidDetails(
-  'mailto:suporte@gagalist.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:suporte@gagalist.com',
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  )
+} else {
+  console.warn('VAPID keys not configured. Push notifications will not work.')
+}
 
 export async function POST(request: Request) {
   try {

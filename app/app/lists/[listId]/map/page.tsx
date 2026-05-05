@@ -86,10 +86,6 @@ export default function CadeTuPage() {
 
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatTarget, setChatTarget] = useState<
-    | { id: string; full_name: string | null; avatar_url: string | null }
-    | undefined
-  >(undefined)
   const [L, setL] = useState<any>(null)
   const [gpsPermission, setGpsPermission] = useState<
     "prompt" | "granted" | "denied"
@@ -330,7 +326,7 @@ export default function CadeTuPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => {
                         if (u.user_id) {
@@ -372,24 +368,6 @@ export default function CadeTuPage() {
                         Zap
                       </span>
                     </a>
-
-                    <button
-                      onClick={() => {
-                        trigger("light")
-                        setChatTarget({
-                          id: u.user_id,
-                          full_name: u.full_name,
-                          avatar_url: u.avatar_url
-                        })
-                        setIsChatOpen(true)
-                      }}
-                      className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 shadow-lg"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span className="text-[8px] font-black uppercase tracking-tighter">
-                        Chat
-                      </span>
-                    </button>
                   </div>
                 </div>
               ))
@@ -404,9 +382,7 @@ export default function CadeTuPage() {
         isOpen={isChatOpen}
         onClose={() => {
           setIsChatOpen(false)
-          setChatTarget(undefined)
         }}
-        targetUser={chatTarget}
       />
 
       <style jsx global>{`
