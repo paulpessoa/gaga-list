@@ -81,10 +81,6 @@ export default function ListDetail({
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isCreateItemModalOpen, setIsCreateItemModalOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [chatTarget, setChatTarget] = useState<
-    | { id: string; full_name: string | null; avatar_url: string | null }
-    | undefined
-  >(undefined)
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
   const [editTitle, setEditTitle] = useState("")
@@ -118,27 +114,14 @@ export default function ListDetail({
 
   useEffect(() => {
     const openChat = searchParams.get("openChat")
-    const targetId = searchParams.get("targetId")
 
     if (openChat === "true" && !isChatOpen) {
       const timer = setTimeout(() => {
-        if (targetId && collaborators) {
-          const collab = (collaborators as Collaborator[]).find(
-            (c) => c.user_id === targetId || c.profiles?.id === targetId
-          )
-          if (collab && chatTarget?.id !== targetId) {
-            setChatTarget({
-              id: targetId,
-              full_name: collab.profiles?.full_name || null,
-              avatar_url: collab.profiles?.avatar_url || null
-            })
-          }
-        }
         setIsChatOpen(true)
       }, 100)
       return () => clearTimeout(timer)
     }
-  }, [searchParams, collaborators, isChatOpen, chatTarget?.id])
+  }, [searchParams, isChatOpen])
 
   // Estados para IA (Voz/Foto)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
@@ -715,10 +698,6 @@ export default function ListDetail({
             }
           })
         }}
-        onOpenChat={(target) => {
-          setChatTarget(target)
-          setIsChatOpen(true)
-        }}
       />
 
       <ListChat
@@ -727,9 +706,7 @@ export default function ListDetail({
         isOpen={isChatOpen}
         onClose={() => {
           setIsChatOpen(false)
-          setChatTarget(undefined)
         }}
-        targetUser={chatTarget}
       />
 
       <VisionScanner

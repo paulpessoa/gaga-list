@@ -3,7 +3,6 @@
 import { useNotifications } from "@/providers/notification-provider"
 import {
   Bell,
-  MessageSquare,
   Trash2,
   Clock,
   Smartphone,
@@ -92,9 +91,6 @@ export default function NotificationsPage() {
             const baseUrl = `/app/lists/${notif.listId}`
             const queryParams = new URLSearchParams()
             queryParams.set("openChat", "true")
-            if (notif.type === "dm" && notif.senderId) {
-              queryParams.set("targetId", notif.senderId)
-            }
             const destinationUrl = `${baseUrl}?${queryParams.toString()}`
 
             return (
@@ -105,21 +101,15 @@ export default function NotificationsPage() {
                 className="glass-panel p-6 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-right-4 duration-300 hover:border-[#53E076]/30 dark:hover:border-[#53E076]/20 transition-all group relative active:scale-[0.98]"
               >
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110 duration-300 ${notif.type === "dm" ? "bg-[#1DB954]/10 text-indigo-600 dark:text-[#53E076]" : "bg-amber-500/10 text-amber-600 dark:text-amber-500"}`}
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-110 duration-300 bg-amber-500/10 text-amber-600 dark:text-amber-500"
                 >
-                  {notif.type === "dm" ? (
-                    <MessageSquare className="w-7 h-7" />
-                  ) : (
-                    <Smartphone className="w-7 h-7 animate-shake" />
-                  )}
+                  <Smartphone className="w-7 h-7 animate-shake" />
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
                     <h3 className="font-black text-zinc-900 dark:text-zinc-100 text-sm uppercase tracking-tight">
-                      {notif.type === "dm"
-                        ? "Nova Mensagem"
-                        : "Chamada no Radar"}
+                      Chamada no Radar
                     </h3>
                     <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-zinc-100 dark:bg-[#201f1f] px-2 py-1 rounded-lg">
                       <Clock className="w-3 h-3" />
@@ -133,9 +123,7 @@ export default function NotificationsPage() {
                     <span className="text-zinc-900 dark:text-[#e5e2e1] font-black">
                       {notif.senderName}
                     </span>
-                    {notif.type === "dm"
-                      ? `: "${notif.message}"`
-                      : " está tentando chamar sua atenção agora!"}
+                    {" está tentando chamar sua atenção agora!"}
                   </p>
                   {notif.listTitle && (
                     <div className="inline-flex items-center gap-1.5 mt-3 px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-[#1DB954]/10 border border-indigo-100 dark:border-[#53E076]/10">
@@ -153,13 +141,6 @@ export default function NotificationsPage() {
             )
           })
         )}
-      </div>
-
-      <div className="mt-4 p-8 rounded-[2.5rem] bg-[#1DB954]/5 dark:bg-[#1DB954]/10 border border-[#53E076]/10 dark:border-[#53E076]/5">
-        <p className="text-[10px] text-[#53E076]/60 dark:text-[#53E076]/40 text-center font-black uppercase tracking-[0.2em] leading-relaxed">
-          Dica: Mensagens individuais são privadas e não ficam salvas após
-          limpar esta lista.
-        </p>
       </div>
     </main>
   )

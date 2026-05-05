@@ -41,11 +41,6 @@ interface ShareModalProps {
     callbacks: { onSuccess: () => void; onError: (err: any) => void }
   ) => void
   onRemoveCollaborator: (userId: string) => void
-  onOpenChat?: (targetUser: {
-    id: string
-    full_name: string | null
-    avatar_url: string | null
-  }) => void
 }
 
 export function ShareModal({
@@ -57,8 +52,7 @@ export function ShareModal({
   currentUser,
   onAddCollaborator,
   onInviteUser,
-  onRemoveCollaborator,
-  onOpenChat
+  onRemoveCollaborator
 }: ShareModalProps) {
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState("")
@@ -325,7 +319,7 @@ export function ShareModal({
 
                       {/* Action Bar */}
                       {collab.status === "active" && (
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <button
                             onClick={() => {
                               if (collab.profiles?.id) {
@@ -365,31 +359,6 @@ export function ShareModal({
                               Zap
                             </span>
                           </a>
-
-                          <button
-                            onClick={() => {
-                              if (collab.profiles?.id || collab.user_id) {
-                                trigger("light")
-                                onClose()
-                                onOpenChat?.({
-                                  id: (collab.profiles?.id ||
-                                    collab.user_id) as string,
-                                  full_name:
-                                    collab.profiles?.full_name ||
-                                    collab.profiles?.email ||
-                                    "Usuário",
-                                  avatar_url:
-                                    collab.profiles?.avatar_url || null
-                                })
-                              }
-                            }}
-                            className="flex flex-col items-center justify-center gap-2 p-3 rounded-[1.25rem] bg-[#1DB954]/5 dark:bg-[#1DB954]/10 border border-[#53E076]/20 text-indigo-600 dark:text-[#53E076] hover:bg-[#1DB954] hover:text-white transition-all active:scale-95"
-                          >
-                            <MessageSquare className="w-4 h-4" />
-                            <span className="text-[8px] font-black uppercase tracking-tighter">
-                              Chat
-                            </span>
-                          </button>
 
                           <Link
                             href={`/app/lists/${listId}/map`}

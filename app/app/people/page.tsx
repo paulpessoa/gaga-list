@@ -8,7 +8,6 @@ import {
   UserPlus,
   Search,
   ChevronRight,
-  MessageCircle,
   Clock,
   Check,
   X,
@@ -264,13 +263,6 @@ export default function PeoplePage() {
                     >
                       Add Lista
                     </button>
-                    <Link
-                      href={`/app?openChat=true&targetId=${friend.id}`}
-                      onClick={() => trigger("light")}
-                      className="w-10 h-10 rounded-xl bg-zinc-50 dark:bg-[#201f1f] flex items-center justify-center text-zinc-400 hover:text-[#53E076] transition-all shadow-inner"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                    </Link>
                   </div>
                 </div>
               ))}
