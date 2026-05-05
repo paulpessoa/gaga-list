@@ -2,7 +2,7 @@
 -- Tabela para rastrear convites enviados para e-mails que ainda não estão no sistema.
 
 CREATE TABLE IF NOT EXISTS public.pending_invitations (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   list_id UUID REFERENCES public.lists(id) ON DELETE CASCADE NOT NULL,
   email TEXT NOT NULL,
   invited_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,

@@ -26,7 +26,7 @@ ADD COLUMN IF NOT EXISTS allow_notifications BOOLEAN DEFAULT true;
 
 -- 2. Criar a tabela de Mensagens (Chat com Histórico)
 CREATE TABLE IF NOT EXISTS public.list_messages (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   list_id UUID REFERENCES public.lists(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   content TEXT NOT NULL,

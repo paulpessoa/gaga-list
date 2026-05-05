@@ -8,7 +8,7 @@ ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
 -- 2. Create AI Usage Log Table (for Admin tracking)
 CREATE TABLE IF NOT EXISTS public.ai_usage_logs (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     feature TEXT NOT NULL, -- e.g., 'ocr', 'recipe', 'vision'
     cost INTEGER NOT NULL, -- how many 'grãos' were spent

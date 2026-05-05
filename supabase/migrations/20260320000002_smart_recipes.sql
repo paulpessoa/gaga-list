@@ -2,7 +2,7 @@
 -- Description: Creates table for storing AI-generated recipes.
 
 CREATE TABLE IF NOT EXISTS public.recipes (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
   description TEXT,

@@ -116,12 +116,11 @@ export default function ListDetail({
     const openChat = searchParams.get("openChat")
 
     if (openChat === "true" && !isChatOpen) {
-      const timer = setTimeout(() => {
-        setIsChatOpen(true)
-      }, 100)
-      return () => clearTimeout(timer)
+      setIsChatOpen(true)
+      // Limpa o parâmetro da URL sem recarregar a página
+      router.replace(`/app/lists/${listId}`, { scroll: false })
     }
-  }, [searchParams, isChatOpen])
+  }, [searchParams, isChatOpen, router, listId])
 
   // Estados para IA (Voz/Foto)
   const [isOcrScannerOpen, setIsOcrScannerOpen] = useState(false)
