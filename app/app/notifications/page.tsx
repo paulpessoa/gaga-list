@@ -85,7 +85,7 @@ export default function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
                     <h3 className="font-black text-zinc-900 dark:text-zinc-100 text-sm uppercase tracking-tight">
-                      Chamada no Radar
+                      {notif.type === "dm" ? "Nova Mensagem" : "Atenção!"}
                     </h3>
                     <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5 bg-zinc-100 dark:bg-[#201f1f] px-2 py-1 rounded-lg">
                       <Clock className="w-3 h-3" />

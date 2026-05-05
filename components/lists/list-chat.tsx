@@ -194,7 +194,7 @@ export function ListChat({
             </div>
             <div className="flex flex-col">
               <h2 className="text-lg font-black text-zinc-900 dark:text-white leading-tight">
-                Chat da Equipe
+                Chat: {listTitle || "em Grupo"}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em] font-black">
