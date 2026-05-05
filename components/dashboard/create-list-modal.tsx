@@ -33,7 +33,6 @@ interface CreateListModalProps {
   stopRecording: () => void
   trigger: (type?: any) => void
   setIsOcrScannerOpen: (val: boolean) => void
-  setIsLegacyOcrScannerOpen: (val: boolean) => void
   onOcrSuccess: (data: any) => void
   voiceTranscription: string
   setVoiceTranscription: (val: string) => void
