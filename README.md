@@ -5,70 +5,53 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Deploy-000000?style=flat-square&logo=vercel)](https://vercel.com/)
 
-**Gaga List** é um Progressive Web App (PWA) de alto padrão, desenvolvido com foco em performance extrema e experiência mobile-first. Ele transforma listas de compras em ferramentas inteligentes usando IA (Gemini, OpenAI, Groq) e sincronização em tempo real.
+**Gaga List** é um Progressive Web App (PWA) de alto padrão, desenvolvido com foco em performance extrema e experiência mobile-first. Ele transforma listas de compras em ferramentas inteligentes usando IA e sincronização em tempo real. 
+
+> [!NOTE]
+> **O Porquê do Projeto:** O GagaList nasceu de uma necessidade real: ajudar a mim e minha esposa a fazermos compras de forma mais rápida e organizada. É um produto construído para ser usado no dia a dia, resolvendo problemas reais de logística doméstica com tecnologia de ponta.
 
 ---
 
 ## 📺 Demo Video
 > [!IMPORTANT]
-> Assista ao vídeo de demonstração capturado diretamente do smartphone para ver a fluidez e os feedbacks hápticos em ação:
-> **[LINK PARA O SEU VÍDEO AQUI]**
+> Assista ao vídeo de demonstração capturado diretamente do smartphone para ver a fluidez, os feedbacks hápticos e as features de IA em ação:
+> **[GagaList Pro - Assista no YouTube Shorts](https://youtube.com/shorts/-s8xaNOKgGY)**
 
 ---
 
-## 💎 Diferenciais Técnicos (Recruiter's Quick Look)
+## 💎 Diferenciais Técnicos & Inovação
 
-Para recrutadores e engenheiros sêniores, aqui estão os pontos de destaque na arquitetura deste projeto:
+Para este projeto, não apenas empilhei tecnologias, mas explorei soluções de engenharia para otimizar custo e UX:
 
-- **Arquitetura Limpa (Clean Architecture):** Separação clara entre camadas de interface (`components`), lógica de negócio (`services`) e gerenciamento de estado (`hooks`).
-- **Next.js 15 + React 19:** Uso de **React Server Components (RSC)** por padrão para minimizar o bundle size no cliente.
-- **Tailwind CSS 4.0:** Implementação de um Design System customizado ("Electric Sophistication") usando a nova engine v4.
-- **Observabilidade:** Integrado com **Microsoft Clarity** para análise de UX e preparado para **Sentry**.
-- **IA Multi-Model:**
-  - **Voz:** Whisper (via Groq) para latência < 500ms.
-  - **Visão:** GPT-4o-mini para extração de itens de fotos.
-  - **Lógica:** Gemini 1.5 Flash para geração de receitas e categorização inteligente.
-- **PWA Avançado:** Suporte offline com service workers, sincronização em tempo real via Supabase Realtime e feedback háptico (vibration API).
+- **Computer Vision (OCR IA):** Extração inteligente de itens a partir de fotos de listas de papel ou encartes usando GPT-4o-mini.
+- **Transcrição de Áudio Híbrida (Token Saver):** Implementei o reconhecimento de voz nativo do browser (`Web Speech API`) para processar a fala localmente, economizando milhares de tokens de APIs de transcrição e garantindo latência zero. A IA entra apenas para a estruturação semântica do texto.
+- **Maps API & GPS Radar:** Recurso "Cadê Tu?" que permite ver a localização em tempo real de colaboradores dentro do mercado via Mapas, facilitando a dinâmica de compras em dupla.
+- **Convites via QR Code:** Sistema de "onboarding instantâneo" para novos colaboradores.
+- **Criação de Listas Multi-Modal:** Gere listas completas a partir de áudio, imagens ou arquivos.
 
 ---
 
-## 🎨 Design System: "Electric Sophistication"
+## 🛠️ Developer's Secret Sauce
 
-O projeto utiliza uma paleta proprietária focada em ambientes de baixa luminosidade (supermercados):
-- **Primary:** Neon Green (`#53E076`)
-- **Base:** Obsidian Black (`#131313`)
-- **Efeito:** Glassmorphism com haptic feedback em cada interação.
-
----
-
-## 🛠️ Tech Stack & Ferramentas
-
-| Categoria | Tecnologia |
-| :--- | :--- |
-| **Frontend** | Next.js 15 (App Router), TypeScript, Tailwind 4, Framer Motion |
-| **Backend** | Supabase (Auth, Postgres, Realtime, Edge Functions) |
-| **IA** | Google Gemini, OpenAI GPT-4o, Groq (Whisper) |
-| **Payments** | Stripe Integration |
-| **PWA** | Workbox, Web Manifest, Push Notifications |
-| **Testes** | Playwright (E2E) |
+A velocidade e profundidade técnica deste projeto foram aceleradas pelo uso de ferramentas experimentais e de automação de agentes que testei e validei:
+- **Google Stitch & Antigravity:** Orquestração de agentes para aceleração de desenvolvimento.
+- **Supabase MCP & MCP DevTools:** Gerenciamento ágil de infraestrutura e políticas RLS.
+- **Claude Code, Gemini CLI & Gemini Dev:** Ferramentas de terminal para refatoração e auditoria de código em tempo real.
 
 ---
 
-## 🚀 Como Executar
+## 🎨 Design System: "Obsidian Pro"
 
-1. **Clone & Install:**
-   ```bash
-   git clone https://github.com/paulpessoa/gaga-list.git
-   npm install
-   ```
+O app utiliza uma estética Dark-Only blindada ("Obsidian"), otimizada para legibilidade em ambientes de mercado e economia de energia:
+- **Primary:** Neon Green (`#53E076`) com Glow Effects.
+- **Fundo:** Obsidian Black (`#131313`).
+- **Cards:** Gunmetal Deep (`#1c1b1b`).
 
-2. **Env Config:**
-   Renomeie `.env.example` para `.env.local` e preencha as chaves do Supabase e APIs de IA.
+---
 
-3. **Dev Mode:**
-   ```bash
-   npm run dev
-   ```
+## 🚀 Roadmap (Próximos Passos)
+- [ ] **Sistemas de Recompensas:** Gamificação para liberar créditos de IA através de interações e convites.
+- [ ] **Análise de Gastos:** Dashboards avançados com D3.js para histórico de preços.
 
 ---
 
@@ -76,6 +59,7 @@ O projeto utiliza uma paleta proprietária focada em ambientes de baixa luminosi
 
 **Paul Pessoa** - Staff Software Engineer
 > Focado em construir produtos escaláveis que resolvem problemas reais com IA e UX de ponta.
+> *Um entusiasta de tecnologia que usa o que constrói para facilitar a vida em casa.*
 
 ---
 *Este projeto segue os princípios SOLID e DRY, priorizando manutenibilidade e performance (Core Web Vitals).*
