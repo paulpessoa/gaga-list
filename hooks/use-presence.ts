@@ -45,6 +45,7 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
       .then(({ data }) => setUserProfile(data))
   }, [currentUser, supabase])
 
+  // 1. Estabilizar a referência do Canal
   useEffect(() => {
     if (!listId || !currentUser) return
 
@@ -60,12 +61,9 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
 
     channel.on("broadcast", { event: "nudge" }, (payload) => {
       const { targetId, senderName } = payload.payload
-
       if (targetId === currentUser.id) {
         if (userProfile?.allow_notifications !== false) {
-          if ("vibrate" in navigator) {
-            navigator.vibrate([200, 100, 200])
-          }
+          if ("vibrate" in navigator) navigator.vibrate([200, 100, 200])
           trigger("heavy")
           setLastNudge({ senderName, time: Date.now() })
           setTimeout(() => setLastNudge(null), 5000)
@@ -73,78 +71,76 @@ export function usePresence(listId: string, currentUser: any, listTitle?: string
       }
     })
 
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState()
-        const formatted: Record<string, PresenceUser> = {}
+    channel.on("presence", { event: "sync" }, () => {
+      const state = channel.presenceState()
+      const formatted: Record<string, PresenceUser> = {}
 
-        Object.keys(state).forEach((key) => {
-          // Pegar a sessão mais "rica" (que tem localização) ou a mais recente
-          const sessions = state[key] as any[]
-          const bestSession = sessions.reduce((prev, curr) => {
-            if (curr.lat && !prev.lat) return curr
-            if (curr.online_at > prev.online_at) return curr
-            return prev
-          }, sessions[0])
+      Object.keys(state).forEach((key) => {
+        const sessions = state[key] as any[]
+        if (!sessions?.length) return
 
-          formatted[key] = {
-            user_id: key,
-            full_name: bestSession.full_name,
-            avatar_url: bestSession.avatar_url,
-            phone: bestSession.phone,
-            lat: bestSession.lat,
-            lng: bestSession.lng,
-            last_seen: bestSession.online_at || new Date().toISOString()
-          }
-        })
-        setOnlineUsers(formatted)
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            full_name:
-              userProfile?.full_name ||
-              currentUser.user_metadata?.full_name ||
-              "Usuário",
-            avatar_url:
-              userProfile?.avatar_url ||
-              currentUser.user_metadata?.avatar_url ||
-              null,
-            phone: userProfile?.phone || null,
-            lat: null,
-            lng: null,
-            online_at: new Date().toISOString()
-          })
+        const bestSession = sessions.reduce((prev, curr) => {
+          if (curr.lat && !prev.lat) return curr
+          if (curr.online_at > prev.online_at) return curr
+          return prev
+        }, sessions[0])
+
+        formatted[key] = {
+          user_id: key,
+          full_name: bestSession.full_name || "Usuário",
+          avatar_url: bestSession.avatar_url,
+          phone: bestSession.phone,
+          lat: bestSession.lat,
+          lng: bestSession.lng,
+          last_seen: bestSession.online_at || new Date().toISOString()
         }
       })
+      setOnlineUsers(formatted)
+    })
 
+    channel.subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [listId, currentUser?.id, supabase]) // Apenas listId e ID do usuário
+
+  // 2. Sincronizar dados de Tracking (Perfil e Localização) sem re-conectar
+  useEffect(() => {
+    const channel = channelRef.current
+    if (!channel || channel.state !== 'joined') return
+
+    const trackData = {
+      full_name: userProfile?.full_name || currentUser?.user_metadata?.full_name || "Usuário",
+      avatar_url: userProfile?.avatar_url || currentUser?.user_metadata?.avatar_url || null,
+      phone: userProfile?.phone || null,
+      lat: myLocation?.lat || null,
+      lng: myLocation?.lng || null,
+      online_at: new Date().toISOString()
+    }
+
+    channel.track(trackData)
+  }, [userProfile, myLocation, currentUser])
+
+  // 3. Monitorar Geolocalização separadamente
+  useEffect(() => {
     let watchId: number
     if ("geolocation" in navigator) {
       watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-          setMyLocation(coords)
-
-          // Sinal de Rádio (Realtime) - PRIORIDADE MÁXIMA
-          channel.track({
-            full_name: userProfile?.full_name || currentUser.user_metadata?.full_name || "Usuário",
-            avatar_url: userProfile?.avatar_url || currentUser.user_metadata?.avatar_url || null,
-            phone: userProfile?.phone || null,
-            lat: coords.lat,
-            lng: coords.lng,
-            online_at: new Date().toISOString()
+          setMyLocation({ 
+            lat: pos.coords.latitude, 
+            lng: pos.coords.longitude 
           })
         },
         (err) => console.error("Erro GPS:", err),
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       )
     }
-
     return () => {
-      supabase.removeChannel(channel)
       if (watchId) navigator.geolocation.clearWatch(watchId)
     }
-  }, [listId, currentUser, supabase, trigger, userProfile])
+  }, [])
 
   const sendNudge = async (targetId: string) => {
     if (channelRef.current) {
