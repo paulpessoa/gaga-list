@@ -105,15 +105,16 @@ export default function CadeTuPage() {
   }, [])
 
   useEffect(() => {
-    // 1. Se eu tenho minha localização, foco em mim
+    // Só centraliza automaticamente se ainda não tivermos um centro definido
+    if (mapCenter) return
+
     if (myLocation) {
       setMapCenter([myLocation.lat, myLocation.lng])
       return
     }
 
-    // 2. Se não tenho minha localização, mas tenho colegas, foco no primeiro deles
     const firstColleague = Object.values(onlineUsers).find(u => u.user_id !== user?.id && u.lat && u.lng)
-    if (firstColleague && !mapCenter) {
+    if (firstColleague) {
       setMapCenter([firstColleague.lat!, firstColleague.lng!])
     }
   }, [myLocation, onlineUsers, user?.id, mapCenter])
@@ -148,26 +149,39 @@ export default function CadeTuPage() {
 
   return (
     <main className="h-screen bg-black text-white flex flex-col overflow-hidden">
-      <header className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-[1000] pointer-events-none">
+      <header className="absolute top-0 left-0 right-0 p-6 flex items-center justify-between z-[2000] pointer-events-none">
         <div className="flex items-center gap-4 pointer-events-auto">
           <Link
             href={`/app/lists/${listId}`}
-            className="p-3 rounded-2xl bg-zinc-950/80 backdrop-blur-md border border-white/10 text-zinc-400 hover:text-white shadow-2xl"
+            className="p-3 rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-white/10 text-zinc-400 hover:text-white shadow-2xl active:scale-95 transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="bg-zinc-950/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl shadow-2xl">
-            <h1 className="text-sm font-bold tracking-tight">Radar GPS</h1>
-            <div className="flex items-center gap-1.5">
+          <div className="bg-zinc-950/90 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl shadow-2xl flex flex-col justify-center">
+            <h1 className="text-xs font-black tracking-tight text-white leading-none">Radar GPS</h1>
+            <div className="flex items-center gap-1.5 mt-1">
               <div
-                className={`w-1.5 h-1.5 rounded-full ${myLocation ? "bg-emerald-500 animate-pulse" : "bg-zinc-600"}`}
+                className={`w-1.5 h-1.5 rounded-full ${myLocation ? "bg-[#53E076] animate-pulse" : "bg-zinc-600"}`}
               />
-              <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
-                {myLocation ? "Alta Precisão" : "Sincronizando..."}
+              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest leading-none">
+                {myLocation ? "Sinal Ativo" : "Buscando..."}
               </span>
             </div>
           </div>
         </div>
+
+        <button
+          onClick={() => {
+            if (myLocation) {
+              setMapCenter([myLocation.lat, myLocation.lng])
+              trigger("medium")
+            }
+          }}
+          className="p-3 rounded-2xl bg-[#53E076] text-black shadow-2xl shadow-[#53E076]/20 pointer-events-auto active:scale-90 transition-all border border-white/20"
+          title="Minha Posição"
+        >
+          <Navigation className="w-5 h-5 fill-current" />
+        </button>
       </header>
 
       <div className="flex-1 w-full bg-zinc-900 relative">
