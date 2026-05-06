@@ -303,7 +303,8 @@ export default function ListDetail({
     return () => window.removeEventListener("open-create-item", handleOpenModal)
   }, [])
 
-      <main className="min-h-screen bg-[#131313] flex flex-col pb-32">
+  return (
+    <main className="min-h-screen bg-[#131313] flex flex-col pb-32">
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-[#131313]/80 backdrop-blur-xl border-b border-[#3d4a3d]/50 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-5">
