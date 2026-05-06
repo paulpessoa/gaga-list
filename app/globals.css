@@ -5,6 +5,10 @@
    Tokens derivados do Stitch MCP: projects/3884342704772771895
    ============================================================ */
 
+:root {
+  color-scheme: dark;
+}
+
 @theme {
   /* Brand Colors */
   --color-brand-primary:        #53E076;   /* Neon Green — ações primárias */

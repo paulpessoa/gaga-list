@@ -117,21 +117,21 @@ export function CreateItemModal({
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
-        <Drawer.Content className="bg-white dark:bg-[#131313] flex flex-col rounded-t-[2.5rem] h-auto mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-zinc-200 dark:border-[#3d4a3d]/60 shadow-2xl">
-          <div className="p-4 bg-white dark:bg-[#131313] rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
-            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-[#201f1f] mb-8" />
+        <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[2.5rem] h-auto mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d]/60 shadow-2xl">
+          <div className="p-4 bg-[#131313] rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
+            <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-[#201f1f] mb-8" />
             
             <div className="max-w-md mx-auto">
               {!showAiPreview ? (
                 <>
                   <div className="mb-8 text-center">
-                    <div className="w-16 h-16 bg-[#1DB954]/10 dark:bg-[#1DB954]/20 rounded-3xl flex items-center justify-center mb-6 mx-auto">
+                    <div className="w-16 h-16 bg-[#1DB954]/20 rounded-3xl flex items-center justify-center mb-6 mx-auto">
                       <ShoppingBag className="w-8 h-8 text-[#53E076]" />
                     </div>
-                    <Drawer.Title className="text-3xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2 leading-tight">
+                    <Drawer.Title className="text-3xl font-black text-[#e5e2e1] mb-2 leading-tight">
                       Novo Item
                     </Drawer.Title>
-                    <Drawer.Description className="text-zinc-500 dark:text-[#bccbb9] text-sm font-medium">
+                    <Drawer.Description className="text-[#bccbb9] text-sm font-medium">
                       Escolha uma opção para adicionar.
                     </Drawer.Description>
                   </div>
@@ -142,9 +142,9 @@ export function CreateItemModal({
                         type="button"
                         onClick={() => checkAndAct(costs.cost_voice, () => (isRecording ? stopRecording() : startRecording()))}
                         disabled={isAiProcessing}
-                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] border-zinc-100 dark:border-[#3d4a3d]/60 hover:bg-white dark:hover:bg-zinc-900 shadow-inner"}`}
+                        className={`p-6 w-full rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 transition-all border active:scale-95 relative overflow-hidden min-h-[140px] shadow-sm ${isRecording ? "bg-red-500 text-white border-red-600 animate-pulse" : "bg-[#1c1b1b]/50 text-[#bccbb9] border-[#3d4a3d]/60 hover:bg-zinc-900 shadow-inner"}`}
                       >
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-[#1DB954]/10 dark:bg-[#1DB954]/20'}`}>
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${isRecording ? 'bg-white/20' : 'bg-[#1DB954]/20'}`}>
                           {isAiProcessing ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                           ) : isRecording ? (
@@ -163,9 +163,9 @@ export function CreateItemModal({
                           checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
-                        className="p-6 w-full bg-zinc-50 dark:bg-[#1c1b1b]/50 text-zinc-600 dark:text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-white dark:hover:bg-zinc-900 transition-all border border-zinc-100 dark:border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        className="p-6 w-full bg-[#1c1b1b]/50 text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
-                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/10 dark:bg-[#1DB954]/20 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/20 flex items-center justify-center">
                           <Camera className="w-6 h-6 text-[#53E076]" />
                         </div>
                         <span className="text-[9px] font-black leading-tight text-center">Via Foto</span>
@@ -194,7 +194,7 @@ export function CreateItemModal({
                         type="button"
                         onClick={() => checkAndAct(costs.cost_ocr, () => fileInputRef.current?.click())}
                         disabled={isAiProcessing || isUploadingLocal}
-                        className="w-full py-4 bg-zinc-100 dark:bg-[#1c1b1b] text-zinc-600 dark:text-[#bccbb9] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-200 dark:hover:bg-zinc-900 transition-all border border-zinc-200 dark:border-[#3d4a3d]/60 active:scale-95"
+                        className="w-full py-4 bg-[#1c1b1b] text-[#bccbb9] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95"
                       >
                         {isUploadingLocal ? (
                           <>
@@ -209,7 +209,7 @@ export function CreateItemModal({
                         )}
                       </button>
                       <div className="flex items-center justify-center gap-2 py-1">
-                        <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-widest opacity-60">
+                        <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
                           Máximo de 3MB • PNG, JPG ou WEBP
                         </span>
                       </div>
@@ -235,11 +235,11 @@ export function CreateItemModal({
                             placeholder="Ex: 2kg de arroz..."
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
-                            className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-5 px-6 text-zinc-900 dark:text-[#e5e2e1] placeholder:text-zinc-400 dark:placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
+                            className="w-full bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-5 px-6 text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
                           />
 
                           {suggestions.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-3 z-30 bg-white dark:bg-[#1c1b1b] rounded-[1.5rem] shadow-2xl border border-zinc-100 dark:border-zinc-800 overflow-hidden">
+                            <div className="absolute top-full left-0 right-0 mt-3 z-30 bg-[#1c1b1b] rounded-[1.5rem] shadow-2xl border border-zinc-800 overflow-hidden">
                               {suggestions.map((s, i) => (
                                 <button
                                   key={i}
@@ -248,14 +248,14 @@ export function CreateItemModal({
                                     onAddManual(s.name, s.category, s.unit)
                                     setItemName("")
                                   }}
-                                  className="w-full flex items-center justify-between p-5 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-50 dark:border-zinc-800 last:border-0"
+                                  className="w-full flex items-center justify-between p-5 hover:bg-zinc-800/50 text-left transition-colors border-b border-zinc-800 last:border-0"
                                 >
                                   <div className="flex items-center gap-4">
                                     <div className="w-10 h-10 rounded-xl bg-[#1DB954]/5 flex items-center justify-center text-lg">
                                       🛒
                                     </div>
                                     <div>
-                                      <p className="font-black text-zinc-900 dark:text-white text-sm tracking-tight uppercase">{s.name}</p>
+                                      <p className="font-black text-white text-sm tracking-tight uppercase">{s.name}</p>
                                       <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest opacity-60">{s.category}</p>
                                     </div>
                                   </div>
@@ -270,7 +270,7 @@ export function CreateItemModal({
                       <button
                         type="submit"
                         disabled={!itemName.trim() || isAiProcessing}
-                        className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                        className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                       >
                         <Plus className="w-4 h-4" />
                         Adicionar Item
@@ -281,7 +281,7 @@ export function CreateItemModal({
               ) : (
                 <div className="animate-in fade-in zoom-in-95 duration-300">
                   <div className="mb-6 text-center">
-                    <h2 className="text-2xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-2 tracking-tight">
+                    <h2 className="text-2xl font-black text-[#e5e2e1] mb-2 tracking-tight">
                       Confirmar Itens
                     </h2>
                     <p className="text-zinc-500 text-sm font-medium">
@@ -289,17 +289,17 @@ export function CreateItemModal({
                     </p>
                   </div>
                   
-                  <div className="bg-zinc-50 dark:bg-[#1c1b1b] rounded-[2.5rem] p-6 max-h-80 overflow-y-auto border border-zinc-100 dark:border-[#3d4a3d]/60 shadow-inner mb-8">
+                  <div className="bg-[#1c1b1b] rounded-[2.5rem] p-6 max-h-80 overflow-y-auto border border-[#3d4a3d]/60 shadow-inner mb-8">
                     <ul className="space-y-3">
                       {voiceItems.map((item, i) => (
                         <li
                           key={i}
-                          className="flex items-center gap-3 text-sm font-bold text-zinc-700 dark:text-[#bccbb9] bg-white dark:bg-[#201f1f]/50 p-4 rounded-2xl border border-zinc-100 dark:border-[#3d4a3d]/60"
+                          className="flex items-center gap-3 text-sm font-bold text-[#bccbb9] bg-[#201f1f]/50 p-4 rounded-2xl border border-[#3d4a3d]/60"
                         >
                           <CheckCircle2 className="w-5 h-5 text-emerald-500" />{" "}
                           <span className="flex-1">{item.name}</span>
                           {(item.quantity || item.unit) && (
-                            <span className="text-[10px] bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded-md text-zinc-500">
+                            <span className="text-[10px] bg-zinc-700 px-2 py-1 rounded-md text-zinc-500">
                               {item.quantity} {item.unit}
                             </span>
                           )}

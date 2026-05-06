@@ -185,19 +185,19 @@ export function ListChat({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center sm:p-4 bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-zinc-950 w-full h-[90vh] sm:h-[650px] sm:max-w-lg sm:rounded-[2.5rem] flex flex-col relative shadow-2xl border-none sm:border sm:border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
-        <header className="p-6 px-8 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between sm:rounded-t-[2.5rem]">
+    <div className="fixed inset-0 z-[2000] flex items-end justify-center sm:items-center sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-[#131313] w-full h-[90vh] sm:h-[650px] sm:max-w-lg sm:rounded-[2.5rem] flex flex-col relative shadow-2xl border-none sm:border sm:border-[#3d4a3d]/60 animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+        <header className="p-6 px-8 border-b border-[#3d4a3d]/60 flex items-center justify-between sm:rounded-t-[2.5rem]">
           <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-indigo-500/20 text-indigo-400">
               <MessageSquare className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <h2 className="text-lg font-black text-zinc-900 dark:text-white leading-tight">
+              <h2 className="text-lg font-black text-white leading-tight">
                 Chat: {listTitle || "em Grupo"}
               </h2>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[9px] text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em] font-black">
+                <span className="text-[9px] text-zinc-500 uppercase tracking-[0.15em] font-black">
                   Nuvem Ativa
                 </span>
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_5px_rgba(99,102,241,0.5)]" />
@@ -206,7 +206,7 @@ export function ListChat({
           </div>
           <button
             onClick={onClose}
-            className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all"
+            className="p-3 rounded-2xl bg-[#1c1b1b] text-zinc-500 hover:text-white transition-all"
           >
             <X className="w-5 h-5" />
           </button>
@@ -214,10 +214,10 @@ export function ListChat({
 
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide bg-zinc-50/30 dark:bg-transparent"
+          className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide bg-[#0e0e0e]"
         >
           {isLoading ? (
-            <div className="h-full flex flex-col items-center justify-center gap-4 text-zinc-400">
+            <div className="h-full flex flex-col items-center justify-center gap-4 text-zinc-500">
               <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
               <span className="text-[10px] font-black uppercase tracking-widest">
                 Sincronizando...
@@ -225,8 +225,8 @@ export function ListChat({
             </div>
           ) : messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center gap-4 opacity-30">
-              <div className="w-20 h-20 rounded-[2rem] bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
-                <MessageSquare className="w-8 h-8 text-zinc-400" />
+              <div className="w-20 h-20 rounded-[2rem] bg-[#1c1b1b] flex items-center justify-center">
+                <MessageSquare className="w-8 h-8 text-zinc-500" />
               </div>
               <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest max-w-[200px]">
                 Silêncio por aqui... Diga algo!
@@ -242,7 +242,7 @@ export function ListChat({
                 >
                   <div className={`flex gap-3 max-w-[85%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
                     {!isMine && (
-                      <div className="w-9 h-9 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-900 relative shadow-sm">
+                      <div className="w-9 h-9 rounded-2xl bg-zinc-900 flex-shrink-0 flex items-center justify-center overflow-hidden border-2 border-zinc-950 relative shadow-sm">
                         {msg.profiles?.avatar_url ? (
                           <Image
                             src={msg.profiles.avatar_url}
@@ -252,23 +252,23 @@ export function ListChat({
                             sizes="36px"
                           />
                         ) : (
-                          <User className="w-5 h-5 text-zinc-400" />
+                          <User className="w-5 h-5 text-zinc-500" />
                         )}
                       </div>
                     )}
                     <div className="flex flex-col gap-1.5">
                       {!isMine && (
-                        <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest ml-1">
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">
                           {msg.profiles?.full_name?.split(" ")[0] || "Usuário"}
                         </span>
                       )}
                       <div
-                        className={`py-3.5 px-5 rounded-[1.5rem] text-sm font-medium leading-relaxed shadow-sm ${isMine ? "bg-indigo-500 text-white rounded-tr-none" : "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 rounded-tl-none border border-zinc-100 dark:border-zinc-800"}`}
+                        className={`py-3.5 px-5 rounded-[1.5rem] text-sm font-medium leading-relaxed shadow-sm ${isMine ? "bg-indigo-500 text-white rounded-tr-none" : "bg-zinc-900 text-zinc-200 rounded-tl-none border border-[#3d4a3d]/60"}`}
                       >
                         {msg.content}
                       </div>
                       <span
-                        className={`text-[8px] font-black text-zinc-400 dark:text-zinc-600 uppercase tracking-tighter ${isMine ? "text-right mr-1" : "ml-1"}`}
+                        className={`text-[8px] font-black text-zinc-600 uppercase tracking-tighter ${isMine ? "text-right mr-1" : "ml-1"}`}
                       >
                         {new Date(msg.created_at).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -283,14 +283,14 @@ export function ListChat({
           )}
         </div>
 
-        <footer className="p-6 px-8 bg-white dark:bg-zinc-950 border-t border-zinc-100 dark:border-zinc-900 sm:rounded-b-[2.5rem]">
+        <footer className="p-6 px-8 bg-[#131313] border-t border-[#3d4a3d]/60 sm:rounded-b-[2.5rem]">
           <form onSubmit={handleSendMessage} className="flex gap-3">
             <input
               type="text"
               placeholder="Escreva uma mensagem para o grupo..."
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-1 bg-zinc-100 dark:bg-zinc-900/50 border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-sm text-zinc-900 dark:text-white placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner"
+              className="flex-1 bg-[#1c1b1b] border-2 border-transparent focus:border-indigo-500 rounded-2xl py-4 px-6 text-sm text-white placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner"
             />
             <button
               type="submit"

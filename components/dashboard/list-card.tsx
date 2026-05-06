@@ -68,7 +68,7 @@ export function ListCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           {showDragHandle && (
-            <div className="p-1 text-zinc-300 dark:text-zinc-700 cursor-grab active:cursor-grabbing">
+            <div className="p-1 text-zinc-700 cursor-grab active:cursor-grabbing">
               <GripVertical className="w-4 h-4" />
             </div>
           )}

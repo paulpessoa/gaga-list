@@ -307,13 +307,13 @@ export default function AppPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr">
         {isLoading ? (
           [1, 2].map((i) => (
-            <div key={i} className="h-[180px] bg-zinc-50 dark:bg-[#201f1f] rounded-[2rem] animate-pulse" />
+            <div key={i} className="h-[180px] bg-[#201f1f] rounded-[2rem] animate-pulse" />
           ))
         ) : isError ? (
           <div className="col-span-full py-12 text-center text-rose-500 font-bold">Erro ao carregar listas.</div>
         ) : filteredLists.length === 0 ? (
           <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-center">
-            <div className="w-16 h-16 bg-zinc-50 dark:bg-[#201f1f] rounded-3xl flex items-center justify-center text-zinc-200 dark:text-zinc-800">
+            <div className="w-16 h-16 bg-[#201f1f] rounded-3xl flex items-center justify-center text-zinc-800">
               <Plus className="w-8 h-8" />
             </div>
             <p className="text-zinc-400 font-bold">Nenhuma lista encontrada.</p>

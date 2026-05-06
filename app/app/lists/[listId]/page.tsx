@@ -341,12 +341,16 @@ export default function ListDetail({
                           setIsEditingTitle(true)
                         }}
                         className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors shrink-0"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </>
-                )}
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-2xl font-black text-[#e5e2e1] truncate tracking-tight leading-none">
+                  {list?.title || "Carregando..."}
+                </h1>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#53E076] animate-pulse" />
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                    {Object.keys(onlineUsers).length + 1} Ativos
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -356,7 +360,7 @@ export default function ListDetail({
                   trigger("light")
                   setIsChatOpen(true)
                 }}
-                className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 border border-indigo-500/10"
+                className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95 border border-indigo-500/10"
               >
                 <MessageCircle className="w-5 h-5" />
               </button>
@@ -365,7 +369,7 @@ export default function ListDetail({
                   trigger("light")
                   router.push(`/app/lists/${listId}/map`)
                 }}
-                className="w-10 h-10 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all active:scale-95 border border-emerald-500/10"
+                className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all active:scale-95 border border-emerald-500/10"
               >
                 <MapIcon className="w-5 h-5" />
               </button>
@@ -382,16 +386,16 @@ export default function ListDetail({
                   {(items || []).length}
                 </span>
               </div>
-              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
+              <div className="h-6 w-px bg-zinc-800 mx-1" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Faltando
                 </span>
                 <span className="text-sm font-black text-rose-500 leading-none mt-1">
                   {formatCurrency(pendingSum)}
                 </span>
               </div>
-              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
+              <div className="h-6 w-px bg-zinc-800 mx-1" />
               <div className="flex flex-col">
                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                   Comprado
@@ -409,7 +413,7 @@ export default function ListDetail({
               {otherCollaborators.slice(0, 4).map((collab, i) => (
                 <div
                   key={collab.user_id || `collab-${i}`}
-                  className="w-7 h-7 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm"
+                  className="w-7 h-7 rounded-full border-2 border-[#0e0e0e] bg-zinc-800 overflow-hidden shadow-sm"
                   style={{ zIndex: 10 - i }}
                 >
                   <Image
@@ -424,7 +428,7 @@ export default function ListDetail({
                   />
                 </div>
               ))}
-              <div className="w-7 h-7 rounded-full border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-indigo-500 group-hover:border-indigo-500 transition-all ml-1 shadow-inner">
+              <div className="w-7 h-7 rounded-full border-2 border-dashed border-zinc-800 flex items-center justify-center text-zinc-500 group-hover:text-[#53E076] group-hover:border-[#53E076] transition-all ml-1 shadow-inner">
                 <UserPlus className="w-3 h-3" />
               </div>
             </div>
@@ -433,26 +437,26 @@ export default function ListDetail({
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1">
             <button
               onClick={() => setFilter(filter === "pending" ? "all" : "pending")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
               Faltando
             </button>
             <button
               onClick={() => setFilter(filter === "purchased" ? "all" : "purchased")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
               Comprado
             </button>
-            <div className="w-px h-4 bg-zinc-100 dark:bg-zinc-800 shrink-0 mx-1" />
+            <div className="w-px h-4 bg-zinc-800 shrink-0 mx-1" />
             <button
               onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl" : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
               A-Z
             </button>
             <button
               onClick={handleClearFilters}
-              className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-100 dark:bg-zinc-800 border-transparent text-zinc-500 hover:text-indigo-500"
+              className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-800 border-transparent text-zinc-500 hover:text-[#53E076]"
             >
               Limpar
             </button>
@@ -481,8 +485,8 @@ export default function ListDetail({
                 className={cn(
                   "flex flex-col rounded-[1.5rem] transition-all duration-300 border",
                   expandedItemId === item.id 
-                    ? "bg-zinc-50/50 dark:bg-zinc-900/30 border-indigo-500/30 shadow-lg scale-[1.02] z-10" 
-                    : "bg-white dark:bg-zinc-950 border-zinc-100 dark:border-zinc-900 hover:border-zinc-200 dark:hover:border-zinc-800 shadow-sm"
+                    ? "bg-zinc-900/30 border-indigo-500/30 shadow-lg scale-[1.02] z-10" 
+                    : "bg-zinc-950 border-zinc-900 hover:border-zinc-800 shadow-sm"
                 )}
               >
                 <div className="flex items-center justify-between p-3 px-4">
@@ -523,12 +527,12 @@ export default function ListDetail({
                             }
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="bg-transparent text-sm font-black text-zinc-900 dark:text-white outline-none ring-2 ring-indigo-500/20 rounded px-1 -ml-1 w-full"
+                          className="bg-transparent text-sm font-black text-white outline-none ring-2 ring-indigo-500/20 rounded px-1 -ml-1 w-full"
                         />
                       ) : (
                         <span className={cn(
                           "font-bold text-sm truncate",
-                          item.is_purchased ? "line-through text-zinc-400 dark:text-zinc-600" : "text-zinc-900 dark:text-zinc-100"
+                          item.is_purchased ? "line-through text-zinc-600" : "text-zinc-100"
                         )}>
                           {item.name}
                         </span>
@@ -557,7 +561,7 @@ export default function ListDetail({
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
                         "p-2 rounded-xl transition-all",
-                        expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                        expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-500 hover:bg-zinc-900"
                       )}
                     >
                       {expandedItemId === item.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -586,14 +590,14 @@ export default function ListDetail({
                             type="number"
                             value={item.quantity}
                             onChange={(e) => handleUpdateRichData(item.id, "quantity", parseFloat(e.target.value) || 0)}
-                            className="w-16 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                            className="w-16 bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none text-white"
                           />
                           <input
                             type="text"
                             placeholder="un, kg, L..."
                             value={item.unit || ""}
                             onChange={(e) => handleUpdateRichData(item.id, "unit", e.target.value)}
-                            className="flex-1 bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                            className="flex-1 bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none text-white"
                           />
                         </div>
                       </div>
