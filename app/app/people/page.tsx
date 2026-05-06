@@ -133,9 +133,9 @@ export default function PeoplePage() {
     )
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
+        <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
           Pessoas
         </h1>
         <p className="text-sm text-zinc-500 font-medium">
@@ -144,8 +144,8 @@ export default function PeoplePage() {
       </header>
 
       {/* Convite Viral (Referral) */}
-      <section className="glass-panel p-8 rounded-[2.5rem] bg-[#1DB954]/5 border-2 border-[#53E076]/10 flex flex-col gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-10">
+      <section className="p-8 rounded-[2.5rem] bg-[#1c1b1b] border-2 border-[#53E076]/10 flex flex-col gap-6 relative overflow-hidden shadow-xl">
+        <div className="absolute top-0 right-0 -mr-4 -mt-4 opacity-5">
           <Zap className="w-32 h-32 text-[#53E076]" />
         </div>
         <div className="relative z-10">
@@ -153,13 +153,13 @@ export default function PeoplePage() {
             <div className="w-10 h-10 rounded-2xl bg-[#1DB954] text-white flex items-center justify-center shadow-lg">
               <UserPlus className="w-5 h-5" />
             </div>
-            <h2 className="text-lg font-black text-zinc-900 dark:text-[#e5e2e1] uppercase tracking-tight">
+            <h2 className="text-lg font-black text-[#e5e2e1] uppercase tracking-tight">
               Convidar Amigos
             </h2>
           </div>
-          <p className="text-sm text-zinc-600 dark:text-[#bccbb9] font-medium mb-6 leading-relaxed">
+          <p className="text-sm text-zinc-500 font-medium mb-6 leading-relaxed">
             Convide alguém para o app. Quando eles entrarem, você ganha{" "}
-            <strong>{costs.referral_bonus} grãos mágicos</strong>! 🌾
+            <strong className="text-[#53E076]">{costs.referral_bonus} grãos mágicos</strong>! 🌾
           </p>
           <form
             onSubmit={handleInviteByEmail}
@@ -171,7 +171,7 @@ export default function PeoplePage() {
               required
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 bg-white dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076] rounded-2xl py-4 px-6 text-sm font-bold outline-none shadow-inner"
+              className="flex-1 bg-[#131313] border-2 border-[#3d4a3d]/40 focus:border-[#53E076] rounded-2xl py-4 px-6 text-sm font-bold text-[#e5e2e1] outline-none shadow-inner"
             />
             <button
               disabled={isInviting}
@@ -190,20 +190,20 @@ export default function PeoplePage() {
       {/* Busca e Lista */}
       <div className="space-y-6">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
           <input
             type="text"
             placeholder="Buscar nos seus contatos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-none rounded-[1.5rem] py-4 pl-12 pr-6 text-sm font-bold focus:ring-2 focus:ring-[#53E076] outline-none shadow-inner"
+            className="w-full bg-[#1c1b1b] border border-[#3d4a3d]/40 rounded-[1.5rem] py-4 pl-12 pr-6 text-sm font-bold text-[#e5e2e1] focus:ring-2 focus:ring-[#53E076] outline-none shadow-inner"
           />
         </div>
 
         <section className="space-y-4">
           <div className="flex items-center gap-2 ml-1">
-            <Users className="w-3.5 h-3.5 text-zinc-400" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+            <Users className="w-3.5 h-3.5 text-zinc-600" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
               Seus Contatos ({filteredFriends.length})
             </h2>
           </div>
@@ -213,13 +213,13 @@ export default function PeoplePage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-20 bg-zinc-100 dark:bg-[#1c1b1b] rounded-[1.5rem] animate-pulse"
+                  className="h-20 bg-[#1c1b1b] rounded-[1.5rem] animate-pulse"
                 />
               ))}
             </div>
           ) : filteredFriends.length === 0 ? (
-            <div className="py-20 text-center space-y-4 bg-zinc-50 dark:bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-zinc-100 dark:border-[#3d4a3d]/60">
-              <Users className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto" />
+            <div className="py-20 text-center space-y-4 bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-[#3d4a3d]/60">
+              <Users className="w-10 h-10 text-zinc-800 mx-auto" />
               <p className="text-zinc-500 text-sm font-medium">
                 Nenhum contato encontrado.
               </p>
@@ -229,10 +229,10 @@ export default function PeoplePage() {
               {filteredFriends.map((friend) => (
                 <div
                   key={friend.id}
-                  className="glass-panel p-4 px-5 rounded-[2rem] flex items-center justify-between bg-white dark:bg-[#1c1b1b]/40 border border-zinc-100 dark:border-[#3d4a3d]/60 hover:border-[#53E076]/20 transition-all group"
+                  className="p-4 px-5 rounded-[2rem] flex items-center justify-between bg-[#1c1b1b]/60 border border-[#3d4a3d]/30 hover:border-[#53E076]/20 transition-all group shadow-sm"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl border-2 border-white dark:border-zinc-900 overflow-hidden bg-zinc-100 dark:bg-[#201f1f] relative shadow-sm">
+                    <div className="w-12 h-12 rounded-2xl border-2 border-[#131313] overflow-hidden bg-[#201f1f] relative shadow-sm">
                       <Image
                         src={
                           friend.avatar_url ||
@@ -244,7 +244,7 @@ export default function PeoplePage() {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-zinc-900 dark:text-zinc-100">
+                      <span className="text-sm font-black text-[#e5e2e1]">
                         {friend.full_name || "Usuário Anon"}
                       </span>
                       <span className="text-[10px] text-zinc-500 font-bold tracking-tight">
@@ -259,7 +259,7 @@ export default function PeoplePage() {
                         setIsSelectDrawerOpen(true)
                         trigger("medium")
                       }}
-                      className="px-4 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black font-black text-[9px] uppercase tracking-widest active:scale-95 transition-all shadow-lg"
+                      className="px-4 py-2.5 rounded-xl bg-[#201f1f] border border-[#3d4a3d]/60 text-[#e5e2e1] font-black text-[9px] uppercase tracking-widest active:scale-95 transition-all shadow-lg hover:bg-[#201f1f]/80"
                     >
                       Add Lista
                     </button>
@@ -278,8 +278,8 @@ export default function PeoplePage() {
         friendName={selectedFriend?.full_name || selectedFriend?.email || ""}
       />
 
-      <footer className="mt-10 pt-10 border-t border-zinc-100 dark:border-[#3d4a3d]/60 text-center">
-        <p className="text-[8px] text-zinc-300 dark:text-zinc-700 font-bold uppercase tracking-tighter">
+      <footer className="mt-10 pt-10 border-t border-[#3d4a3d]/40 text-center">
+        <p className="text-[8px] text-zinc-800 font-bold uppercase tracking-tighter">
           Conexão é a chave para a harmonia nas compras
         </p>
       </footer>

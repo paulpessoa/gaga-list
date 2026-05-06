@@ -194,7 +194,7 @@ export default function PlansPage() {
               <button
                 onClick={() => handleSelectPlan(plan.id)}
                 disabled={!!loadingPlan}
-                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${plan.popular ? "bg-[#1DB954] text-white hover:bg-[#1DB954]" : "bg-zinc-900 dark:bg-white text-white dark:text-black hover:opacity-90"} disabled:opacity-50`}
+                className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${plan.popular ? "bg-[#1DB954] text-white" : "bg-[#201f1f] text-[#e5e2e1] border border-[#3d4a3d]/50 hover:bg-[#201f1f]/80"} disabled:opacity-50`}
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -207,14 +207,14 @@ export default function PlansPage() {
         })}
       </div>
 
-      <div className="mt-8 p-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-[#53E076]/10 dark:border-[#53E076]/5 text-center">
+      <div className="mt-8 p-10 rounded-[3rem] bg-[#1c1b1b] border border-[#3d4a3d]/20 text-center">
         <div className="flex items-center justify-center gap-3 text-[#53E076] mb-4">
           <Sparkles className="w-6 h-6" />
           <h4 className="font-black uppercase tracking-widest text-xs">
             Garantia Staff
           </h4>
         </div>
-        <p className="text-sm text-zinc-500 dark:text-[#bccbb9] font-medium max-w-2xl mx-auto leading-relaxed">
+        <p className="text-sm text-zinc-500 font-medium max-w-2xl mx-auto leading-relaxed">
           Nossos grãos não expiram. Compre agora e use quando precisar. Ao
           adquirir um pacote, você ajuda a manter o projeto ativo e livre de
           anúncios irritantes.

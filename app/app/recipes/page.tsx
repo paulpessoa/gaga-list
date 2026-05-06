@@ -237,9 +237,9 @@ function RecipesContent() {
   }
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
+        <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
           Cozinha Inteligente
         </h1>
         <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">
@@ -248,13 +248,13 @@ function RecipesContent() {
       </header>
 
       {/* Tabs Navigation (3 Abas) */}
-      <div className="flex items-center p-1.5 bg-zinc-100 dark:bg-[#1c1b1b] rounded-[2rem] border border-zinc-200 dark:border-[#3d4a3d]/60">
+      <div className="flex items-center p-1.5 bg-[#1c1b1b] rounded-[2rem] border border-[#3d4a3d]/60">
         <button
           onClick={() => {
             setActiveTab("list")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "list" ? "bg-white dark:bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "list" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-500 hover:text-zinc-200"}`}
         >
           Minha Lista
         </button>
@@ -263,7 +263,7 @@ function RecipesContent() {
             setActiveTab("inspiration")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-white dark:bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5 border border-rose-500/20" : "text-zinc-500 hover:text-zinc-200"}`}
         >
           Inspiração
         </button>
@@ -272,7 +272,7 @@ function RecipesContent() {
             setActiveTab("book")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-white dark:bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5" : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5 border border-emerald-500/20" : "text-zinc-500 hover:text-zinc-200"}`}
         >
           Meu Livro
         </button>
@@ -288,7 +288,7 @@ function RecipesContent() {
             exit={{ opacity: 0, x: 10 }}
             className="flex flex-col gap-6"
           >
-            <div className="glass-panel p-8 rounded-[2.5rem] flex flex-col gap-6 bg-[#1DB954]/5 border-2 border-[#53E076]/10">
+            <div className="p-8 rounded-[2.5rem] flex flex-col gap-6 bg-[#1c1b1b] border-2 border-[#53E076]/10 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-[#53E076]">
                   <div className="w-10 h-10 rounded-2xl bg-[#1DB954]/10 flex items-center justify-center shadow-inner">

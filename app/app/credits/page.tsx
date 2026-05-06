@@ -122,17 +122,17 @@ export default function CreditsPage() {
   }, [logs])
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
+    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
       <header className="flex items-center gap-4">
         <Link
           href="/app/profile"
           onClick={() => trigger("light")}
-          className="p-2.5 rounded-xl bg-zinc-100 dark:bg-[#1c1b1b] transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-[#3d4a3d]/60 shadow-sm active:scale-95"
+          className="p-2.5 rounded-xl bg-[#1c1b1b] transition-all text-zinc-500 hover:text-white border border-[#3d4a3d]/60 shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
+          <h1 className="text-2xl font-black tracking-tight text-[#e5e2e1] leading-tight">
             Energia IA
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
@@ -142,7 +142,7 @@ export default function CreditsPage() {
       </header>
 
       {/* Saldo Principal */}
-      <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-[#53E076]/30 border border-white/10">
+      <div className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-600 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-[#53E076]/20 border border-white/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-400/20 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none" />
 
@@ -161,14 +161,14 @@ export default function CreditsPage() {
 
       {/* Seção de Recarga e Valores (Carousel Ribbon) */}
       <div className="flex flex-col gap-6">
-        <div className="bg-zinc-900 dark:bg-[#1c1b1b]/5 dark:bg-white/5 rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-zinc-800 dark:border-zinc-100/10">
+        <div className="bg-[#1c1b1b] rounded-[2.5rem] p-8 flex flex-col items-center text-center gap-6 shadow-xl relative overflow-hidden group border border-[#3d4a3d]/30">
           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
             <Zap className="w-24 h-24 text-white" />
           </div>
           
           <div className="relative z-10">
-            <h3 className="text-lg font-black text-white dark:text-zinc-100 mb-1">Precisa de mais Grãos?</h3>
-            <p className="text-xs font-medium text-zinc-500 dark:text-[#bccbb9] px-4 leading-tight">Libere o potencial máximo do seu Assistente IA.</p>
+            <h3 className="text-lg font-black text-white mb-1">Precisa de mais Grãos?</h3>
+            <p className="text-xs font-medium text-zinc-500 px-4 leading-tight">Libere o potencial máximo do seu Assistente IA.</p>
           </div>
 
           <Link
@@ -190,13 +190,13 @@ export default function CreditsPage() {
           </div>
           <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6 snap-x">
             {PRICING_DATA.map((item) => (
-              <div key={item.id} className="snap-start flex-shrink-0 w-32 glass-panel p-4 rounded-3xl flex flex-col items-center text-center gap-3 border border-zinc-100 dark:border-[#3d4a3d]/60 bg-white dark:bg-[#1c1b1b]/40 shadow-sm">
-                <div className={`w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-[#201f1f] flex items-center justify-center`}>
+              <div key={item.id} className="snap-start flex-shrink-0 w-32 p-4 rounded-3xl flex flex-col items-center text-center gap-3 border border-[#3d4a3d]/40 bg-[#1c1b1b] shadow-sm">
+                <div className={`w-10 h-10 rounded-2xl bg-[#201f1f] flex items-center justify-center`}>
                   <item.icon className={`w-5 h-5 ${FEATURE_COLORS[item.id].split(' ')[0]}`} />
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-black text-zinc-900 dark:text-zinc-100 text-[10px] uppercase tracking-tighter">{item.label}</span>
-                  <span className="text-[9px] font-black text-zinc-400 uppercase">{item.cost} Grão{item.cost > 1 ? 's' : ''}</span>
+                  <span className="font-black text-[#e5e2e1] text-[10px] uppercase tracking-tighter">{item.label}</span>
+                  <span className="text-[9px] font-black text-zinc-500 uppercase">{item.cost} Grão{item.cost > 1 ? 's' : ''}</span>
                 </div>
               </div>
             ))}
@@ -205,13 +205,13 @@ export default function CreditsPage() {
       </div>
 
       {/* Gráfico Recharts */}
-      <section className="glass-panel p-8 rounded-[2.5rem] bg-zinc-50/50 dark:bg-[#1c1b1b]/20 border border-zinc-100 dark:border-[#3d4a3d]/60 flex flex-col gap-6">
+      <section className="p-8 rounded-[2.5rem] bg-[#1c1b1b] border border-[#3d4a3d]/50 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[#53E076]" />
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Consumo Semanal</h3>
           </div>
-          <span className="text-[9px] font-black text-zinc-400 bg-zinc-100 dark:bg-[#201f1f] px-2 py-1 rounded-md">Grãos Usados</span>
+          <span className="text-[9px] font-black text-zinc-500 bg-[#201f1f] px-2 py-1 rounded-md">Grãos Usados</span>
         </div>
 
         <div className="h-48 w-full -ml-6">
@@ -222,8 +222,8 @@ export default function CreditsPage() {
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     return (
-                      <div className="bg-zinc-900 dark:bg-white p-2 px-3 rounded-xl shadow-2xl border border-white/10 dark:border-black/10">
-                        <p className="text-[10px] font-black text-white dark:text-black uppercase tracking-widest">
+                      <div className="bg-[#131313] p-2 px-3 rounded-xl shadow-2xl border border-[#3d4a3d]/50">
+                        <p className="text-[10px] font-black text-[#e5e2e1] uppercase tracking-widest">
                           {payload[0].value} Grãos
                         </p>
                       </div>
@@ -236,7 +236,7 @@ export default function CreditsPage() {
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.grains > 0 ? '#6366f1' : '#e4e4e730'} 
+                    fill={entry.grains > 0 ? '#6366f1' : '#3d4a3d30'} 
                   />
                 ))}
               </Bar>
@@ -244,7 +244,7 @@ export default function CreditsPage() {
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fontSize: 8, fontWeight: 900, fill: '#a1a1aa' }} 
+                tick={{ fontSize: 8, fontWeight: 900, fill: '#52525b' }} 
                 dy={10}
               />
             </BarChart>
@@ -264,12 +264,12 @@ export default function CreditsPage() {
         {isLoading ? (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-zinc-100 dark:bg-[#1c1b1b] rounded-3xl animate-pulse" />
+              <div key={i} className="h-20 bg-[#1c1b1b] rounded-3xl animate-pulse" />
             ))}
           </div>
         ) : logs.length === 0 ? (
-          <div className="text-center py-16 bg-zinc-50 dark:bg-[#1c1b1b]/20 rounded-[2.5rem] border border-dashed border-zinc-200 dark:border-[#3d4a3d]/60">
-            <Sparkles className="w-8 h-8 text-zinc-200 dark:text-zinc-800 mx-auto mb-3" />
+          <div className="text-center py-16 bg-[#1c1b1b]/20 rounded-[2.5rem] border border-dashed border-[#3d4a3d]/60">
+            <Sparkles className="w-8 h-8 text-zinc-800 mx-auto mb-3" />
             <p className="text-zinc-500 text-sm font-medium">Você ainda não usou grãos mágicos.</p>
           </div>
         ) : (
@@ -280,14 +280,14 @@ export default function CreditsPage() {
               const colorClass = FEATURE_COLORS[log.feature] || "text-[#53E076] bg-[#1DB954]/10 border-[#53E076]/20"
 
               return (
-                <div key={log.id} className="flex items-center justify-between p-5 glass-panel rounded-[2rem] bg-white dark:bg-[#1c1b1b]/40 border border-zinc-100 dark:border-[#3d4a3d]/60 hover:border-[#53E076]/20 transition-all shrink-0">
+                <div key={log.id} className="flex items-center justify-between p-5 rounded-[2rem] bg-[#1c1b1b]/60 border border-[#3d4a3d]/30 hover:border-[#53E076]/20 transition-all shrink-0 shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${colorClass.split(' border')[0]}`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-black text-zinc-900 dark:text-zinc-100 capitalize">{label}</span>
-                      <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                      <span className="text-sm font-black text-[#e5e2e1] capitalize">{label}</span>
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5" />
                         {new Date(log.created_at).toLocaleDateString()} às {new Date(log.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>

@@ -147,20 +147,20 @@ export default function AdminPage() {
   if (!isAdmin) return null
 
   return (
-    <main className="min-h-screen bg-[#131313] text-white p-6 md:p-12 pb-32">
+    <main className="min-h-screen bg-[#131313] text-[#e5e2e1] p-6 md:p-12 pb-32">
       <div className="max-w-6xl mx-auto space-y-10">
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <Link
               href="/app"
-              className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+              className="p-3 rounded-xl bg-[#1c1b1b] border border-[#3d4a3d]/60 hover:bg-[#201f1f] transition-all text-zinc-500 hover:text-white shadow-sm"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <ShieldAlert className="w-5 h-5 text-red-500" />
-                <h1 className="text-2xl font-black uppercase tracking-tighter">
+                <ShieldAlert className="w-5 h-5 text-rose-500" />
+                <h1 className="text-2xl font-black uppercase tracking-tighter text-[#e5e2e1]">
                   Painel Staff
                 </h1>
               </div>
@@ -170,13 +170,13 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="flex bg-zinc-900 p-1.5 rounded-2xl border border-white/5">
+          <div className="flex bg-[#1c1b1b] p-1.5 rounded-2xl border border-[#3d4a3d]/60 shadow-xl">
             <button
               onClick={() => {
                 setActiveTab("finance")
                 trigger("light")
               }}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "finance" ? "bg-white text-zinc-900 shadow-xl" : "text-zinc-500 hover:text-white"}`}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "finance" ? "bg-[#1DB954] text-white shadow-lg shadow-[#53E076]/20" : "text-zinc-500 hover:text-zinc-200"}`}
             >
               <DollarSign className="w-4 h-4" /> Financeiro
             </button>
@@ -185,16 +185,16 @@ export default function AdminPage() {
                 setActiveTab("curation")
                 trigger("light")
               }}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "curation" ? "bg-white text-zinc-900 shadow-xl" : "text-zinc-500 hover:text-white"}`}
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "curation" ? "bg-[#1DB954] text-white shadow-lg shadow-[#53E076]/20" : "text-zinc-500 hover:text-zinc-200"}`}
             >
               <Star className="w-4 h-4" /> Curadoria
             </button>
             <Link
               href="/app/admin/settings"
               onClick={() => trigger("light")}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-all"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-200 transition-all"
             >
-              <Settings className="w-4 h-4" /> Configura��es
+              <Settings className="w-4 h-4" /> Configurações
             </Link>
           </div>
         </header>

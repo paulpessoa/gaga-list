@@ -19,19 +19,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  useEffect(() => {
-    // Sincroniza o tema com a preferência do sistema/dispositivo
-    const root = window.document.documentElement;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    const applyTheme = () => {
-      root.classList.toggle('dark', mediaQuery.matches);
-    };
+  // O GagaList Pro é Dark-Only por design. 
+  // Removida a sincronização com o sistema para garantir a experiência Obsidian.
 
-    applyTheme();
-    mediaQuery.addEventListener('change', applyTheme);
-    return () => mediaQuery.removeEventListener('change', applyTheme);
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

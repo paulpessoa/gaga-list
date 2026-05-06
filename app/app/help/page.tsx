@@ -90,17 +90,17 @@ export default function HelpPage() {
   }
 
   return (
-    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-white dark:bg-[#131313] transition-colors duration-300">
+    <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
       <header className="flex items-center gap-4">
         <Link
           href="/app/profile"
           onClick={() => trigger("light")}
-          className="p-2.5 rounded-xl bg-zinc-100 dark:bg-[#1c1b1b] transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-[#3d4a3d]/60 shadow-sm active:scale-95"
+          className="p-2.5 rounded-xl bg-[#1c1b1b] transition-all text-zinc-500 hover:text-white border border-[#3d4a3d]/60 shadow-sm active:scale-95"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-[#e5e2e1] leading-tight">
+          <h1 className="text-2xl font-black tracking-tight text-[#e5e2e1] leading-tight">
             Central de Ajuda
           </h1>
           <p className="text-sm text-zinc-500 font-medium">
@@ -111,18 +111,18 @@ export default function HelpPage() {
 
       {/* Busca */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" />
         <input
           type="text"
           placeholder="Como eu ganho grãos?..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-100 dark:bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076] rounded-2xl py-4 pl-12 pr-4 text-zinc-900 dark:text-[#e5e2e1] placeholder:text-zinc-500 focus:outline-none transition-all shadow-inner font-bold text-sm"
+          className="w-full bg-[#1c1b1b] border border-[#3d4a3d]/40 focus:border-[#53E076] rounded-2xl py-4 pl-12 pr-4 text-[#e5e2e1] placeholder:text-zinc-600 focus:outline-none transition-all shadow-inner font-bold text-sm"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -131,8 +131,8 @@ export default function HelpPage() {
 
       <div className="flex flex-col gap-8">
         {filteredFaq.length === 0 ? (
-          <div className="text-center py-20 bg-zinc-50 dark:bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-[#3d4a3d]/60">
-            <HelpCircle className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mx-auto mb-4" />
+          <div className="text-center py-20 bg-[#1c1b1b]/20 rounded-[3rem] border-2 border-dashed border-[#3d4a3d]/60">
+            <HelpCircle className="w-10 h-10 text-zinc-800 mx-auto mb-4" />
             <p className="text-zinc-500 text-sm font-medium">
               Nenhum resultado encontrado para sua busca.
             </p>
@@ -141,8 +141,8 @@ export default function HelpPage() {
           filteredFaq.map((cat, catIdx) => (
             <section key={catIdx} className="space-y-4">
               <div className="flex items-center gap-2 ml-1">
-                <cat.icon className="w-3.5 h-3.5 text-zinc-400" />
-                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                <cat.icon className="w-3.5 h-3.5 text-zinc-600" />
+                <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">
                   {cat.category}
                 </h2>
               </div>
@@ -153,19 +153,19 @@ export default function HelpPage() {
                   return (
                     <div
                       key={qIdx}
-                      className={`glass-panel rounded-[2rem] border transition-all duration-300 ${isOpen ? "bg-indigo-50/30 dark:bg-[#1DB954]/5 border-[#53E076]/20 shadow-lg" : "bg-white dark:bg-[#1c1b1b]/40 border-zinc-100 dark:border-[#3d4a3d]/60"}`}
+                      className={`rounded-[2rem] border transition-all duration-300 ${isOpen ? "bg-[#201f1f] border-[#53E076]/30 shadow-lg" : "bg-[#1c1b1b]/40 border-[#3d4a3d]/30"}`}
                     >
                       <button
                         onClick={() => toggleQuestion(id)}
                         className="w-full p-6 flex items-center justify-between text-left"
                       >
                         <span
-                          className={`text-sm font-black tracking-tight uppercase ${isOpen ? "text-indigo-600 dark:text-[#53E076]" : "text-zinc-700 dark:text-[#e5e2e1]"}`}
+                          className={`text-sm font-black tracking-tight uppercase ${isOpen ? "text-[#53E076]" : "text-[#e5e2e1]"}`}
                         >
                           {q.q}
                         </span>
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen ? "bg-[#1DB954] text-white rotate-180" : "bg-zinc-100 dark:bg-[#201f1f] text-zinc-400"}`}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isOpen ? "bg-[#1DB954] text-white rotate-180" : "bg-[#201f1f] text-zinc-500"}`}
                         >
                           <Plus
                             className={`w-4 h-4 transition-transform ${isOpen ? "rotate-45" : ""}`}
@@ -180,7 +180,7 @@ export default function HelpPage() {
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="px-6 pb-6 text-sm font-medium text-zinc-500 dark:text-[#bccbb9] leading-relaxed">
+                            <div className="px-6 pb-6 text-sm font-medium text-zinc-500 leading-relaxed">
                               {q.a}
                             </div>
                           </motion.div>
@@ -196,15 +196,15 @@ export default function HelpPage() {
       </div>
 
       {/* Footer Suporte */}
-      <section className="mt-8 p-8 rounded-[3rem] bg-zinc-900 dark:bg-white flex flex-col items-center text-center gap-6 shadow-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500">
-          <MessageCircle className="w-20 h-20 text-white dark:text-zinc-900" />
+      <section className="mt-8 p-8 rounded-[3rem] bg-[#1c1b1b] border border-[#3d4a3d]/30 flex flex-col items-center text-center gap-6 shadow-2xl relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
+          <MessageCircle className="w-20 h-20 text-white" />
         </div>
         <div className="relative z-10">
-          <h3 className="text-lg font-black text-white dark:text-zinc-900 mb-1">
+          <h3 className="text-lg font-black text-white mb-1">
             Ainda com dúvidas?
           </h3>
-          <p className="text-xs font-medium text-zinc-500 dark:text-[#bccbb9]">
+          <p className="text-xs font-medium text-zinc-500">
             Fale diretamente com o time do Gaga List.
           </p>
         </div>
