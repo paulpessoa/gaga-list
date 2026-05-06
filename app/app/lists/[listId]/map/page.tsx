@@ -105,10 +105,18 @@ export default function CadeTuPage() {
   }, [])
 
   useEffect(() => {
-    if (myLocation && !mapCenter) {
+    // 1. Se eu tenho minha localização, foco em mim
+    if (myLocation) {
       setMapCenter([myLocation.lat, myLocation.lng])
+      return
     }
-  }, [myLocation, mapCenter])
+
+    // 2. Se não tenho minha localização, mas tenho colegas, foco no primeiro deles
+    const firstColleague = Object.values(onlineUsers).find(u => u.user_id !== user?.id && u.lat && u.lng)
+    if (firstColleague && !mapCenter) {
+      setMapCenter([firstColleague.lat!, firstColleague.lng!])
+    }
+  }, [myLocation, onlineUsers, user?.id, mapCenter])
 
   const requestGPS = () => {
     trigger("medium")
