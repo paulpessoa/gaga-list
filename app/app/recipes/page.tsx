@@ -254,7 +254,7 @@ function RecipesContent() {
             setActiveTab("list")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "list" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-500 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "list" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Minha Lista
         </button>
@@ -263,7 +263,7 @@ function RecipesContent() {
             setActiveTab("inspiration")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5 border border-rose-500/20" : "text-zinc-500 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5 border border-rose-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Inspiração
         </button>
@@ -272,7 +272,7 @@ function RecipesContent() {
             setActiveTab("book")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5 border border-emerald-500/20" : "text-zinc-500 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5 border border-emerald-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Meu Livro
         </button>
@@ -313,13 +313,13 @@ function RecipesContent() {
               <select
                 value={selectedListId}
                 onChange={(e) => setSelectedListId(e.target.value)}
-                className="w-full bg-white dark:bg-[#1c1b1b] border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-[#53E076] outline-none shadow-inner"
+                className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-2xl py-4 px-5 text-sm font-bold text-[#e5e2e1] focus:ring-2 focus:ring-[#53E076] outline-none shadow-inner"
               >
                 <option value="">Escolha uma lista ativa...</option>
                 {lists
                   ?.filter((l: any) => (l.items?.length || 0) > 0)
                   .map((l: any) => (
-                    <option key={l.id} value={l.id}>
+                    <option key={l.id} value={l.id} className="bg-[#1c1b1b]">
                       {l.title} ({l.items?.length} itens)
                     </option>
                   ))}
@@ -375,7 +375,7 @@ function RecipesContent() {
                   {selectedProductNames.map((name, idx) => (
                     <span
                       key={idx}
-                      className="px-3 py-1.5 bg-white dark:bg-[#201f1f] border border-rose-500/20 rounded-lg text-[9px] font-black uppercase text-rose-600 dark:text-rose-400"
+                      className="px-3 py-1.5 bg-[#201f1f] border border-rose-500/20 rounded-lg text-[9px] font-black uppercase text-rose-400"
                     >
                       {name}
                     </span>
@@ -424,13 +424,13 @@ function RecipesContent() {
                 placeholder="Ex: Almoço rápido com frango..."
                 value={customQuery}
                 onChange={(e) => setCustomQuery(e.target.value)}
-                className="w-full bg-white dark:bg-[#1c1b1b] border-none rounded-2xl py-5 px-6 text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none shadow-inner"
+                className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-2xl py-5 px-6 text-sm font-bold text-[#e5e2e1] focus:ring-2 focus:ring-rose-500 outline-none shadow-inner"
               />
 
               <button
                 onClick={() => checkAndAct(costs.cost_recipe, () => generateRecipes("custom"))}
                 disabled={!customQuery || isLoading}
-                className="w-full py-5 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl active:scale-95 transition-all disabled:opacity-50"
+                className="w-full py-5 bg-[#201f1f] border border-[#3d4a3d]/60 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl active:scale-95 transition-all disabled:opacity-50"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin mx-auto" />
@@ -473,14 +473,14 @@ function RecipesContent() {
                   <div
                     key={r.id}
                     onClick={() => setViewingRecipe(r)}
-                    className="glass-panel p-6 rounded-[2.5rem] flex items-center justify-between group cursor-pointer bg-white dark:bg-[#1c1b1b]/40 border-2 border-transparent shadow-sm hover:border-[#53E076]/30 transition-all"
+                    className="glass-panel p-6 rounded-[2.5rem] flex items-center justify-between group cursor-pointer bg-[#1c1b1b]/40 border-2 border-transparent shadow-sm hover:border-[#53E076]/30 transition-all"
                   >
                     <div className="flex items-center gap-5">
                       <div className="w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
                         <UtensilsCrossed className="w-7 h-7" />
                       </div>
                       <div>
-                        <h4 className="font-black text-zinc-900 dark:text-zinc-100 text-lg group-hover:text-[#53E076] transition-colors">
+                        <h4 className="font-black text-[#e5e2e1] text-lg group-hover:text-[#53E076] transition-colors">
                           {r.title}
                         </h4>
                         <p className="text-[9px] text-zinc-500 font-black uppercase tracking-[0.2em]">
@@ -516,7 +516,7 @@ function RecipesContent() {
               {recipes.map((recipe, idx) => (
                 <div
                   key={idx}
-                  className="glass-panel p-8 rounded-[3rem] bg-white dark:bg-[#1c1b1b]/40 border-2 border-[#53E076]/10 shadow-2xl relative overflow-hidden group"
+                  className="glass-panel p-8 rounded-[3rem] bg-[#1c1b1b]/60 border-2 border-[#53E076]/10 shadow-2xl relative overflow-hidden group"
                 >
                   <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
                     <ChefHat className="w-64 h-64 text-[#53E076]" />
@@ -524,14 +524,14 @@ function RecipesContent() {
                   <div className="relative z-10 flex flex-col gap-8">
                     <div>
                       <div className="flex items-center gap-3 mb-4">
-                        <span className="px-3 py-1.5 bg-[#1DB954]/10 text-indigo-600 dark:text-[#53E076] rounded-xl text-[9px] font-black uppercase tracking-widest">
+                        <span className="px-3 py-1.5 bg-[#1DB954]/10 text-[#53E076] rounded-xl text-[9px] font-black uppercase tracking-widest">
                           {recipe.difficulty}
                         </span>
-                        <span className="flex items-center gap-1.5 text-zinc-400 text-[9px] font-black uppercase">
+                        <span className="flex items-center gap-1.5 text-zinc-500 text-[9px] font-black uppercase">
                           <Clock className="w-3.5 h-3.5" /> {recipe.prep_time}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-3 leading-tight">
+                      <h3 className="text-2xl font-black text-[#e5e2e1] mb-3 leading-tight">
                         {recipe.title}
                       </h3>
                       <p className="text-zinc-500 text-sm font-medium leading-relaxed mb-8 max-w-2xl">
@@ -547,7 +547,7 @@ function RecipesContent() {
                             {recipe.ingredients.map((ing: any, i: number) => (
                               <li
                                 key={i}
-                                className="flex items-start gap-3 text-xs font-bold text-zinc-700 dark:text-[#e5e2e1]"
+                                className="flex items-start gap-3 text-xs font-bold text-[#e5e2e1]"
                               >
                                 <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                                 <span>
@@ -589,10 +589,10 @@ function RecipesContent() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100 dark:border-[#3d4a3d]/60">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3d4a3d]/60">
                       <button
                         onClick={() => createListFromRecipe(recipe)}
-                        className="flex-1 py-4 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-2xl flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
+                        className="flex-1 py-4 bg-[#201f1f] border border-[#3d4a3d]/60 text-white rounded-2xl flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
                       >
                         <ShoppingCart className="w-4 h-4" /> Criar Lista de
                         Compras
@@ -619,10 +619,10 @@ function RecipesContent() {
       >
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
-          <Drawer.Content className="bg-white dark:bg-[#131313] flex flex-col rounded-t-[3.5rem] h-[92vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t-2 border-emerald-500/20">
+          <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[3.5rem] h-[92vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t-2 border-[#53E076]/20">
             {viewingRecipe && (
-              <div className="p-4 bg-white dark:bg-[#131313] rounded-t-[3.5rem] flex-1 overflow-y-auto pb-20 custom-scrollbar">
-                <div className="mx-auto w-12 h-1.5 rounded-full bg-zinc-300 dark:bg-[#201f1f] mb-8" />
+              <div className="p-4 bg-[#131313] rounded-t-[3.5rem] flex-1 overflow-y-auto pb-20 custom-scrollbar">
+                <div className="mx-auto w-12 h-1.5 rounded-full bg-[#1c1b1b] mb-8 shadow-inner" />
                 <div className="max-w-2xl mx-auto px-4 sm:px-8">
                   <header className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
@@ -641,7 +641,7 @@ function RecipesContent() {
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </header>
-                  <Drawer.Title className="text-4xl font-black text-zinc-900 dark:text-[#e5e2e1] mb-4 leading-tight">
+                  <Drawer.Title className="text-4xl font-black text-[#e5e2e1] mb-4 leading-tight">
                     {viewingRecipe.title}
                   </Drawer.Title>
                   <Drawer.Description className="text-zinc-500 font-medium mb-12 text-lg leading-relaxed">
@@ -696,17 +696,17 @@ function RecipesContent() {
                     </div>
                   </div>
 
-                  <div className="mt-16 flex flex-col sm:flex-row gap-4 border-t border-zinc-100 dark:border-[#3d4a3d]/60 pt-10">
+                  <div className="mt-16 flex flex-col sm:flex-row gap-4 border-t border-[#3d4a3d]/60 pt-10">
                     <button
                       onClick={() => createListFromRecipe(viewingRecipe)}
-                      className="flex-1 py-6 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                      className="flex-1 py-6 bg-[#201f1f] border border-[#3d4a3d]/60 text-white rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
                     >
                       <ShoppingCart className="w-5 h-5" /> Criar Lista de
                       Compras
                     </button>
                     <button
                       onClick={() => setViewingRecipe(null)}
-                      className="px-10 py-6 bg-zinc-100 dark:bg-[#1c1b1b] rounded-3xl font-black uppercase text-[10px] text-zinc-500 active:scale-95 transition-all"
+                      className="px-10 py-6 bg-[#131313] border border-[#3d4a3d]/60 rounded-3xl font-black uppercase text-[10px] text-zinc-500 active:scale-95 transition-all"
                     >
                       Fechar
                     </button>

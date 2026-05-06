@@ -219,8 +219,10 @@ export default function ListDetail({
   }
 
   const handleDeleteItem = (itemId: string) => {
-    trigger("heavy")
-    deleteItem.mutate(itemId)
+    if (confirm("Tem certeza que deseja excluir este item?")) {
+      trigger("heavy")
+      deleteItem.mutate(itemId)
+    }
   }
 
   const handleUpdateRichData = (itemId: string, field: string, value: any) => {
@@ -495,10 +497,10 @@ export default function ListDetail({
               <div
                 key={item.id}
                 className={cn(
-                  "flex flex-col rounded-[1.5rem] transition-all duration-300 border",
+                  "flex flex-col rounded-[2rem] transition-all duration-300 border-2",
                   expandedItemId === item.id 
-                    ? "bg-zinc-900/30 border-indigo-500/30 shadow-lg scale-[1.02] z-10" 
-                    : "bg-zinc-950 border-zinc-900 hover:border-zinc-800 shadow-sm"
+                    ? "bg-[#1c1b1b] border-[#53E076]/40 shadow-2xl scale-[1.02] z-10" 
+                    : "bg-[#1c1b1b]/40 border-[#3d4a3d]/20 hover:border-[#3d4a3d]/60 shadow-sm"
                 )}
               >
                 <div className="flex items-center justify-between p-3 px-4">
@@ -539,28 +541,28 @@ export default function ListDetail({
                             }
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="bg-transparent text-sm font-black text-white outline-none ring-2 ring-indigo-500/20 rounded px-1 -ml-1 w-full"
+                          className="bg-[#131313] text-sm font-black text-[#e5e2e1] outline-none ring-2 ring-[#53E076]/20 rounded-xl px-3 py-1 -ml-1 w-full"
                         />
                       ) : (
                         <span className={cn(
-                          "font-bold text-sm truncate",
-                          item.is_purchased ? "line-through text-zinc-600" : "text-zinc-100"
+                          "font-black text-sm truncate tracking-tight",
+                          item.is_purchased ? "line-through text-zinc-600" : "text-[#e5e2e1]"
                         )}>
                           {item.name}
                         </span>
                       )}
                       
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-tight">
+                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
                           {item.quantity} {item.unit || "un"}
                         </span>
                         {item.category && (
-                          <span className="text-[9px] font-black text-indigo-400 dark:text-indigo-600 uppercase tracking-tight">
+                          <span className="text-[9px] font-black text-[#53E076] uppercase tracking-widest">
                             • {item.category}
                           </span>
                         )}
                         {item.price && item.price > 0 && (
-                          <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-tight">
+                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
                             • {formatCurrency(item.price * item.quantity)}
                           </span>
                         )}
@@ -572,26 +574,26 @@ export default function ListDetail({
                     <button
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
-                        "p-2 rounded-xl transition-all",
-                        expandedItemId === item.id ? "bg-indigo-500 text-white" : "text-zinc-500 hover:bg-zinc-900"
+                        "w-10 h-10 rounded-xl transition-all flex items-center justify-center",
+                        expandedItemId === item.id ? "bg-[#53E076] text-black shadow-lg shadow-[#53E076]/20" : "text-zinc-500 hover:bg-[#131313]"
                       )}
                     >
-                      {expandedItemId === item.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      {expandedItemId === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
                 {expandedItemId === item.id && (
-                  <div className="px-5 pb-6 pt-2 flex flex-col gap-5 border-t border-zinc-100 dark:border-zinc-900/50 animate-in slide-in-from-top-2 duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                  <div className="px-6 pb-8 pt-2 flex flex-col gap-6 border-t border-[#3d4a3d]/20 animate-in slide-in-from-top-2 duration-300">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                          <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
                             Qtd / Medida
                           </label>
                           <button
                             onClick={() => handleDeleteItem(item.id)}
-                            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-600"
+                            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 bg-rose-500/5 px-3 py-1 rounded-lg border border-rose-500/10 transition-all active:scale-95"
                           >
                             <Trash2 className="w-3 h-3" />
                             Excluir
@@ -602,19 +604,19 @@ export default function ListDetail({
                             type="number"
                             value={item.quantity}
                             onChange={(e) => handleUpdateRichData(item.id, "quantity", parseFloat(e.target.value) || 0)}
-                            className="w-16 bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none text-white"
+                            className="w-20 bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                           />
                           <input
                             type="text"
                             placeholder="un, kg, L..."
                             value={item.unit || ""}
                             onChange={(e) => handleUpdateRichData(item.id, "unit", e.target.value)}
-                            className="flex-1 bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none text-white"
+                            className="flex-1 bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                           />
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
                           Preço Unitário
                         </label>
                         <div className="relative">
@@ -628,16 +630,16 @@ export default function ListDetail({
                               const numericValue = parsePriceFromMask(rawValue)
                               handleUpdateRichData(item.id, "price", numericValue)
                             }}
-                            className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 pl-10 px-3 text-sm font-bold outline-none"
+                            className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 pl-10 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                           />
                           <Coins className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
                           Categoria / Corredor
                         </label>
                         <input
@@ -645,11 +647,11 @@ export default function ListDetail({
                           placeholder="Ex: Hortifruti, Limpeza..."
                           value={item.category || ""}
                           onChange={(e) => handleUpdateRichData(item.id, "category", e.target.value)}
-                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                          className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 ml-1">
+                      <div className="space-y-3">
+                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
                           Observações
                         </label>
                         <input
@@ -657,21 +659,21 @@ export default function ListDetail({
                           placeholder="Ex: Marca preferida..."
                           value={item.notes || ""}
                           onChange={(e) => handleUpdateRichData(item.id, "notes", e.target.value)}
-                          className="w-full bg-zinc-100 dark:bg-zinc-900 border-none rounded-xl py-2.5 px-3 text-sm font-bold outline-none"
+                          className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                         />
                       </div>
                     </div>
 
                     {item.is_purchased && (item as any).checked_by_profile && (
-                      <div className="flex items-center gap-2 pt-1">
-                        <div className="w-5 h-5 rounded-full bg-zinc-100 overflow-hidden">
+                      <div className="flex items-center gap-2 pt-2 border-t border-[#3d4a3d]/10">
+                        <div className="w-6 h-6 rounded-lg bg-[#131313] overflow-hidden border border-[#3d4a3d]/60">
                           <Image
-                            src={(item as any).checked_by_profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((item as any).checked_by_profile.full_name || "U")}&background=6366f1&color=fff`}
-                            width={20} height={20} alt="Avatar"
+                            src={(item as any).checked_by_profile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent((item as any).checked_by_profile.full_name || "U")}&background=131313&color=53E076`}
+                            width={24} height={24} alt="Avatar"
                           />
                         </div>
-                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-wider">
-                          Pegado por {(item as any).checked_by_profile.full_name}
+                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                          Adquirido por <span className="text-[#53E076]">{(item as any).checked_by_profile.full_name}</span>
                         </p>
                       </div>
                     )}

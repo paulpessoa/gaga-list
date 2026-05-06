@@ -67,22 +67,22 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-zinc-950/95 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-[2.5rem] p-8 flex flex-col items-center shadow-2xl relative overflow-hidden border border-zinc-200 dark:border-zinc-800">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-[#131313]/90 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-[#131313] w-full max-w-sm rounded-[3rem] p-8 flex flex-col items-center shadow-2xl relative overflow-hidden border-2 border-[#3d4a3d]/30">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-2 z-10"
+          className="absolute top-8 right-8 text-zinc-500 hover:text-white transition-colors p-2 z-10 bg-[#1c1b1b] rounded-xl border border-[#3d4a3d]/60"
         >
           <X className="w-6 h-6" />
         </button>
 
-        <h2 className="text-xl font-black text-zinc-900 dark:text-white mb-6 mt-2 tracking-tight uppercase">Escanear Convite</h2>
+        <h2 className="text-xl font-black text-[#e5e2e1] mb-6 mt-4 tracking-tight uppercase">Escanear Convite</h2>
         
-        <div className="w-full rounded-3xl overflow-hidden border-2 border-indigo-500/20 bg-zinc-100 dark:bg-zinc-950 shadow-inner min-h-[300px]">
+        <div className="w-full rounded-[2.5rem] overflow-hidden border-2 border-[#53E076]/20 bg-[#1c1b1b] shadow-inner min-h-[300px]">
           <div id="qr-reader" className="w-full"></div>
         </div>
         
-        <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-8 text-center leading-relaxed max-w-[200px]">
+        <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mt-10 text-center leading-relaxed max-w-[220px]">
           Aponte a câmera para o QR Code de um amigo.
         </p>
 
@@ -90,22 +90,31 @@ export function QRScanner({ onScanSuccess, onScanError, isOpen, onClose }: QRSca
         <style jsx global>{`
           #qr-reader__dashboard_section_swaplink {
             display: block !important;
-            margin-top: 20px !important;
-            color: #6366f1 !important;
+            margin-top: 24px !important;
+            color: #53E076 !important;
             text-decoration: none !important;
-            font-weight: bold !important;
-            font-size: 12px !important;
+            font-weight: 900 !important;
+            font-size: 10px !important;
             text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
           }
           #qr-reader button {
-            background-color: #6366f1 !important;
-            color: white !important;
+            background-color: #53E076 !important;
+            color: #131313 !important;
             border: none !important;
-            padding: 10px 20px !important;
-            border-radius: 12px !important;
-            font-weight: bold !important;
+            padding: 14px 28px !important;
+            border-radius: 16px !important;
+            font-weight: 900 !important;
+            font-size: 10px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
             cursor: pointer !important;
-            margin-top: 10px !important;
+            margin-top: 15px !important;
+            transition: all 0.2s !important;
+            box-shadow: 0 10px 15px -3px rgba(83, 224, 118, 0.2) !important;
+          }
+          #qr-reader button:active {
+            transform: scale(0.95) !important;
           }
         `}</style>
       </div>

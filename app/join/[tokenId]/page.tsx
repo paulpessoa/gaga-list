@@ -65,46 +65,52 @@ export default function JoinListPage({
   }, [tokenId, supabase, router])
 
   return (
-    <main className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
-      <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-8">
-        <ShoppingCart className="w-10 h-10 text-indigo-400" />
+    <main className="min-h-screen bg-[#131313] flex flex-col items-center justify-center p-6 text-center">
+      <div className="w-24 h-24 rounded-[2rem] bg-[#1c1b1b] border-2 border-[#53E076]/20 flex items-center justify-center mb-8 shadow-2xl shadow-[#53E076]/5">
+        <ShoppingCart className="w-10 h-10 text-[#53E076]" />
       </div>
 
       {status === "loading" && (
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-          <h1 className="text-xl font-bold text-white">
-            Validando seu convite...
-          </h1>
-          <p className="text-zinc-500 text-sm">Quase lá!</p>
+        <div className="flex flex-col items-center gap-6">
+          <Loader2 className="w-10 h-10 text-[#53E076] animate-spin" />
+          <div>
+            <h1 className="text-2xl font-black text-[#e5e2e1] mb-2 tracking-tight">
+              Validando seu convite
+            </h1>
+            <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">Aguarde um momento...</p>
+          </div>
         </div>
       )}
 
       {status === "success" && (
-        <div className="flex flex-col items-center gap-4 animate-in zoom-in-95 duration-300">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+        <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500">
+          <div className="w-16 h-16 rounded-2xl bg-[#53E076]/10 flex items-center justify-center border border-[#53E076]/20 shadow-lg shadow-[#53E076]/10">
+            <CheckCircle2 className="w-8 h-8 text-[#53E076]" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Bem-vindo à lista!</h1>
-          <p className="text-zinc-400">
-            Você agora é colaborador da lista{" "}
-            <span className="text-indigo-400 font-bold">{listName}</span>.
-          </p>
+          <div>
+            <h1 className="text-3xl font-black text-[#e5e2e1] mb-2 tracking-tight">Bem-vindo à lista!</h1>
+            <p className="text-zinc-500 text-lg">
+              Você agora é colaborador da lista{" "}
+              <span className="text-[#53E076] font-black">{listName}</span>
+            </p>
+          </div>
         </div>
       )}
 
       {status === "error" && (
-        <div className="flex flex-col items-center gap-4 animate-in zoom-in-95 duration-300">
-          <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-            <XCircle className="w-6 h-6 text-red-500" />
+        <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500">
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center border border-rose-500/20 shadow-lg shadow-rose-500/10">
+            <XCircle className="w-8 h-8 text-rose-500" />
           </div>
-          <h1 className="text-xl font-bold text-white">Convite Inválido</h1>
-          <p className="text-zinc-500 text-sm">
-            Este link de convite expirou ou já foi utilizado.
-          </p>
+          <div>
+            <h1 className="text-2xl font-black text-[#e5e2e1] mb-2 tracking-tight">Convite Inválido</h1>
+            <p className="text-zinc-500 text-sm font-bold leading-relaxed max-w-xs">
+              Este link de convite expirou ou já foi utilizado por outra pessoa.
+            </p>
+          </div>
           <button
             onClick={() => router.push("/app")}
-            className="mt-4 px-6 py-2 bg-zinc-900 text-white rounded-xl font-bold"
+            className="mt-4 px-10 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-xl"
           >
             Voltar para o Início
           </button>
@@ -112,13 +118,17 @@ export default function JoinListPage({
       )}
 
       {status === "unauthorized" && (
-        <div className="flex flex-col items-center gap-4 animate-in zoom-in-95 duration-300">
-          <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
-          <h1 className="text-xl font-bold text-white">Quase pronto!</h1>
-          <p className="text-zinc-500 text-sm max-w-[250px]">
-            Você precisa estar logado para entrar na lista. Redirecionando para
-            o cadastro...
-          </p>
+        <div className="flex flex-col items-center gap-6 animate-in zoom-in-95 duration-500">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shadow-lg shadow-amber-500/10">
+            <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-[#e5e2e1] mb-2 tracking-tight">Quase pronto!</h1>
+            <p className="text-zinc-500 text-sm font-bold leading-relaxed max-w-xs">
+              Você precisa de uma conta para participar. Redirecionando para
+              o cadastro em instantes...
+            </p>
+          </div>
         </div>
       )}
     </main>
