@@ -303,48 +303,59 @@ export default function ListDetail({
     return () => window.removeEventListener("open-create-item", handleOpenModal)
   }, [])
 
-  return (
-    <main className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col pb-32 transition-colors duration-300">
+      <main className="min-h-screen bg-[#131313] flex flex-col pb-32">
       {/* HEADER */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-100 dark:border-zinc-900 px-6 py-4">
+      <header className="sticky top-0 z-40 bg-[#131313]/80 backdrop-blur-xl border-b border-[#3d4a3d]/50 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <div className="flex items-center gap-4 min-w-0">
               <Link
                 href="/app"
-                className="p-2 -ml-2 rounded-xl bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white shrink-0"
+                className="w-12 h-12 rounded-[1.25rem] bg-[#1c1b1b] flex items-center justify-center text-zinc-400 hover:text-[#53E076] transition-all active:scale-95 shrink-0 border border-[#3d4a3d]/60"
               >
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <div className="flex items-center gap-2 min-w-0">
-                {isEditingTitle && isOwner ? (
-                  <input
-                    autoFocus
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={handleUpdateTitle}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleUpdateTitle()
-                      if (e.key === "Escape") setIsEditingTitle(false)
-                    }}
-                    className="bg-zinc-100 dark:bg-zinc-900 text-lg font-black rounded px-2 outline-none ring-2 ring-indigo-500 w-full"
-                  />
-                ) : (
-                  <>
-                    <h1 className="text-lg font-black text-zinc-900 dark:text-white tracking-tight leading-tight truncate">
-                      {list?.title || "Carregando..."}
-                    </h1>
-                    {isOwner && (
-                      <button
-                        onClick={() => {
-                          setEditTitle(list?.title || "")
-                          setIsEditingTitle(true)
-                        }}
-                        className="p-1 text-zinc-400 hover:text-indigo-500 transition-colors shrink-0"
               <div className="flex flex-col min-w-0">
-                <h1 className="text-2xl font-black text-[#e5e2e1] truncate tracking-tight leading-none">
-                  {list?.title || "Carregando..."}
-                </h1>
+                <div className="flex items-center gap-2">
+                  {isEditingTitle && isOwner ? (
+                    <input
+                      autoFocus
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onBlur={handleUpdateTitle}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleUpdateTitle()
+                        if (e.key === "Escape") setIsEditingTitle(false)
+                      }}
+                      className="bg-[#1c1b1b] text-xl font-black rounded px-2 outline-none ring-2 ring-indigo-500 w-full text-white"
+                    />
+                  ) : (
+                    <>
+                      <h1 
+                        className="text-2xl font-black text-[#e5e2e1] truncate tracking-tight leading-none cursor-pointer"
+                        onClick={() => {
+                          if (isOwner) {
+                            setEditTitle(list?.title || "")
+                            setIsEditingTitle(true)
+                          }
+                        }}
+                      >
+                        {list?.title || "Carregando..."}
+                      </h1>
+                      {isOwner && (
+                        <button
+                          onClick={() => {
+                            setEditTitle(list?.title || "")
+                            setIsEditingTitle(true)
+                          }}
+                          className="p-1 text-zinc-500 hover:text-indigo-400 transition-colors shrink-0"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 mt-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#53E076] animate-pulse" />
                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
@@ -379,7 +390,7 @@ export default function ListDetail({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Itens
                 </span>
                 <span className="text-sm font-black text-indigo-500 leading-none mt-1">
@@ -397,7 +408,7 @@ export default function ListDetail({
               </div>
               <div className="h-6 w-px bg-zinc-800 mx-1" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Comprado
                 </span>
                 <span className="text-sm font-black text-emerald-500 leading-none mt-1">
