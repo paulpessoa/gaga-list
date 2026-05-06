@@ -1,11 +1,11 @@
-# 🧺 Gaga List | AI-Powered Smart Grocery Shopping
+# 🧺 GagaList | AI-Powered Smart Grocery Shopping
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Deploy-000000?style=flat-square&logo=vercel)](https://vercel.com/)
 
-**Gaga List** é um Progressive Web App (PWA) de alto padrão, desenvolvido com foco em performance extrema e experiência mobile-first. Ele transforma listas de compras em ferramentas inteligentes usando IA e sincronização em tempo real. 
+**GagaList** é um Progressive Web App (PWA) de alto padrão, desenvolvido com foco em performance extrema e experiência mobile-first. Ele transforma listas de compras em ferramentas inteligentes usando IA e sincronização em tempo real. 
 
 > [!NOTE]
 > **O Porquê do Projeto:** O GagaList nasceu de uma necessidade real: ajudar a mim e minha esposa a fazermos compras de forma mais rápida e organizada. É um produto construído para ser usado no dia a dia, resolvendo problemas reais de logística doméstica com tecnologia de ponta.
@@ -15,7 +15,7 @@
 ## 📺 Demo Video
 > [!IMPORTANT]
 > Assista ao vídeo de demonstração capturado diretamente do smartphone para ver a fluidez, os feedbacks hápticos e as features de IA em ação:
-> **[GagaList Pro - Assista no YouTube Shorts](https://youtube.com/shorts/-s8xaNOKgGY)**
+> **[GagaList - Assista no YouTube Shorts](https://youtube.com/shorts/-s8xaNOKgGY)**
 
 ---
 
@@ -40,7 +40,7 @@ A velocidade e profundidade técnica deste projeto foram aceleradas pelo uso de 
 
 ---
 
-## 🎨 Design System: "Obsidian Pro"
+## 🎨 Design System: "Obsidian Black"
 
 O app utiliza uma estética Dark-Only blindada ("Obsidian"), otimizada para legibilidade em ambientes de mercado e economia de energia:
 - **Primary:** Neon Green (`#53E076`) com Glow Effects.
