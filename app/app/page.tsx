@@ -259,52 +259,50 @@ export default function AppPage() {
   }, [])
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 pb-32 bg-[#131313]">
-      <header className="sticky top-0 z-30 py-4 -mx-5 px-5 flex flex-col gap-6 border-b border-[#3d4a3d]/50 backdrop-blur-xl transition-all" style={{ background: "rgba(19,19,19,0.85)" }}>
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 bg-[#131313]">
+      <header className="flex flex-col gap-6">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
               Minhas Listas
             </h1>
-            <p className="text-sm text-[#bccbb9] font-medium">
+            <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">
               {filteredLists.length} listas ativas • Gerencie seus itens
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {isOffline && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
-                <WifiOff className="w-3 h-3" />
-                <span>OFFLINE</span>
-              </div>
-            )}
-          </div>
+          {isOffline && (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
+              <WifiOff className="w-3 h-3" />
+              <span>OFFLINE</span>
+            </div>
+          )}
         </div>
 
         {/* Filtros de Abas */}
-        <div className="flex items-center gap-1 bg-[#201f1f] border border-[#3d4a3d] p-1 rounded-2xl w-fit">
+        <div className="flex items-center p-1.5 bg-[#1c1b1b] rounded-[2rem] border border-[#3d4a3d]/60">
           <button
             onClick={() => { setFilter("all"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Todas
           </button>
           <button
             onClick={() => { setFilter("mine"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5 border border-rose-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Minhas
           </button>
           <button
             onClick={() => { setFilter("shared"); trigger("light"); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-[#131313] text-[#53E076] border border-[#53E076]/20 shadow-sm" : "text-[#bccbb9]/50 hover:text-[#bccbb9]"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5 border border-emerald-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Outros
           </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr pb-32">
         {isLoading ? (
           [1, 2].map((i) => (
             <div key={i} className="h-[180px] bg-[#201f1f] rounded-[2rem] animate-pulse" />

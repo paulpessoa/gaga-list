@@ -262,21 +262,16 @@ export default function ListDetail({
     if (filter === "pending") result = result.filter((i) => !i.is_purchased)
     if (filter === "purchased") result = result.filter((i) => i.is_purchased)
 
-    // ORDENAÇÃO INTELIGENTE AUTOMÁTICA
+    // ORDENAÇÃO ESTÁVEL
     result.sort((a, b) => {
-      // 1. Status: Pendentes primeiro
-      if (a.is_purchased !== b.is_purchased) {
-        return a.is_purchased ? 1 : -1
-      }
-
-      // 2. Categoria (Agrupar por corredor)
+      // 1. Categoria (Agrupar por corredor)
       const catA = a.category || "Z-Geral"
       const catB = b.category || "Z-Geral"
       if (catA !== catB) {
         return catA.localeCompare(catB)
       }
 
-      // 3. Nome (Alfabético)
+      // 2. Nome (Alfabético)
       return a.name.localeCompare(b.name)
     })
 
@@ -306,7 +301,7 @@ export default function ListDetail({
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#131313] flex flex-col pb-32">
+    <main className="min-h-screen bg-[#131313] flex flex-col">
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-[#131313]/80 backdrop-blur-xl border-b border-[#3d4a3d]/50 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-5">
@@ -453,33 +448,32 @@ export default function ListDetail({
               onClick={() => setFilter(filter === "pending" ? "all" : "pending")}
               className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              Faltando
+              faltando
             </button>
             <button
               onClick={() => setFilter(filter === "purchased" ? "all" : "purchased")}
               className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              Comprado
+              comprado
             </button>
-            <div className="w-px h-4 bg-zinc-800 shrink-0 mx-1" />
             <button
               onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
               className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              A-Z
+              a-z
             </button>
             <button
               onClick={handleClearFilters}
               className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-800 border-transparent text-zinc-500 hover:text-[#53E076]"
             >
-              Limpar
+              limpar
             </button>
           </div>
         </div>
       </header>
 
       {/* LISTA DE ITENS */}
-      <div className="flex-1 max-w-4xl mx-auto w-full p-6">
+      <div className="flex-1 max-w-4xl mx-auto w-full p-6 pb-32">
         {isLoading ? (
           <div className="flex flex-col gap-4">
             {[1, 2, 3].map((i) => (
@@ -575,7 +569,7 @@ export default function ListDetail({
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
                         "w-10 h-10 rounded-xl transition-all flex items-center justify-center",
-                        expandedItemId === item.id ? "bg-[#53E076] text-black shadow-lg shadow-[#53E076]/20" : "text-zinc-500 hover:bg-[#131313]"
+                        expandedItemId === item.id ? "bg-[#2a2a2a] text-[#53E076] border border-[#53E076]/20" : "text-zinc-500 hover:bg-[#131313]"
                       )}
                     >
                       {expandedItemId === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -606,13 +600,21 @@ export default function ListDetail({
                             onChange={(e) => handleUpdateRichData(item.id, "quantity", parseFloat(e.target.value) || 0)}
                             className="w-20 bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
                           />
-                          <input
-                            type="text"
-                            placeholder="un, kg, L..."
-                            value={item.unit || ""}
+                          <select
+                            value={item.unit || "un"}
                             onChange={(e) => handleUpdateRichData(item.id, "unit", e.target.value)}
-                            className="flex-1 bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
-                          />
+                            className="flex-1 bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner appearance-none"
+                          >
+                            <option value="un">un</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="L">L</option>
+                            <option value="ml">ml</option>
+                            <option value="pct">pct</option>
+                            <option value="cx">cx</option>
+                            <option value="fd">fd</option>
+                            <option value="dz">dz</option>
+                          </select>
                         </div>
                       </div>
                       <div className="space-y-3">
