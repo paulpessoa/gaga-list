@@ -84,7 +84,7 @@ export function CreateListModal({
 
     trigger("medium")
     setIsUploadingLocal(true)
-    
+
     // Converter para Base64
     const reader = new FileReader()
     reader.onload = async () => {
@@ -110,8 +110,8 @@ export function CreateListModal({
     reader.readAsDataURL(file)
   }
   return (
-    <Drawer.Root 
-      open={isOpen} 
+    <Drawer.Root
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           onClose()
@@ -124,7 +124,7 @@ export function CreateListModal({
         <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d]/60 shadow-2xl">
           <div className="p-4 bg-[#131313] rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-[#201f1f] mb-8" />
-            
+
             <div className="max-w-md mx-auto">
               {!showVoicePreview ? (
                 <>
@@ -163,7 +163,7 @@ export function CreateListModal({
                           )}
                         </div>
                       </button>
-                      
+
                       <button
                         type="button"
                         onClick={() => {
@@ -183,8 +183,8 @@ export function CreateListModal({
                       </button>
                     </div>
 
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       ref={nativeCameraRef}
                       onChange={handleFileUpload}
                       accept="image/*"
@@ -192,8 +192,8 @@ export function CreateListModal({
                       className="hidden"
                     />
 
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       ref={fileInputRef}
                       onChange={handleFileUpload}
                       accept="image/*"
@@ -215,7 +215,7 @@ export function CreateListModal({
                         ) : (
                           <>
                             <UploadCloud className="w-4 h-4 text-[#53E076]" />
-                            Ou suba um arquivo de imagem
+                            arquivo de imagem
                           </>
                         )}
                       </button>
@@ -228,9 +228,6 @@ export function CreateListModal({
 
                     <form onSubmit={submitCreateList} className="space-y-6">
                       <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
-                          Ou crie manualmente
-                        </label>
                         <div className="relative">
                           <input
                             type="text"
@@ -238,11 +235,10 @@ export function CreateListModal({
                             required
                             value={newListTitle}
                             onChange={(e) => setNewListTitle(e.target.value)}
-                            className={`w-full bg-[#1c1b1b] border-2 rounded-2xl py-5 px-6 text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base ${
-                              !newListTitle.trim() && newListTitle.length > 0 
-                                ? "border-red-500" 
-                                : "border-transparent focus:border-[#53E076]/50"
-                            }`}
+                            className={`w-full bg-[#1c1b1b] border-2 rounded-2xl py-5 px-6 text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base ${!newListTitle.trim() && newListTitle.length > 0
+                              ? "border-red-500"
+                              : "border-transparent focus:border-[#53E076]/50"
+                              }`}
                           />
                           {!newListTitle.trim() && (newListTitle?.length || 0) > 0 && (
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-red-500 animate-pulse">
@@ -280,7 +276,7 @@ export function CreateListModal({
                       Confira o que a IA entendeu:
                     </p>
                   </div>
-                  
+
                   <div className="space-y-4 mb-8">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">

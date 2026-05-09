@@ -208,18 +208,11 @@ export default function ProfilePage() {
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-10 pb-32 bg-[#131313]">
       <header className="flex flex-col gap-8">
         <div className="flex items-center gap-4">
-          <Link
-            href="/app"
-            onClick={() => trigger("light")}
-            className="w-12 h-12 rounded-[1.25rem] bg-[#1c1b1b] flex items-center justify-center text-zinc-400 hover:text-[#53E076] transition-all active:scale-95 shrink-0 border border-[#3d4a3d]/60"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
           <div className="flex flex-col gap-1">
             <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
               Ajustes
             </h1>
-            <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">
+            <p className="text-sm text-zinc-500 font-medium tracking-wide opacity-70">
               Gerencie seu perfil e preferências
             </p>
           </div>

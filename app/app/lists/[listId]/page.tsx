@@ -357,7 +357,7 @@ export default function ListDetail({
                 </div>
                 <div className="flex items-center gap-2 mt-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#53E076] animate-pulse" />
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  <span className="text-[10px] font-black text-zinc-500 tracking-wide">
                     {Object.keys(onlineUsers).length + 1} Ativos
                   </span>
                 </div>
@@ -517,51 +517,30 @@ export default function ListDetail({
                       className="flex flex-col flex-1 cursor-pointer min-w-0"
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                     >
-                      {expandedItemId === item.id ? (
-                        <input
-                          autoFocus
-                          defaultValue={item.name}
-                          onBlur={(e) => {
-                            if (e.target.value.trim() && e.target.value !== item.name) {
-                              handleUpdateRichData(item.id, "name", e.target.value.trim())
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              const val = (e.target as HTMLInputElement).value.trim()
-                              if (val && val !== item.name) {
-                                handleUpdateRichData(item.id, "name", val)
-                              }
-                              setExpandedItemId(null)
-                            }
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-[#131313] text-sm font-black text-[#e5e2e1] outline-none ring-2 ring-[#53E076]/20 rounded-xl px-3 py-1 -ml-1 w-full"
-                        />
-                      ) : (
-                        <span className={cn(
-                          "font-black text-sm truncate tracking-tight",
-                          item.is_purchased ? "line-through text-zinc-600" : "text-[#e5e2e1]"
-                        )}>
-                          {item.name}
-                        </span>
-                      )}
+                      <span className={cn(
+                        "font-black text-sm truncate tracking-tight",
+                        item.is_purchased ? "line-through text-zinc-600" : "text-[#e5e2e1]"
+                      )}>
+                        {item.name}
+                      </span>
                       
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
-                          {item.quantity} {item.unit || "un"}
-                        </span>
-                        {item.category && (
-                          <span className="text-[9px] font-black text-[#53E076] uppercase tracking-widest">
-                            • {item.category}
+                      {expandedItemId !== item.id && (
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                            {item.quantity} {item.unit || "un"}
                           </span>
-                        )}
-                        {item.price && item.price > 0 && (
-                          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
-                            • {formatCurrency(item.price * item.quantity)}
-                          </span>
-                        )}
-                      </div>
+                          {item.category && (
+                            <span className="text-[9px] font-black text-[#53E076] uppercase tracking-widest">
+                              • {item.category}
+                            </span>
+                          )}
+                          {item.price && item.price > 0 && (
+                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
+                              • {formatCurrency(item.price * item.quantity)}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -569,33 +548,39 @@ export default function ListDetail({
                     <button
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
-                        "w-10 h-10 rounded-xl transition-all flex items-center justify-center",
+                        "w-8 h-8 rounded-lg transition-all flex items-center justify-center",
                         expandedItemId === item.id 
                           ? "bg-[#1c1b1b] text-[#53E076] border border-[#3d4a3d]/60 shadow-inner" 
                           : "text-zinc-600 hover:bg-[#1c1b1b] hover:text-[#53E076]"
                       )}
                     >
-                      {expandedItemId === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      {expandedItemId === item.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                     </button>
                   </div>
                 </div>
-
                 {expandedItemId === item.id && (
-                  <div className="px-6 pb-8 pt-2 flex flex-col gap-6 border-t border-[#3d4a3d]/20 animate-in slide-in-from-top-2 duration-300">
+                  <div className="px-6 pb-8 pt-4 flex flex-col gap-6 border-t border-[#3d4a3d]/20 animate-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-3">
+                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
+                        Nome do Item
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={item.name}
+                        onBlur={(e) => {
+                          if (e.target.value.trim() && e.target.value !== item.name) {
+                            handleUpdateRichData(item.id, "name", e.target.value.trim())
+                          }
+                        }}
+                        className="w-full bg-[#131313] border border-[#3d4a3d]/40 rounded-xl py-3 px-4 text-sm font-black outline-none text-[#e5e2e1] focus:border-[#53E076]/40 shadow-inner"
+                      />
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
-                            Qtd / Medida
-                          </label>
-                          <button
-                            onClick={() => handleDeleteItem(item.id)}
-                            className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-rose-500 hover:text-rose-400 bg-rose-500/5 px-3 py-1 rounded-lg border border-rose-500/10 transition-all active:scale-95"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            Excluir
-                          </button>
-                        </div>
+                        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 ml-1">
+                          Qtd / Medida
+                        </label>
                         <div className="flex gap-2">
                           <input
                             type="number"
@@ -677,11 +662,21 @@ export default function ListDetail({
                             width={24} height={24} alt="Avatar"
                           />
                         </div>
-                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
+                        <p className="text-[9px] font-black text-zinc-600 tracking-wide">
                           Adquirido por <span className="text-[#53E076]">{(item as any).checked_by_profile.full_name}</span>
                         </p>
                       </div>
                     )}
+
+                    <div className="pt-2">
+                      <button
+                        onClick={() => handleDeleteItem(item.id)}
+                        className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-rose-500/5 text-rose-500 text-[10px] font-black uppercase tracking-widest border border-rose-500/10 hover:bg-rose-500/10 transition-all active:scale-[0.98]"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remover este item da lista
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

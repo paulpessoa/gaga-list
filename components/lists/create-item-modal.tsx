@@ -212,7 +212,7 @@ export function CreateItemModal({
                       </button>
                       <div className="flex items-center justify-center gap-2 py-1">
                         <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
-                          Máximo de 3MB • PNG, JPG ou WEBP
+                          {costs.cost_ocr} {costs.cost_ocr === 1 ? 'Grão' : 'Grãos'} • Máximo de 3MB • PNG, JPG ou WEBP
                         </span>
                       </div>
                     </div>

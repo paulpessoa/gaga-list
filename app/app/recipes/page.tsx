@@ -242,7 +242,7 @@ function RecipesContent() {
         <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
           Cozinha Inteligente
         </h1>
-        <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">
+        <p className="text-sm text-zinc-500 font-medium tracking-wide opacity-70">
           Sua assistente gastronômica
         </p>
       </header>
@@ -263,7 +263,7 @@ function RecipesContent() {
             setActiveTab("inspiration")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-rose-500 shadow-xl shadow-black/5 border border-rose-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Inspiração
         </button>
@@ -272,7 +272,7 @@ function RecipesContent() {
             setActiveTab("book")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-emerald-500 shadow-xl shadow-black/5 border border-emerald-500/20" : "text-zinc-600 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Meu Livro
         </button>
