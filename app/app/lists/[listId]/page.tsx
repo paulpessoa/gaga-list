@@ -194,13 +194,14 @@ export default function ListDetail({
     setIsCreateItemModalOpen(false)
   }
 
-  const handleAddItem = (name: string, category?: string, unit?: string) => {
+  const handleAddItem = (name: string, category?: string, unit?: string, quantity?: number) => {
     if (!name.trim()) return
     trigger("medium")
     createItem.mutate({
       name: name.trim(),
       category: category || null,
-      unit: unit || null
+      unit: unit || null,
+      quantity: quantity || 1
     })
     setIsCreateItemModalOpen(false)
   }
@@ -301,7 +302,7 @@ export default function ListDetail({
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#131313] flex flex-col">
+    <main className="bg-[#131313] flex flex-col">
       {/* HEADER */}
       <header className="sticky top-0 z-40 bg-[#131313]/80 backdrop-blur-xl border-b border-[#3d4a3d]/50 px-6 py-4">
         <div className="max-w-4xl mx-auto flex flex-col gap-5">
@@ -569,7 +570,9 @@ export default function ListDetail({
                       onClick={() => setExpandedItemId(expandedItemId === item.id ? null : item.id)}
                       className={cn(
                         "w-10 h-10 rounded-xl transition-all flex items-center justify-center",
-                        expandedItemId === item.id ? "bg-[#2a2a2a] text-[#53E076] border border-[#53E076]/20" : "text-zinc-500 hover:bg-[#131313]"
+                        expandedItemId === item.id 
+                          ? "bg-[#1c1b1b] text-[#53E076] border border-[#3d4a3d]/60 shadow-inner" 
+                          : "text-zinc-600 hover:bg-[#1c1b1b] hover:text-[#53E076]"
                       )}
                     >
                       {expandedItemId === item.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

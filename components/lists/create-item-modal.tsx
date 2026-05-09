@@ -25,7 +25,7 @@ import { useAICosts } from "@/hooks/use-ai-costs"
 interface CreateItemModalProps {
   isOpen: boolean
   onClose: () => void
-  onAddManual: (name: string, category?: string, unit?: string) => void
+  onAddManual: (name: string, category?: string, unit?: string, quantity?: number) => void
   isRecording: boolean
   startRecording: () => void
   stopRecording: () => void
@@ -56,6 +56,8 @@ export function CreateItemModal({
   trigger
 }: CreateItemModalProps) {
   const [itemName, setItemName] = useState("")
+  const [itemQuantity, setItemQuantity] = useState("1")
+  const [itemUnit, setItemUnit] = useState("un")
   const { checkAndAct } = useAICreditCheck()
   const { costs } = useAICosts()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -219,8 +221,15 @@ export function CreateItemModal({
                       onSubmit={(e) => {
                         e.preventDefault()
                         if (itemName.trim()) {
-                          onAddManual(itemName.trim())
+                          onAddManual(
+                            itemName.trim(), 
+                            undefined, 
+                            itemUnit, 
+                            parseFloat(itemQuantity) || 1
+                          )
                           setItemName("")
+                          setItemQuantity("1")
+                          setItemUnit("un")
                         }
                       }} 
                       className="space-y-6"
@@ -229,14 +238,38 @@ export function CreateItemModal({
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
                           Ou digite manualmente
                         </label>
-                        <div className="relative">
+                        <div className="flex flex-col gap-3">
                           <input
                             type="text"
-                            placeholder="Ex: 2kg de arroz..."
+                            placeholder="Nome do item (ex: Arroz)"
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
                             className="w-full bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-5 px-6 text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-base"
                           />
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="relative">
+                              <input
+                                type="number"
+                                step="any"
+                                placeholder="Qtd"
+                                value={itemQuantity}
+                                onChange={(e) => setItemQuantity(e.target.value)}
+                                className="w-full bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-4 px-6 text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none transition-all shadow-inner font-bold text-sm"
+                              />
+                            </div>
+                            <div className="relative">
+                              <select
+                                value={itemUnit}
+                                onChange={(e) => setItemUnit(e.target.value)}
+                                className="w-full bg-[#1c1b1b] border-2 border-transparent focus:border-[#53E076]/50 rounded-2xl py-4 px-6 text-[#e5e2e1] focus:outline-none transition-all shadow-inner font-bold text-sm appearance-none"
+                              >
+                                {["un", "kg", "g", "L", "ml", "pct", "cx", "fd", "dz"].map(u => (
+                                  <option key={u} value={u}>{u}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
 
                           {suggestions.length > 0 && (
                             <div className="absolute top-full left-0 right-0 mt-3 z-30 bg-[#1c1b1b] rounded-[1.5rem] shadow-2xl border border-zinc-800 overflow-hidden">

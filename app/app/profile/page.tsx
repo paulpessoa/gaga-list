@@ -206,13 +206,24 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-2xl mx-auto flex flex-col gap-10 pb-32 bg-[#131313]">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
-          Ajustes
-        </h1>
-        <p className="text-sm text-zinc-500 font-medium">
-          Gerencie seu perfil e preferências do app
-        </p>
+      <header className="flex flex-col gap-8">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/app"
+            onClick={() => trigger("light")}
+            className="w-12 h-12 rounded-[1.25rem] bg-[#1c1b1b] flex items-center justify-center text-zinc-400 hover:text-[#53E076] transition-all active:scale-95 shrink-0 border border-[#3d4a3d]/60"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-3xl font-black tracking-tight text-[#e5e2e1] leading-tight">
+              Ajustes
+            </h1>
+            <p className="text-sm text-zinc-500 font-medium uppercase tracking-widest opacity-70">
+              Gerencie seu perfil e preferências
+            </p>
+          </div>
+        </div>
       </header>
 
       {/* Identidade / Card de Perfil */}
@@ -223,22 +234,24 @@ export default function ProfilePage() {
             Identidade
           </h2>
         </div>
-        <div className="p-8 rounded-[2.5rem] bg-[#1c1b1b] border-2 border-[#3d4a3d]/30 flex flex-col items-center text-center gap-4 relative overflow-hidden shadow-2xl">
-          <div className="w-24 h-24 rounded-[2rem] bg-[#131313] border-4 border-[#3d4a3d]/60 shadow-2xl flex items-center justify-center relative group">
+        <div className="p-8 rounded-[3rem] bg-[#1c1b1b] border border-[#3d4a3d]/40 flex flex-col items-center text-center gap-6 relative overflow-hidden shadow-2xl">
+          <div className="w-28 h-28 rounded-[2.5rem] bg-[#131313] border-2 border-[#3d4a3d]/60 shadow-2xl flex items-center justify-center relative group">
             {isUploadingPhoto ? (
               <Loader2 className="w-8 h-8 animate-spin text-[#53E076]" />
             ) : profile?.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.full_name || ""}
-                className="w-full h-full object-cover rounded-[1.8rem]"
+                className="w-full h-full object-cover rounded-[2.2rem]"
               />
             ) : (
-              <User className="w-10 h-10 text-[#53E076]" />
+              <div className="w-full h-full rounded-[2.2rem] bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
+                <User className="w-12 h-12 text-[#53E076]" />
+              </div>
             )}
             
-            <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#201f1f] rounded-full shadow-lg border border-[#3d4a3d]/60 flex items-center justify-center text-zinc-500 hover:text-[#53E076] transition-all active:scale-90 cursor-pointer">
-              <Camera className="w-4 h-4" />
+            <label className="absolute -bottom-1 -right-1 w-10 h-10 bg-[#201f1f] rounded-2xl shadow-xl border border-[#3d4a3d]/60 flex items-center justify-center text-[#53E076] hover:bg-[#53E076] hover:text-black transition-all active:scale-90 cursor-pointer">
+              <Camera className="w-5 h-5" />
               <input 
                 type="file" 
                 className="hidden" 
@@ -249,7 +262,7 @@ export default function ProfilePage() {
             </label>
           </div>
           
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-1">
             {isEditingName ? (
               <div className="flex items-center gap-2 animate-in fade-in zoom-in duration-300">
                 <input
@@ -257,31 +270,31 @@ export default function ProfilePage() {
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="bg-[#131313] border-2 border-[#53E076] rounded-xl py-2 px-4 text-center font-black text-[#e5e2e1] outline-none"
+                  className="bg-[#131313] border-2 border-[#53E076]/40 rounded-2xl py-3 px-6 text-center font-black text-[#e5e2e1] outline-none focus:border-[#53E076] transition-all"
                 />
                 <button
                   onClick={handleUpdateName}
                   disabled={isUpdatingName}
-                  className="p-2 bg-[#53E076] text-white rounded-xl active:scale-90 transition-all disabled:opacity-50"
+                  className="p-3 bg-[#53E076] text-black rounded-2xl active:scale-90 transition-all disabled:opacity-50"
                 >
-                  {isUpdatingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  {isUpdatingName ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
                 </button>
                 <button
                   onClick={() => { setIsEditingName(false); setNewName(profile?.full_name || ""); }}
-                  className="p-2 bg-[#201f1f] text-zinc-400 rounded-xl active:scale-90 transition-all"
+                  className="p-3 bg-[#201f1f] text-zinc-400 rounded-2xl active:scale-90 transition-all"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingName(true)}>
-                <h3 className="text-xl font-black text-[#e5e2e1]">
+                <h3 className="text-2xl font-black text-[#e5e2e1] tracking-tight">
                   {profile?.full_name || "Usuário"}
                 </h3>
-                <Pencil className="w-3.5 h-3.5 text-zinc-600 group-hover:text-[#53E076] transition-colors" />
+                <Pencil className="w-4 h-4 text-zinc-600 group-hover:text-[#53E076] transition-colors" />
               </div>
             )}
-            <p className="text-sm text-zinc-500 font-medium">
+            <p className="text-sm text-zinc-500 font-bold uppercase tracking-widest opacity-60">
               {profile?.email || user?.email}
             </p>
           </div>
@@ -299,23 +312,23 @@ export default function ProfilePage() {
         <Link
           href="/app/credits"
           onClick={() => trigger("light")}
-          className="p-6 rounded-[2rem] flex items-center justify-between group hover:border-[#53E076]/30 transition-all bg-[#1c1b1b] border border-[#3d4a3d]/50 shadow-xl"
+          className="p-8 rounded-[2.5rem] flex items-center justify-between group hover:border-[#53E076]/40 transition-all bg-[#1c1b1b] border border-[#3d4a3d]/40 shadow-2xl"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shadow-inner">
-              <Zap className="w-6 h-6 fill-current" />
+          <div className="flex items-center gap-5">
+            <div className="w-14 h-14 rounded-[1.5rem] bg-amber-500/10 text-amber-500 flex items-center justify-center shadow-inner border border-amber-500/10">
+              <Zap className="w-7 h-7 fill-current" />
             </div>
             <div>
-              <p className="text-sm font-black text-[#e5e2e1]">
-                Meus Grãos Mágicos
+              <p className="text-lg font-black text-[#e5e2e1] tracking-tight">
+                Grãos Mágicos
               </p>
-              <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                {credits} disponíveis
+              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
+                {credits} grãos ativos
               </p>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-full bg-[#201f1f] flex items-center justify-center text-zinc-500 group-hover:bg-[#1DB954] group-hover:text-white transition-all">
-            <ChevronRight className="w-5 h-5" />
+          <div className="w-12 h-12 rounded-2xl bg-[#201f1f] flex items-center justify-center text-zinc-600 group-hover:bg-[#53E076] group-hover:text-black transition-all border border-[#3d4a3d]/40 shadow-lg">
+            <ChevronRight className="w-6 h-6" />
           </div>
         </Link>
       </section>
@@ -328,24 +341,24 @@ export default function ProfilePage() {
             Preferências do App
           </h2>
         </div>
-        <div className="rounded-[2.5rem] overflow-hidden border border-[#3d4a3d]/60 bg-[#1c1b1b]">
+        <div className="rounded-[2.5rem] overflow-hidden border border-[#3d4a3d]/40 bg-[#1c1b1b] shadow-2xl">
           {/* Notificações Push */}
-          <div className="p-6 flex items-center justify-between border-b border-[#3d4a3d]/30">
+          <div className="p-7 flex items-center justify-between border-b border-[#3d4a3d]/30">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/10">
                 <Bell className="w-5 h-5" />
               </div>
-              <span className="text-sm font-bold text-[#e5e2e1]">
+              <span className="text-sm font-bold text-[#e5e2e1] tracking-tight">
                 Notificações Push
               </span>
             </div>
             <button
               onClick={togglePush}
               disabled={isUpdatingPush}
-              className={`w-12 h-6 rounded-full transition-all relative ${isPushEnabled ? "bg-[#53E076]" : "bg-[#201f1f]"}`}
+              className={`w-14 h-7 rounded-full transition-all relative ${isPushEnabled ? "bg-[#53E076]" : "bg-[#201f1f]"}`}
             >
               <div
-                className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${isPushEnabled ? "left-7" : "left-1"}`}
+                className={`absolute top-1 w-5 h-5 rounded-full shadow-lg transition-all ${isPushEnabled ? "left-8 bg-black" : "left-1 bg-zinc-600"}`}
               />
             </button>
           </div>
@@ -354,17 +367,17 @@ export default function ProfilePage() {
           <Link
             href="/app/notifications"
             onClick={() => trigger("light")}
-            className="p-6 flex items-center justify-between hover:bg-[#201f1f]/50 transition-all"
+            className="p-7 flex items-center justify-between hover:bg-zinc-800/30 transition-all group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/10">
                 <Bell className="w-5 h-5" />
               </div>
-              <span className="text-sm font-bold text-[#e5e2e1]">
+              <span className="text-sm font-bold text-[#e5e2e1] tracking-tight">
                 Central de Avisos
               </span>
             </div>
-            <ChevronRight className="w-5 h-5 text-zinc-500" />
+            <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-[#53E076] transition-all" />
           </Link>
         </div>
       </section>
@@ -377,21 +390,21 @@ export default function ProfilePage() {
             Ajuda
           </h2>
         </div>
-        <div className="grid grid-cols-1 gap-3">
-          <Link
-            href="/app/help"
-            onClick={() => trigger("light")}
-            className="p-5 rounded-2xl flex items-center justify-between group hover:border-[#53E076]/20 transition-all bg-[#1c1b1b] border border-[#3d4a3d]/50"
-          >
-            <div className="flex items-center gap-4">
-              <HelpCircle className="w-5 h-5 text-zinc-500" />
-              <span className="text-sm font-bold text-[#e5e2e1]">
-                Central de Ajuda
-              </span>
+        <Link
+          href="/app/help"
+          onClick={() => trigger("light")}
+          className="p-7 rounded-[2rem] flex items-center justify-between group hover:border-[#53E076]/40 transition-all bg-[#1c1b1b] border border-[#3d4a3d]/40 shadow-xl"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-zinc-800/50 text-zinc-400 flex items-center justify-center border border-zinc-800">
+              <HelpCircle className="w-5 h-5" />
             </div>
-            <ChevronRight className="w-4 h-4 text-zinc-500" />
-          </Link>
-        </div>
+            <span className="text-sm font-bold text-[#e5e2e1] tracking-tight">
+              Central de Ajuda
+            </span>
+          </div>
+          <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-[#53E076] transition-all" />
+        </Link>
       </section>
 
       {/* Ações de Conta */}

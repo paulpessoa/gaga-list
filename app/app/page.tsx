@@ -16,6 +16,7 @@ import {
   WifiOff,
   X,
   Loader2,
+  Search,
 } from "lucide-react"
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
@@ -51,6 +52,7 @@ export default function AppPage() {
 
   // Filtros e Ordenação
   const [filter, setFilter] = useState<"all" | "mine" | "shared">("all")
+  const [searchTerm, setSearchTerm] = useState("")
 
   // Estados para Preview de Voz
   const [voiceTranscription, setVoiceTranscription] = useState("")
@@ -71,22 +73,24 @@ export default function AppPage() {
   }, [])
 
   const filteredLists = useMemo(() => {
-    if (!lists) return []
-    
-    let result = [...lists]
+    let result = (lists || [])
 
-    // Filtragem
     if (filter === "mine") {
-      result = result.filter(l => l.owner_id === user?.id)
+      result = result.filter((l) => l.owner_id === user?.id)
     } else if (filter === "shared") {
-      result = result.filter(l => l.owner_id !== user?.id)
+      result = result.filter((l) => l.owner_id !== user?.id)
     }
 
-    // Ordenação Automática: Últimas atualizadas primeiro
+    if (searchTerm.trim()) {
+      result = result.filter((l) => 
+        l.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
     return result.sort((a, b) => 
       new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     )
-  }, [lists, filter, user?.id])
+  }, [lists, filter, user, searchTerm])
 
   const handleProcessVoice = useCallback(
     async (blob: Blob) => {
@@ -276,6 +280,28 @@ export default function AppPage() {
               <WifiOff className="w-3 h-3" />
               <span>OFFLINE</span>
             </div>
+          )}
+        </div>
+
+        {/* Barra de Pesquisa */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+            <Search className={`w-4 h-4 transition-colors ${searchTerm ? "text-[#53E076]" : "text-zinc-600"}`} />
+          </div>
+          <input
+            type="text"
+            placeholder="Pesquisar listas..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-[#1c1b1b] border border-[#3d4a3d]/40 rounded-2xl py-4 pl-12 pr-12 text-sm text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none focus:border-[#53E076]/40 transition-all shadow-inner"
+          />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm("")}
+              className="absolute inset-y-0 right-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
           )}
         </div>
 
