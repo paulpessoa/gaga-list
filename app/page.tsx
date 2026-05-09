@@ -163,7 +163,7 @@ function InstallPrompt() {
       <div className="fixed bottom-24 right-6 z-50 flex items-center gap-2 animate-in slide-in-from-bottom-4 duration-500">
         <button
           onClick={handleInstall}
-          className="flex items-center gap-3 px-6 py-4 bg-[#201f1f] text-[#e5e2e1] rounded-[1.5rem] border border-[#53E076]/20 font-bold text-xs uppercase tracking-widest shadow-2xl neon-glow-sm active:scale-95 transition-all"
+          className="flex items-center gap-3 px-6 py-4 bg-[#201f1f] text-[#e5e2e1] rounded-[1.5rem] border border-[#53E076]/20 font-bold text-xs tracking-wide shadow-2xl neon-glow-sm active:scale-95 transition-all"
         >
           <Download className="w-4 h-4 text-[#53E076]" /> Instalar App
         </button>
@@ -185,7 +185,7 @@ function InstallPrompt() {
             <Download className="w-5 h-5 text-[#003914]" />
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wider mb-1 text-[#53E076]">
+            <p className="text-[10px] font-bold tracking-wide mb-1 text-[#53E076]">
               Dica Pro:
             </p>
             <p className="text-[11px] leading-tight text-[#bccbb9]">
@@ -380,7 +380,7 @@ function LandingContent() {
                 setIsModalOpen(true)
               }}
               className="
-                group relative px-10 py-4 text-xs font-black uppercase tracking-[0.2em]
+                group relative px-10 py-4 text-xs font-black
                 bg-[#1DB954] hover:bg-[#53E076] text-[#003914]
                 rounded-[1.25rem] transition-all duration-200
                 flex items-center justify-center gap-3 cursor-pointer
@@ -401,7 +401,7 @@ function LandingContent() {
             {["Multi-usuário", "Offline First", "IA integrada", "PWA"].map((feat) => (
               <span
                 key={feat}
-                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#201f1f] border border-[#3d4a3d] text-[#bccbb9]"
+                className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide bg-[#201f1f] border border-[#3d4a3d] text-[#bccbb9]"
               >
                 {feat}
               </span>
@@ -413,13 +413,13 @@ function LandingContent() {
         <div className="mt-auto py-4 flex gap-8 z-10 opacity-50">
           <Link
             href="/privacy"
-            className="text-xs font-bold uppercase tracking-widest text-[#bccbb9] hover:text-[#53E076] transition-colors flex items-center gap-2"
+            className="text-xs font-bold tracking-wide text-[#bccbb9] hover:text-[#53E076] transition-colors flex items-center gap-2"
           >
             <Shield className="w-3.5 h-3.5" /> Privacidade
           </Link>
           <Link
             href="/terms"
-            className="text-xs font-bold uppercase tracking-widest text-[#bccbb9] hover:text-[#53E076] transition-colors flex items-center gap-2"
+            className="text-xs font-bold tracking-wide text-[#bccbb9] hover:text-[#53E076] transition-colors flex items-center gap-2"
           >
             <FileText className="w-3.5 h-3.5" /> Termos
           </Link>
@@ -467,7 +467,7 @@ function LandingContent() {
               <div className="flex bg-[#131313] p-1.5 rounded-2xl mb-8 border border-[#3d4a3d]">
                 <button
                   onClick={() => setAuthMode("magic_link")}
-                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${
+                  className={`flex-1 py-3 text-xs font-bold tracking-wide rounded-xl transition-all ${
                     authMode === "magic_link"
                       ? "bg-[#53E076]/15 text-[#53E076] border border-[#53E076]/20"
                       : "text-[#bccbb9]/50 hover:text-[#bccbb9]"
@@ -477,7 +477,7 @@ function LandingContent() {
                 </button>
                 <button
                   onClick={() => setAuthMode("password_login")}
-                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${
+                  className={`flex-1 py-3 text-xs font-bold tracking-wide rounded-xl transition-all ${
                     authMode !== "magic_link"
                       ? "bg-[#53E076]/15 text-[#53E076] border border-[#53E076]/20"
                       : "text-[#bccbb9]/50 hover:text-[#bccbb9]"
@@ -497,7 +497,7 @@ function LandingContent() {
                     placeholder="Seu e-mail"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     className="w-full input-gaga rounded-2xl py-4 pl-12 pr-4 text-sm"
                   />
                 </div>
@@ -543,7 +543,7 @@ function LandingContent() {
                       checked={rememberMe}
                       onChange={() => setRememberMe(!rememberMe)}
                     />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#bccbb9]/60 group-hover:text-[#bccbb9] transition-colors">
+                    <span className="text-[10px] font-bold tracking-wide text-[#bccbb9]/60 group-hover:text-[#bccbb9] transition-colors">
                       Lembrar-me
                     </span>
                   </label>
@@ -551,7 +551,7 @@ function LandingContent() {
                     <button
                       type="button"
                       onClick={() => setAuthMode("password_reset")}
-                      className="text-[10px] font-bold uppercase tracking-widest text-[#bccbb9]/50 hover:text-[#53E076] transition-colors"
+                      className="text-[10px] font-bold tracking-wide text-[#bccbb9]/50 hover:text-[#53E076] transition-colors"
                     >
                       Esqueceu a senha?
                     </button>
@@ -565,7 +565,7 @@ function LandingContent() {
                   className="
                     w-full py-5 bg-[#1DB954] hover:bg-[#53E076]
                     text-[#003914] rounded-[1.5rem]
-                    font-black text-sm uppercase tracking-[0.2em]
+                    font-black text-sm tracking-wide
                     transition-all disabled:opacity-40
                     shadow-xl neon-glow
                     active:scale-95 hover:scale-[1.02]

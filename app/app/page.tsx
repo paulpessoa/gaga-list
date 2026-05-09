@@ -276,9 +276,9 @@ export default function AppPage() {
           </div>
 
           {isOffline && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold tracking-wide">
               <WifiOff className="w-3 h-3" />
-              <span>OFFLINE</span>
+              <span>Modo Offline</span>
             </div>
           )}
         </div>
@@ -309,19 +309,19 @@ export default function AppPage() {
         <div className="flex items-center p-1.5 bg-[#1c1b1b] rounded-[2rem] border border-[#3d4a3d]/60">
           <button
             onClick={() => { setFilter("all"); trigger("light"); }}
-            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "all" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${filter === "all" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Todas
           </button>
           <button
             onClick={() => { setFilter("mine"); trigger("light"); }}
-            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "mine" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${filter === "mine" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Minhas
           </button>
           <button
             onClick={() => { setFilter("shared"); trigger("light"); }}
-            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${filter === "shared" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+            className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${filter === "shared" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
           >
             Outros
           </button>

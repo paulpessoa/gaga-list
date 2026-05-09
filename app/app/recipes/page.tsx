@@ -254,7 +254,7 @@ function RecipesContent() {
             setActiveTab("list")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "list" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${activeTab === "list" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Minha Lista
         </button>
@@ -263,7 +263,7 @@ function RecipesContent() {
             setActiveTab("inspiration")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${activeTab === "inspiration" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Inspiração
         </button>
@@ -272,7 +272,7 @@ function RecipesContent() {
             setActiveTab("book")
             trigger("light")
           }}
-          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === "book" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
+          className={`flex-1 py-4 rounded-[1.5rem] text-[10px] font-bold tracking-wide transition-all ${activeTab === "book" ? "bg-[#201f1f] text-[#53E076] shadow-xl shadow-black/5 border border-[#53E076]/20" : "text-zinc-600 hover:text-zinc-200"}`}
         >
           Meu Livro
         </button>
@@ -295,7 +295,7 @@ function RecipesContent() {
                     <UtensilsCrossed className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="font-black uppercase tracking-widest text-[10px]">
+                    <h2 className="font-bold tracking-wide text-[10px]">
                       Cozinhar com a Lista
                     </h2>
                     <p className="text-[9px] font-bold opacity-60">

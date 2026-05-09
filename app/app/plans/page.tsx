@@ -116,10 +116,10 @@ export default function PlansPage() {
         <Link
           href="/app/credits"
           onClick={() => trigger("light")}
-          className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group w-fit"
+          className="flex items-center gap-2 text-zinc-500 hover:text-[#53E076] transition-colors group w-fit"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-black uppercase tracking-widest">
+          <span className="text-xs font-bold tracking-wide">
             Voltar para Energia IA
           </span>
         </Link>
@@ -146,7 +146,7 @@ export default function PlansPage() {
               className={`relative p-8 rounded-[2.5rem] flex flex-col gap-6 transition-all duration-300 border-2 bg-[#1c1b1b]/60 ${plan.popular ? "border-[#53E076] shadow-2xl shadow-[#53E076]/20 scale-105 z-10" : "border-[#3d4a3d]/30 hover:border-[#53E076]/20"}`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#1DB954] text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#1DB954] text-white text-[10px] font-bold tracking-wide px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
                   <Star className="w-3 h-3 fill-current" /> Recomendado
                 </div>
               )}
@@ -165,7 +165,7 @@ export default function PlansPage() {
                     <span className="text-2xl font-black text-[#53E076]">
                       {plan.priceLabel}
                     </span>
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <span className="text-[10px] font-bold text-zinc-500 tracking-wide">
                       / pacote
                     </span>
                   </div>
@@ -210,7 +210,7 @@ export default function PlansPage() {
       <div className="mt-8 p-10 rounded-[3rem] bg-[#1c1b1b] border border-[#3d4a3d]/40 text-center shadow-xl">
         <div className="flex items-center justify-center gap-3 text-[#53E076] mb-4">
           <Sparkles className="w-6 h-6" />
-          <h4 className="font-black uppercase tracking-widest text-xs">
+          <h4 className="font-bold tracking-wide text-xs">
             Garantia Staff
           </h4>
         </div>

@@ -165,7 +165,7 @@ export function CreateItemModal({
                           checkAndAct(costs.cost_ocr, () => setIsOcrScannerOpen(true))
                         }}
                         disabled={isAiProcessing}
-                        className="p-6 w-full bg-[#1c1b1b]/50 text-[#bccbb9] rounded-[2rem] font-black text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
+                        className="p-6 w-full bg-[#1c1b1b]/50 text-[#bccbb9] rounded-[2rem] font-bold text-[10px] tracking-wide flex flex-col items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95 min-h-[140px] shadow-sm shadow-inner"
                       >
                         <div className="w-12 h-12 rounded-2xl bg-[#1DB954]/20 flex items-center justify-center">
                           <Camera className="w-6 h-6 text-[#53E076]" />
@@ -196,7 +196,7 @@ export function CreateItemModal({
                         type="button"
                         onClick={() => checkAndAct(costs.cost_ocr, () => fileInputRef.current?.click())}
                         disabled={isAiProcessing || isUploadingLocal}
-                        className="w-full py-4 bg-[#1c1b1b] text-[#bccbb9] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95"
+                        className="w-full py-4 bg-[#1c1b1b] text-[#bccbb9] rounded-2xl font-bold text-[10px] tracking-wide flex items-center justify-center gap-3 hover:bg-zinc-900 transition-all border border-[#3d4a3d]/60 active:scale-95"
                       >
                         {isUploadingLocal ? (
                           <>
@@ -211,7 +211,7 @@ export function CreateItemModal({
                         )}
                       </button>
                       <div className="flex items-center justify-center gap-2 py-1">
-                        <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
+                        <span className="text-[9px] text-zinc-500 font-bold tracking-wide opacity-60">
                           {costs.cost_ocr} {costs.cost_ocr === 1 ? 'Grão' : 'Grãos'} • Máximo de 3MB • PNG, JPG ou WEBP
                         </span>
                       </div>
@@ -235,7 +235,7 @@ export function CreateItemModal({
                       className="space-y-6"
                     >
                       <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 ml-1">
+                        <label className="text-[10px] font-bold tracking-wide text-zinc-400 dark:text-zinc-500 ml-1">
                           Ou digite manualmente
                         </label>
                         <div className="flex flex-col gap-3">

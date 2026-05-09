@@ -280,15 +280,20 @@ export default function ProfilePage() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setIsEditingName(true)}>
+              <div 
+                className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity" 
+                onClick={() => setIsEditingName(true)}
+              >
                 <h3 className="text-2xl font-black text-[#e5e2e1] tracking-tight">
                   {profile?.full_name || "Usuário"}
                 </h3>
-                <Pencil className="w-4 h-4 text-zinc-600 group-hover:text-[#53E076] transition-colors" />
+                <div className="w-8 h-8 rounded-xl bg-[#131313] flex items-center justify-center border border-[#3d4a3d]/60 group-hover:border-[#53E076]/40 transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-zinc-600 group-hover:text-[#53E076] transition-colors" />
+                </div>
               </div>
             )}
-            <p className="text-sm text-zinc-500 font-bold uppercase tracking-widest opacity-60">
-              {profile?.email || user?.email}
+            <p className="text-sm text-zinc-500 font-bold tracking-wide opacity-60">
+              {(profile?.email || user?.email || "").toLowerCase()}
             </p>
           </div>
         </div>
@@ -298,7 +303,7 @@ export default function ProfilePage() {
       <section className="space-y-4">
         <div className="flex items-center gap-2 ml-1">
           <Zap className="w-3.5 h-3.5 text-zinc-400" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+          <h2 className="text-[10px] font-bold tracking-wide text-zinc-400">
             Energia IA
           </h2>
         </div>
@@ -315,7 +320,7 @@ export default function ProfilePage() {
               <p className="text-lg font-black text-[#e5e2e1] tracking-tight">
                 Grãos Mágicos
               </p>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
+              <p className="text-[10px] text-zinc-500 font-bold tracking-wide opacity-60">
                 {credits} grãos ativos
               </p>
             </div>
@@ -330,7 +335,7 @@ export default function ProfilePage() {
       <section className="space-y-4">
         <div className="flex items-center gap-2 ml-1">
           <Smartphone className="w-3.5 h-3.5 text-zinc-400" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+          <h2 className="text-[10px] font-bold tracking-wide text-zinc-400">
             Preferências do App
           </h2>
         </div>
@@ -379,7 +384,7 @@ export default function ProfilePage() {
       <section className="space-y-4">
         <div className="flex items-center gap-2 ml-1">
           <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+          <h2 className="text-[10px] font-bold tracking-wide text-zinc-400">
             Ajuda
           </h2>
         </div>
@@ -404,14 +409,14 @@ export default function ProfilePage() {
       <section className="mt-4 pt-10 border-t border-[#3d4a3d]/30 space-y-4">
         <button
           onClick={handleLogout}
-          className="w-full py-5 bg-[#1c1b1b] hover:bg-[#201f1f] text-[#bccbb9] rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl border border-[#3d4a3d]/20"
+          className="w-full py-5 bg-[#1c1b1b] hover:bg-[#201f1f] text-[#bccbb9] rounded-2xl font-bold tracking-wide text-xs transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl border border-[#3d4a3d]/20"
         >
           <LogOut className="w-4 h-4" /> Sair da Conta
         </button>
 
         <button
           onClick={() => { trigger("medium"); setIsDeleteModalOpen(true); }}
-          className="w-full py-5 bg-rose-500/5 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="w-full py-5 bg-rose-500/5 hover:bg-rose-500 text-rose-500 hover:text-white border border-rose-500/20 rounded-2xl font-bold tracking-wide text-xs transition-all active:scale-95 flex items-center justify-center gap-3"
         >
           <Trash2 className="w-4 h-4" /> Excluir Minha Conta
         </button>
@@ -458,7 +463,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleDeleteAccount}
                     disabled={isDeleting || deleteConfirmEmail !== (profile?.email || user?.email)}
-                    className="w-full py-5 bg-rose-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-5 bg-rose-500 text-white rounded-2xl font-bold tracking-wide text-xs shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmar Exclusão"}
                   </button>
@@ -469,7 +474,7 @@ export default function ProfilePage() {
         </AnimatePresence>
 
         <footer className="text-center space-y-1">
-          <p className="text-[10px] text-zinc-600 uppercase font-black tracking-widest">
+          <p className="text-[10px] text-zinc-600 font-bold tracking-widest">
             Gaga List v1.1.0
           </p>
         </footer>

@@ -395,7 +395,7 @@ export default function ListDetail({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-zinc-500 tracking-wide">
                   Itens
                 </span>
                 <span className="text-sm font-black text-indigo-500 leading-none mt-1">
@@ -404,7 +404,7 @@ export default function ListDetail({
               </div>
               <div className="h-6 w-px bg-zinc-800 mx-1" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-zinc-500 tracking-wide">
                   Faltando
                 </span>
                 <span className="text-sm font-black text-rose-500 leading-none mt-1">
@@ -413,7 +413,7 @@ export default function ListDetail({
               </div>
               <div className="h-6 w-px bg-zinc-800 mx-1" />
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-zinc-500 tracking-wide">
                   Comprado
                 </span>
                 <span className="text-sm font-black text-emerald-500 leading-none mt-1">
@@ -453,27 +453,27 @@ export default function ListDetail({
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1">
             <button
               onClick={() => setFilter(filter === "pending" ? "all" : "pending")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 ${filter === "pending" ? "bg-rose-500 border-rose-500 text-white shadow-xl shadow-rose-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              faltando
+              Faltando
             </button>
             <button
               onClick={() => setFilter(filter === "purchased" ? "all" : "purchased")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 ${filter === "purchased" ? "bg-emerald-500 border-emerald-500 text-white shadow-xl shadow-emerald-500/20" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              comprado
+              Comprado
             </button>
             <button
               onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              a-z
+              A-Z
             </button>
             <button
               onClick={handleClearFilters}
-              className="px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 bg-zinc-800 border-transparent text-zinc-500 hover:text-[#53E076]"
+              className="px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 bg-zinc-800 border-transparent text-zinc-500 hover:text-[#53E076]"
             >
-              limpar
+              Limpar
             </button>
           </div>
         </div>

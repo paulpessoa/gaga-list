@@ -80,7 +80,7 @@ export function ListCard({
               <div
                 className={`w-1.5 h-1.5 rounded-full ${isOwner ? "bg-[#53E076]" : "bg-emerald-500"}`}
               />
-              <p className="text-[9px] font-black uppercase tracking-widest text-[#bccbb9]/60 opacity-80">
+              <p className="text-[9px] font-bold tracking-wide text-[#bccbb9]/60 opacity-80">
                 {isOwner ? "Sua Lista" : "Lista Compartilhada"}
               </p>
             </div>
@@ -125,7 +125,7 @@ export function ListCard({
       </div>
 
       <div className="mt-6 relative">
-        <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest mb-2.5 text-[#bccbb9]/60">
+        <div className="flex items-center justify-between text-[9px] font-bold tracking-wide mb-2.5 text-[#bccbb9]/60">
           <div className="flex items-center gap-2">
             <span>Progresso</span>
           </div>
