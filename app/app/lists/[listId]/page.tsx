@@ -259,32 +259,38 @@ export default function ListDetail({
     
     let result = [...items]
 
-    // Filtros de UI
-    if (filter === "pending") result = result.filter((i) => !i.is_purchased)
-    if (filter === "purchased") result = result.filter((i) => i.is_purchased)
+    // 1. Filtros de Status
+    if (filter === "pending") {
+      result = result.filter((i) => !i.is_purchased)
+    } else if (filter === "purchased") {
+      result = result.filter((i) => i.is_purchased)
+    }
 
-    // ORDENAÇÃO ESTÁVEL
+    // 2. Ordenação
     result.sort((a, b) => {
-      // 1. Categoria (Agrupar por corredor)
-      const catA = a.category || "Z-Geral"
-      const catB = b.category || "Z-Geral"
+      const nameA = (a.name || "").toLowerCase().trim()
+      const nameB = (b.name || "").toLowerCase().trim()
+
+      // Se A-Z estiver ativo, ignora completamente as categorias
+      if (sortBy === "name") {
+        return nameA.localeCompare(nameB)
+      }
+
+      // Se Recentes estiver ativo
+      if (sortBy === "recent") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      }
+
+      // Padrão: Agrupar por Categoria (Estável) e então por Nome
+      const catA = (a.category || "Sem Categoria").toLowerCase().trim()
+      const catB = (b.category || "Sem Categoria").toLowerCase().trim()
+      
       if (catA !== catB) {
         return catA.localeCompare(catB)
       }
 
-      // 2. Nome (Alfabético)
-      return a.name.localeCompare(b.name)
+      return nameA.localeCompare(nameB)
     })
-
-    // Se houver uma ordenação explícita de A-Z via botão
-    if (sortBy === "name") {
-      result.sort((a, b) => a.name.localeCompare(b.name))
-    } else if (sortBy === "recent") {
-      result.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-    }
     
     return result
   }, [items, filter, sortBy])
