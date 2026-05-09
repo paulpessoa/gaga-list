@@ -408,7 +408,7 @@ export default function ListDetail({
                   Faltando
                 </span>
                 <span className="text-sm font-black text-rose-500 leading-none mt-1">
-                  {pendingSum > 0 ? formatCurrency(pendingSum) : "—"}
+                  {pendingSum > 0 ? formatCurrency(pendingSum) : ""}
                 </span>
               </div>
               <div className="h-6 w-px bg-zinc-800 mx-1" />
@@ -417,7 +417,7 @@ export default function ListDetail({
                   Comprado
                 </span>
                 <span className="text-sm font-black text-emerald-500 leading-none mt-1">
-                  {purchasedSum > 0 ? formatCurrency(purchasedSum) : "—"}
+                  {purchasedSum > 0 ? formatCurrency(purchasedSum) : ""}
                 </span>
               </div>
             </div>
@@ -540,9 +540,9 @@ export default function ListDetail({
                               • {item.category}
                             </span>
                           )}
-                          {item.price && item.price > 0 && (
+                          {Number(item.price) > 0 && (
                             <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">
-                              • {formatCurrency(item.price * item.quantity)}
+                              • {formatCurrency((item.price || 0) * item.quantity)}
                             </span>
                           )}
                         </div>
