@@ -63,10 +63,10 @@ export function parsePriceFromMask(mask: string): number {
  * Sanitiza uma string removendo tags HTML e scripts, prevenindo XSS básico.
  * Também limita o tamanho máximo para evitar abusos no banco de dados.
  */
-export function sanitizeString(text: string, maxLength: number = 1000): string {
-  if (!text) return ""
+export function sanitizeString(text: any, maxLength: number = 1000): string {
+  if (text === null || text === undefined) return ""
 
-  return text
+  return String(text)
     .replace(/<[^>]*>?/gm, "") // Remove tags HTML
     .trim()
     .slice(0, maxLength) // Limita tamanho
