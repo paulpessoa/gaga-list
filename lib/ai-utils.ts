@@ -20,14 +20,15 @@ export function getGeminiApiKey(): string | undefined {
  * Modelo padrão do Gemini usado em todo o projeto.
  *
  * PORQUÊ: Centralizar aqui evita alterar múltiplos arquivos ao trocar de modelo.
- * gemini-1.5-flash → melhor equilíbrio entre cota free tier e capacidade multimodal
- * (suporta texto, imagem e áudio nativamente).
+ * - gemini-2.0-flash: suporte multimodal completo (texto, imagem, áudio)
+ * - gemini-1.5-flash: DEPRECIADO na v1beta — retorna 404
  *
  * Cotas Free Tier (jun/2026):
- *   - gemini-1.5-flash: 15 req/min, 1.500 req/dia
- *   - gemini-2.0-flash: 10 req/min, 1.500 req/dia (limites mais rígidos)
+ *   - gemini-2.0-flash:      10 req/min, 1.500 req/dia
+ *   - gemini-2.0-flash-lite: 30 req/min, 1.500 req/dia (mais permissivo)
  */
-export const GEMINI_MODEL = "gemini-1.5-flash"
+export const GEMINI_MODEL = "gemini-2.0-flash"
+
 
 
 /**
