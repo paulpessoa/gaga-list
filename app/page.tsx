@@ -290,7 +290,7 @@ function LandingContent() {
         setMessage("Cadastro realizado! Verifique seu e-mail.")
       } else if (authMode === "password_reset") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${appUrl}/api/auth/confirm?next=/app/profile`
+          redirectTo: `${appUrl}/api/auth/confirm?next=/app/update-password`
         })
         if (error) throw error
         setMessage("E-mail de recuperação enviado!")
