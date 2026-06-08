@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
-import { getGeminiApiKey } from "@/lib/ai-utils"
+import { getGeminiApiKey, GEMINI_MODEL } from "@/lib/ai-utils"
 
 /**
  * Sugere benefícios e usos de produtos usando Gemini.
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const { productName, brand, category } = await request.json()
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     const result = await model.generateContent(
       `Você é um chef e nutricionista falando Português do Brasil.
@@ -76,7 +76,7 @@ Retorne APENAS o JSON puro, sem blocos de código markdown.`
       user_id: user.id,
       feature: "suggestion",
       cost: requiredCredits,
-      model_used: "gemini-2.0-flash"
+      model_used: GEMINI_MODEL
     })
 
     return NextResponse.json(parsed)

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
-import { getGeminiApiKey, parseGeminiImage } from "@/lib/ai-utils"
+import { getGeminiApiKey, parseGeminiImage, GEMINI_MODEL } from "@/lib/ai-utils"
 
 /**
  * Identifica produtos de supermercado por imagem usando Gemini 2.0 Flash.
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const { data: base64Data, mimeType } = parseGeminiImage(image)
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     const result = await model.generateContent([
       {
@@ -96,7 +96,7 @@ Não inclua explicações ou blocos de código markdown. Retorne APENAS o JSON p
       user_id: user.id,
       feature: "vision",
       cost: requiredCredits,
-      model_used: "gemini-2.0-flash"
+      model_used: GEMINI_MODEL
     })
 
     return NextResponse.json({ data: finalData })

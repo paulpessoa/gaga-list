@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
-import { getGeminiApiKey } from "@/lib/ai-utils"
+import { getGeminiApiKey, GEMINI_MODEL } from "@/lib/ai-utils"
 
 /**
  * Processa áudio de voz para extrair itens de compra usando Gemini 2.0 Flash.
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 
     const genAI = new GoogleGenerativeAI(geminiKey)
     // gemini-2.0-flash suporta áudio nativo como entrada multimodal
-    const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const geminiModel = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     const prompt = `Você é um assistente de compras inteligente falando Português do Brasil.
 Ouça o áudio e extraia os itens de compra mencionados.
@@ -124,7 +124,7 @@ Regras:
       user_id: user.id,
       feature: "voice",
       cost: requiredCredits,
-      model_used: "gemini-2.0-flash"
+      model_used: GEMINI_MODEL
     } as any)
 
     return NextResponse.json({

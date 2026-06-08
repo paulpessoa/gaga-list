@@ -17,6 +17,20 @@ export function getGeminiApiKey(): string | undefined {
 }
 
 /**
+ * Modelo padrão do Gemini usado em todo o projeto.
+ *
+ * PORQUÊ: Centralizar aqui evita alterar múltiplos arquivos ao trocar de modelo.
+ * gemini-1.5-flash → melhor equilíbrio entre cota free tier e capacidade multimodal
+ * (suporta texto, imagem e áudio nativamente).
+ *
+ * Cotas Free Tier (jun/2026):
+ *   - gemini-1.5-flash: 15 req/min, 1.500 req/dia
+ *   - gemini-2.0-flash: 10 req/min, 1.500 req/dia (limites mais rígidos)
+ */
+export const GEMINI_MODEL = "gemini-1.5-flash"
+
+
+/**
  * Extrai os dados necessários de uma imagem base64 para o Gemini (inlineData).
  * Suporta imagens com ou sem o prefixo data URI.
  */

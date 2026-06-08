@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getGeminiApiKey } from "@/lib/ai-utils"
+import { getGeminiApiKey, GEMINI_MODEL } from "@/lib/ai-utils"
 
 /**
  * Endpoint de diagnóstico — verifica se a chave Gemini está configurada.
@@ -21,14 +21,14 @@ export async function GET() {
   try {
     const { GoogleGenerativeAI } = await import("@google/generative-ai")
     const genAI = new GoogleGenerativeAI(key)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
     const result = await model.generateContent("Responda apenas: OK")
     const text = result.response.text().trim()
 
     return NextResponse.json({
       status: "ok",
       key_prefix: key.substring(0, 8) + "...",
-      model: "gemini-2.0-flash",
+      model: GEMINI_MODEL,
       response: text,
     })
   } catch (err: any) {

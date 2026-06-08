@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
-import { getGeminiApiKey } from "@/lib/ai-utils"
+import { getGeminiApiKey, GEMINI_MODEL } from "@/lib/ai-utils"
 
 /**
  * Gera receitas gourmet utilizando a IA do Gemini com base em uma lista de ingredientes ou um item específico.
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL })
 
     const { items, type } = await request.json()
 
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       feature: "recipe",
       cost: requiredCredits,
-      model_used: "gemini-flash-latest"
+      model_used: GEMINI_MODEL
     })
 
     return NextResponse.json(parsedData)
