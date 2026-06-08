@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
+import { getGeminiApiKey } from "@/lib/ai-utils"
 
 /**
  * Sugere benefícios e usos de produtos usando Gemini.
@@ -40,9 +41,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY
+    const apiKey = getGeminiApiKey()
     if (!apiKey)
-      return NextResponse.json({ error: "Erro de config" }, { status: 500 })
+      return NextResponse.json(
+        { error: "Configuração de IA ausente. Defina GEMINI_API_KEY nas variáveis de ambiente." },
+        { status: 500 }
+      )
 
     const { productName, brand, category } = await request.json()
 

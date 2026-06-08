@@ -1,22 +1,49 @@
 // lib/ai-utils.ts
 
 /**
+ * Retorna a chave de API do Gemini, tentando múltiplas variáveis de ambiente.
+ *
+ * PORQUÊ: O AI Studio injeta a chave como GEMINI_API_KEY automaticamente,
+ * mas o projeto também suporta GOOGLE_AI_STUDIO_API_KEY para config manual.
+ * Essa função garante que qualquer uma das duas funcione, sem precisar
+ * alterar as variáveis de ambiente no Vercel/produção.
+ */
+export function getGeminiApiKey(): string | undefined {
+  return (
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_AI_STUDIO_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  )
+}
+
+/**
+ * Extrai os dados necessários de uma imagem base64 para o Gemini (inlineData).
+ * Suporta imagens com ou sem o prefixo data URI.
+ */
+export function parseGeminiImage(image: string): {
+  data: string
+  mimeType: string
+} {
+  const mimeTypeMatch = image.match(/data:([^;]+);base64/)
+  const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : "image/jpeg"
+  const data = image.includes(",") ? image.split(",")[1] : image
+  return { data, mimeType }
+}
+
+/**
  * Limpa e extrai JSON de uma string retornada pela IA.
  * Frequentemente a IA retorna blocos de código Markdown ou texto extra.
  */
 export function extractJSON<T = any>(text: string): T | null {
   try {
-    // Tenta parse direto primeiro
-    return JSON.parse(text)
+    const clean = text.replace(/```json|```/g, "").trim()
+    return JSON.parse(clean)
   } catch (e) {
     try {
-      // Tenta encontrar o primeiro { e o último }
       const start = text.indexOf("{")
       const end = text.lastIndexOf("}")
-
       if (start !== -1 && end !== -1) {
-        const jsonContent = text.substring(start, end + 1)
-        return JSON.parse(jsonContent)
+        return JSON.parse(text.substring(start, end + 1))
       }
     } catch (innerError) {
       console.error("Erro ao extrair JSON da IA:", innerError)
@@ -37,10 +64,8 @@ export function hasSufficientCredits(
 }
 
 export function cleanBase64Image(base64: string): string {
-  // Remove prefixos como data:image/jpeg;base64, se existirem
   if (base64.startsWith("data:image")) {
-    return base64 // GROQ aceita o formato completo data:image/...
+    return base64
   }
-  // Se for apenas a string base64 pura, adiciona um prefixo genérico para o GROQ
   return `data:image/jpeg;base64,${base64}`
 }

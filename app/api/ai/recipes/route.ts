@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
+import { getGeminiApiKey } from "@/lib/ai-utils"
 
 /**
  * Gera receitas gourmet utilizando a IA do Gemini com base em uma lista de ingredientes ou um item específico.
@@ -43,10 +44,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY
+    const apiKey = getGeminiApiKey()
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Configuração de IA ausente (GOOGLE_AI_STUDIO_API_KEY)" },
+        { error: "Configuração de IA ausente. Defina GEMINI_API_KEY nas variáveis de ambiente." },
         { status: 500 }
       )
     }

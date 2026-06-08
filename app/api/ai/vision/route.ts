@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
+import { getGeminiApiKey, parseGeminiImage } from "@/lib/ai-utils"
 
 /**
  * Identifica produtos de supermercado por imagem usando Gemini 2.0 Flash.
@@ -40,10 +41,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY
+    const apiKey = getGeminiApiKey()
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Configuração de IA ausente (GOOGLE_AI_STUDIO_API_KEY)" },
+        { error: "Configuração de IA ausente. Defina GEMINI_API_KEY nas variáveis de ambiente." },
         { status: 500 }
       )
     }
@@ -57,10 +58,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Extrair apenas os dados base64 (remover prefixo data:image/...;base64,)
-    const base64Data = image.includes(",") ? image.split(",")[1] : image
-    const mimeTypeMatch = image.match(/data:([^;]+);base64/)
-    const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : "image/jpeg"
+    const { data: base64Data, mimeType } = parseGeminiImage(image)
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })

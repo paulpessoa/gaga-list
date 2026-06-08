@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
+import { getGeminiApiKey } from "@/lib/ai-utils"
 
 /**
  * Processa áudio de voz para extrair itens de compra usando Gemini 2.0 Flash.
@@ -40,10 +41,10 @@ export async function POST(request: Request) {
       )
     }
 
-    const geminiKey = process.env.GOOGLE_AI_STUDIO_API_KEY
+    const geminiKey = getGeminiApiKey()
     if (!geminiKey) {
       return NextResponse.json(
-        { error: "Configuração de IA ausente (GOOGLE_AI_STUDIO_API_KEY)" },
+        { error: "Configuração de IA ausente. Defina GEMINI_API_KEY nas variáveis de ambiente." },
         { status: 500 }
       )
     }
