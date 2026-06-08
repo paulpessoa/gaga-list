@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server"
-import Groq from "groq-sdk"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import { createClient } from "@/lib/supabase/server"
 import { SettingsService } from "@/services/settings.service"
 
+/**
+ * Sugere benefícios e usos de produtos usando Gemini.
+ *
+ * PORQUÊ: Substituímos o Groq (Llama 3.3-70b) pelo Gemini para unificar
+ * toda a stack de IA em um único provedor e uma única chave de API,
+ * simplificando a gestão de secrets e reduzindo dependências externas.
+ */
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
@@ -33,28 +40,28 @@ export async function POST(request: Request) {
       )
     }
 
-    const apiKey = process.env.GROQ_API_KEY
+    const apiKey = process.env.GOOGLE_AI_STUDIO_API_KEY
     if (!apiKey)
       return NextResponse.json({ error: "Erro de config" }, { status: 500 })
 
-    const groq = new Groq({ apiKey })
     const { productName, brand, category } = await request.json()
 
-    const completion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            'Você é um chef e nutricionista. Com base em um produto, retorne um JSON com "benefits" (texto curto sobre saúde/uso) e "suggested_uses" (array de 3 a 5 ideias de uso ou receitas).'
-        },
-        {
-          role: "user",
-          content: `Produto: ${productName}, Marca: ${brand}, Categoria: ${category}`
-        }
-      ],
-      model: "llama-3.3-70b-versatile",
-      response_format: { type: "json_object" }
-    })
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+
+    const result = await model.generateContent(
+      `Você é um chef e nutricionista falando Português do Brasil.
+Com base no produto abaixo, retorne um JSON com:
+- "benefits": texto curto sobre saúde e uso do produto
+- "suggested_uses": array de 3 a 5 ideias de uso ou receitas
+
+Produto: ${productName}, Marca: ${brand}, Categoria: ${category}
+
+Retorne APENAS o JSON puro, sem blocos de código markdown.`
+    )
+
+    const rawText = result.response.text().replace(/```json|```/g, "").trim()
+    const parsed = JSON.parse(rawText)
 
     // 3. Deduzir créditos e logar
     await supabase
@@ -65,14 +72,13 @@ export async function POST(request: Request) {
       user_id: user.id,
       feature: "suggestion",
       cost: requiredCredits,
-      model_used: "llama-3.3"
+      model_used: "gemini-2.0-flash"
     })
 
-    return NextResponse.json(
-      JSON.parse(completion.choices[0]?.message?.content || "{}")
-    )
+    return NextResponse.json(parsed)
   } catch (error: any) {
-    console.error("BLABLA #3 SUGGESTION ERROR:", error)
+    console.error("SUGGESTION ERROR:", error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
