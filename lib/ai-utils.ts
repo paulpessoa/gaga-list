@@ -1,33 +1,21 @@
 // lib/ai-utils.ts
 
 /**
- * Retorna a chave de API do Gemini, tentando múltiplas variáveis de ambiente.
- *
- * PORQUÊ: O AI Studio injeta a chave como GEMINI_API_KEY automaticamente,
- * mas o projeto também suporta GOOGLE_AI_STUDIO_API_KEY para config manual.
- * Essa função garante que qualquer uma das duas funcione, sem precisar
- * alterar as variáveis de ambiente no Vercel/produção.
+ * Retorna a chave de API do Gemini.
+ * Configure a variável GEMINI_API_KEY no painel da Vercel (Settings → Environment Variables).
  */
 export function getGeminiApiKey(): string | undefined {
-  return (
-    process.env.GEMINI_API_KEY ||
-    process.env.GOOGLE_AI_STUDIO_API_KEY ||
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY
-  )
+  return process.env.GEMINI_API_KEY
 }
+
 
 /**
  * Modelo padrão do Gemini usado em todo o projeto.
  *
- * PORQUÊ: Centralizar aqui evita alterar múltiplos arquivos ao trocar de modelo.
- * - gemini-2.0-flash: suporte multimodal completo (texto, imagem, áudio)
- * - gemini-1.5-flash: DEPRECIADO na v1beta — retorna 404
- *
- * Cotas Free Tier (jun/2026):
- *   - gemini-2.0-flash:      10 req/min, 1.500 req/dia
- *   - gemini-2.0-flash-lite: 30 req/min, 1.500 req/dia (mais permissivo)
+ * PORQUÊ: O alias "gemini-flash-latest" é o compatível com a camada de faturamento
+ * e créditos do Google Developer Program da conta.
  */
-export const GEMINI_MODEL = "gemini-2.0-flash"
+export const GEMINI_MODEL = "gemini-flash-latest"
 
 
 
