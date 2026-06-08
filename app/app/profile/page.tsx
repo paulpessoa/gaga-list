@@ -22,7 +22,8 @@ import {
   CreditCard,
   X,
   Trash2,
-  Pencil
+  Pencil,
+  KeyRound
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -407,6 +408,14 @@ export default function ProfilePage() {
 
       {/* Ações de Conta */}
       <section className="mt-4 pt-10 border-t border-[#3d4a3d]/30 space-y-4">
+        <Link
+          href="/app/update-password"
+          onClick={() => trigger("light")}
+          className="w-full py-5 bg-[#1c1b1b] hover:bg-[#201f1f] text-[#bccbb9] rounded-2xl font-bold tracking-wide text-xs transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl border border-[#3d4a3d]/20"
+        >
+          <KeyRound className="w-4 h-4" /> Alterar Senha
+        </Link>
+
         <button
           onClick={handleLogout}
           className="w-full py-5 bg-[#1c1b1b] hover:bg-[#201f1f] text-[#bccbb9] rounded-2xl font-bold tracking-wide text-xs transition-all active:scale-95 flex items-center justify-center gap-3 shadow-xl border border-[#3d4a3d]/20"
