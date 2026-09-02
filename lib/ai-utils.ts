@@ -9,14 +9,15 @@ export function getGeminiApiKey(): string | undefined {
 }
 
 /**
- * Modelo padrão do Gemini usado em todo o projeto.
- * Usamos 'gemini-1.5-flash' por estabilidade e imunidade a erros 503 do alias 'gemini-flash-latest'.
+ * Modelo padrão do Gemini usado em todo o projeto (Gemini Flash).
+ * Usamos 'gemini-1.5-flash' como modelo principal por alta capacidade e estabilidade.
  */
 export const GEMINI_MODEL = "gemini-1.5-flash"
 
 export const GEMINI_FALLBACK_MODELS = [
-  "gemini-1.5-flash",
   "gemini-2.5-flash",
+  "gemini-1.5-flash",
+  "gemini-2.0-flash",
   "gemini-flash-latest",
 ]
 
