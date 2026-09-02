@@ -8,16 +8,17 @@ export function getGeminiApiKey(): string | undefined {
   return process.env.GEMINI_API_KEY
 }
 
-
 /**
  * Modelo padrão do Gemini usado em todo o projeto.
- *
- * PORQUÊ: O alias "gemini-flash-latest" é o compatível com a camada de faturamento
- * e créditos do Google Developer Program da conta.
+ * Usamos 'gemini-1.5-flash' por estabilidade e imunidade a erros 503 do alias 'gemini-flash-latest'.
  */
-export const GEMINI_MODEL = "gemini-flash-latest"
+export const GEMINI_MODEL = "gemini-1.5-flash"
 
-
+export const GEMINI_FALLBACK_MODELS = [
+  "gemini-1.5-flash",
+  "gemini-2.5-flash",
+  "gemini-flash-latest",
+]
 
 /**
  * Extrai os dados necessários de uma imagem base64 para o Gemini (inlineData).
