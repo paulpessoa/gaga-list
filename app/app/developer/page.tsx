@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const toHex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+
 export default function DeveloperSettings() {
   const [tokenName, setTokenName] = useState("");
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
@@ -18,11 +20,12 @@ export default function DeveloperSettings() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
-      const rawToken = "gl_live_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      
+      const rawToken = "gl_live_" + toHex(crypto.getRandomValues(new Uint8Array(24)));
+      const tokenHash = toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawToken))));
+
       const { error } = await (supabase as any).from("api_tokens").insert({
         user_id: user.id,
-        token_hash: rawToken,
+        token_hash: tokenHash,
         name: tokenName,
       });
 

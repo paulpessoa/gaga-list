@@ -144,6 +144,11 @@ function buildServer(supabase: SupabaseClient, userId: string) {
   return server;
 }
 
+async function sha256Hex(value: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 function withCors(response: Response) {
   const headers = new Headers(response.headers);
   for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
@@ -182,7 +187,7 @@ export default {
     const { data: tokenRow, error } = await supabase
       .from("api_tokens")
       .select("user_id")
-      .eq("token_hash", token)
+      .eq("token_hash", await sha256Hex(token))
       .maybeSingle();
     if (error) {
       return withCors(new Response(`Erro ao validar token no Supabase: ${error.message}`, { status: 500 }));
