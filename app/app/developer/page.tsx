@@ -7,6 +7,7 @@ export default function DeveloperSettings() {
   const [tokenName, setTokenName] = useState("");
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const supabase = createClient();
 
   const handleGenerateToken = async () => {
@@ -34,6 +35,14 @@ export default function DeveloperSettings() {
       alert("Erro ao gerar token.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (generatedToken) {
+      navigator.clipboard.writeText(generatedToken);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -71,7 +80,17 @@ export default function DeveloperSettings() {
               <p className="text-sm text-gray-400 mb-2">
                 Copie seu token agora. Ele não será exibido novamente.
               </p>
-              <code className="text-[#53E076] break-all block p-2 bg-gray-900 rounded">{generatedToken}</code>
+              <div className="flex items-center gap-2">
+                <code className="text-[#53E076] break-all block p-2 bg-gray-900 rounded flex-1">
+                  {generatedToken}
+                </code>
+                <button
+                  onClick={handleCopy}
+                  className="bg-gray-800 text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-1 font-medium text-sm"
+                >
+                  {copied ? "✅ Copiado" : "📋 Copiar"}
+                </button>
+              </div>
             </div>
           )}
         </div>
