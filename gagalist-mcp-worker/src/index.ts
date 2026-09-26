@@ -158,16 +158,20 @@ export default {
       return new Response("GagaList MCP online. Endpoint: /api/mcp", { status: 200 });
     }
 
-    if (url.pathname !== "/api/mcp") {
+    const route = url.pathname.match(/^\/api\/mcp(?:\/([^/]+))?\/?$/);
+    if (!route) {
       return new Response("Not Found", { status: 404 });
     }
+    const pathToken = route[1];
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
     const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : url.searchParams.get("token");
+    const token = authHeader?.startsWith("Bearer ")
+      ? authHeader.substring(7).trim()
+      : pathToken ?? url.searchParams.get("token");
     if (!token) {
       return withCors(new Response("Unauthorized: envie o token via ?token= ou header Authorization", { status: 401 }));
     }
@@ -194,6 +198,9 @@ export default {
       enableJsonResponse: true,
     });
     await server.connect(transport);
-    return withCors(await transport.handleRequest(request));
+    // O transporte exige Accept com json + event-stream; alguns clientes (PowerShell 5.1, navegador) não enviam.
+    const headers = new Headers(request.headers);
+    headers.set("Accept", "application/json, text/event-stream");
+    return withCors(await transport.handleRequest(new Request(request, { headers })));
   },
 };
