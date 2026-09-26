@@ -169,7 +169,7 @@ export default {
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : url.searchParams.get("token");
     if (!token) {
-      return withCors(new Response("Unauthorized", { status: 401 }));
+      return withCors(new Response("Unauthorized: envie o token via ?token= ou header Authorization", { status: 401 }));
     }
 
     const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
@@ -180,8 +180,11 @@ export default {
       .select("user_id")
       .eq("token_hash", token)
       .maybeSingle();
-    if (error || !tokenRow) {
-      return withCors(new Response("Token inválido", { status: 401 }));
+    if (error) {
+      return withCors(new Response(`Erro ao validar token no Supabase: ${error.message}`, { status: 500 }));
+    }
+    if (!tokenRow) {
+      return withCors(new Response("Token inválido", { status: 403 }));
     }
 
     // Stateless: um servidor e um transporte por requisição, isolando cada usuário.
