@@ -84,6 +84,12 @@ export async function POST(req: Request) {
       return respondWithAlexa("Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", true);
     }
 
+    // Handle SessionEndedRequest (quando a Alexa fecha a sessão por inatividade ou usuário manda sair)
+    if (request?.type === 'SessionEndedRequest') {
+      console.log('Sessão encerrada pela Alexa:', request.reason);
+      return NextResponse.json({ version: "1.0", response: { shouldEndSession: true } });
+    }
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
