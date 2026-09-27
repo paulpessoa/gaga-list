@@ -28,10 +28,46 @@ export async function POST(req: Request) {
         // 2. Usar o token para inicializar um Supabase client autenticado (RLS)
         // const token = session?.user?.accessToken;
         
-        // --- Exemplo de Interação com o Supabase ---
-        // OBS: Usando supabaseServerClient temporariamente (Service Role)
-        // O ideal é buscar a lista pelo nome e associar ao item.
-        // await supabaseServerClient.from('items').insert({ name: item, list_id: ... });
+        // --- HACK PARA TESTE RÁPIDO (Seu User ID Fixo) ---
+        const USER_ID = '848e9b09-b1a0-42b9-8127-b8b54c4807b8';
+        
+        // 1. Buscar se a lista já existe para esse usuário
+        let { data: listData, error: listError } = await supabaseServerClient
+          .from('lists')
+          .select('id')
+          .eq('owner_id', USER_ID)
+          .ilike('title', listName)
+          .single();
+
+        let listId = listData?.id;
+
+        // 2. Se não existir, cria a lista na hora!
+        if (!listId) {
+          const { data: newList, error: createListError } = await supabaseServerClient
+            .from('lists')
+            .insert({
+              title: listName,
+              owner_id: USER_ID
+            })
+            .select('id')
+            .single();
+            
+          if (createListError) throw createListError;
+          listId = newList.id;
+        }
+
+        // 3. Insere o item na tabela
+        const { error: itemError } = await supabaseServerClient
+          .from('items')
+          .insert({
+            name: item,
+            list_id: listId,
+            added_by: USER_ID,
+            quantity: 1,
+            is_purchased: false
+          });
+
+        if (itemError) throw itemError;
 
         return respondWithAlexa(`Adicionei ${item} na sua lista de ${listName}.`, true);
       }
