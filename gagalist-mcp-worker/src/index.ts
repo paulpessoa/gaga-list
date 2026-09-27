@@ -114,7 +114,7 @@ function buildServer(supabase: SupabaseClient, userId: string) {
       await assertListAccess(supabase, list_id, userId);
       const { data, error } = await supabase
         .from("items")
-        .select("id, name, quantity, unit, category, price, notes, is_purchased, checked_at, position, created_at")
+        .select("id, name, quantity, unit, category, price, notes, is_purchased, checked_at, created_at")
         .eq("list_id", list_id)
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
