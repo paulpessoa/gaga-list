@@ -36,7 +36,17 @@ curl -s -X POST "http://localhost:8787/api/mcp?token=gl_live_SEU_TOKEN" \
 
 Ou com interface visual: `npx @modelcontextprotocol/inspector` → Transport "Streamable HTTP" → URL `http://localhost:8787/api/mcp?token=gl_live_SEU_TOKEN`.
 
-## Deploy
+## Deploy automático (GitHub Actions)
+
+`.github/workflows/deploy-mcp-worker.yml`:
+- **Pull request** que mexe em `gagalist-mcp-worker/` → typecheck + build (não publica).
+- **Push/merge no `main`** → typecheck + build + deploy na Cloudflare + smoke test.
+- Manual: aba Actions → "MCP Worker" → Run workflow.
+
+Secrets do repositório (Settings → Secrets and variables → Actions): `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers") e `CLOUDFLARE_ACCOUNT_ID`.
+Os secrets do Supabase ficam na Cloudflare (`wrangler secret put`) e persistem entre deploys.
+
+## Deploy manual
 
 ```bash
 npx wrangler login
