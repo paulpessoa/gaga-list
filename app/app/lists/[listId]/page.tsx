@@ -236,7 +236,7 @@ export default function ListDetail({
   }
 
   const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
-  const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
+  const [sortBy, setSortBy] = useState<"az" | "za" | "recent" | "none">("none")
   const [searchQuery, setSearchQuery] = useState("")
 
   const pendingSum = useMemo(
@@ -281,9 +281,12 @@ export default function ListDetail({
       const nameA = (a.name || "").toLowerCase().trim()
       const nameB = (b.name || "").toLowerCase().trim()
 
-      // Se A-Z estiver ativo, ignora completamente as categorias
-      if (sortBy === "name") {
+      // Se A-Z ou Z-A estiver ativo, ignora completamente as categorias
+      if (sortBy === "az") {
         return nameA.localeCompare(nameB)
+      }
+      if (sortBy === "za") {
+        return nameB.localeCompare(nameA)
       }
 
       // Se Recentes estiver ativo
@@ -304,13 +307,6 @@ export default function ListDetail({
     
     return result
   }, [items, filter, sortBy, searchQuery])
-
-  const handleClearFilters = () => {
-    setFilter("all")
-    setSortBy("none")
-    setSearchQuery("")
-    trigger("light")
-  }
 
   useEffect(() => {
     const handleOpenModal = () => setIsCreateItemModalOpen(true)
@@ -496,16 +492,10 @@ export default function ListDetail({
               Comprado
             </button>
             <button
-              onClick={() => setSortBy(sortBy === "name" ? "none" : "name")}
-              className={`px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 ${sortBy === "name" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
+              onClick={() => setSortBy(sortBy === "az" ? "za" : "az")}
+              className={`px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 ${sortBy === "az" || sortBy === "za" ? "bg-white text-black shadow-xl" : "bg-zinc-900 border-white/5 text-zinc-400"}`}
             >
-              A-Z
-            </button>
-            <button
-              onClick={handleClearFilters}
-              className="px-6 py-3 rounded-2xl text-[10px] font-bold tracking-wide whitespace-nowrap transition-all border-2 bg-zinc-800 border-transparent text-zinc-500 hover:text-[#53E076]"
-            >
-              Limpar
+              {sortBy === "za" ? "Z-A" : "A-Z"}
             </button>
           </div>
         </div>
