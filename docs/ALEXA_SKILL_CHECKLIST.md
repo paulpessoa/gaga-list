@@ -40,32 +40,19 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
 - [x] **4.** Escolha o método de hospedagem: **Provision your own** (Pois vamos usar o Next.js).
 - [x] **5.** Escolha um template do zero (Start from scratch).
 
-### Fase B: Interação (Interaction Model)
-- [x] **1.** Vá em **Invocations > Skill Invocation Name** e escreva `gaga list`.
-- [x] **2.** Vá em **Intents** e clique em **Add Intent**.
-- [x] **3.** Crie a Intent `AddItemIntent`.
-- [x] **4.** Adicione as **Utterances** (Exemplos do que o usuário vai falar):
-  - `adicionar {Item} na lista de {List}`
-  - `coloca {Item} na {List}`
-  - `preciso de {Item} na lista {List}`
-- [x] **5.** Na parte debaixo (Intent Slots), adicione:
-  - **Item:** Crie um Slot Type customizado chamado `ITEM_TYPE` (adicione exemplos como: "maçã", "leite", "pão", "água").
-  - **List:** Crie um Slot Type customizado chamado `LIST_TYPE` (adicione exemplos como: "mercado", "tarefas", "farmácia").
-- [ ] **6.** Crie outra Intent clicando em **Add Intent** e nomeie como `ReadListsIntent`.
-- [ ] **7.** Adicione as **Utterances** para o `ReadListsIntent`:
-  - `quais são as minhas listas`
-  - `quantas listas eu tenho`
-  - `leia as minhas listas`
-  - `me diga as minhas listas`
-- [ ] **8.** Crie mais uma Intent clicando em **Add Intent** e nomeie como `CheckItemIntent`.
-- [ ] **9.** Adicione as **Utterances** para o `CheckItemIntent`:
-  - `marcar {Item} como comprado`
-  - `riscar {Item}`
-  - `já comprei {Item}`
-  - `marcar {Item} como comprado na lista de {List}`
-  - `riscar {Item} da {List}`
-- [ ] **10.** No `CheckItemIntent`, use os mesmos slots `Item` (`ITEM_TYPE`) e `List` (`LIST_TYPE`).
-- [ ] **11.** Clique em **Save Model** e depois **Build Model**.
+### Fase B: Interação (Interaction Model - Arquitetura Agent LLM)
+- [ ] **1.** Vá em **Invocations > Skill Invocation Name** e escreva `gaga list`.
+- [ ] **2.** Vá em **Intents** e exclua as intents antigas (`AddItemIntent`, `ReadListsIntent`, `CheckItemIntent`) se elas existirem. O nosso Agente cuidará de tudo!
+- [ ] **3.** Clique em **Add Intent**, escolha *Create custom intent* e nomeie como `AgentIntent`.
+- [ ] **4.** Adicione as seguintes **Utterances** contendo apenas o slot `{Query}`:
+  - `{Query}`
+  - `fazer {Query}`
+  - `quero {Query}`
+  - `pedir {Query}`
+  - `avisar que {Query}`
+- [ ] **5.** Na parte debaixo (Intent Slots), crie o slot `Query` e selecione o tipo de slot (Slot Type) como **`AMAZON.SearchQuery`**.
+  - *(Nota: O `AMAZON.SearchQuery` serve para capturar qualquer texto livre e passar direto para a nossa API)*
+- [ ] **6.** Clique em **Save Model** e depois **Build Model**.
 
 ### Fase C: Endpoint (Conectando com o Next.js)
 - [x] **1.** Vá no menu esquerdo em **Endpoint**.

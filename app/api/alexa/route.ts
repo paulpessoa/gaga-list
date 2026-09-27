@@ -1,213 +1,178 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai';
+import { z } from 'zod';
+import { zodResponseFormat } from 'openai/helpers/zod';
 
-export const runtime = 'nodejs'; // Node.js é recomendado para integrações complexas (ex: ask-sdk), mas Edge também funciona para fetch manual.
+export const runtime = 'nodejs';
+
+// Configuração do Cliente OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, 
+});
+
+// Schema Zod para forçar a saída estruturada do LLM
+const AlexaIntentSchema = z.object({
+  action: z.enum(["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "UNKNOWN"]),
+  item: z.string().nullable().describe("O nome do item mencionado (ex: café, carvão)"),
+  listName: z.string().nullable().describe("O nome da lista. Se não for especificada, retorne null."),
+  notes: z.string().nullable().describe("Qualquer observação adicional sobre o item (urgência, marca, etc)."),
+  naturalResponse: z.string().describe("O que a Alexa deve falar de volta para o usuário com carisma e naturalidade."),
+});
+
+type ParsedAlexaIntent = z.infer<typeof AlexaIntentSchema>;
+
+/**
+ * Função Core do Agente: Processa o texto livre e retorna a intenção estruturada.
+ */
+async function processUserUtterance(rawText: string): Promise<ParsedAlexaIntent> {
+  const completion = await openai.beta.chat.completions.parse({
+    model: "gpt-4o-mini", // Baixa latência é obrigatória para a Alexa (máx 8s)
+    messages: [
+      {
+        role: "system",
+        content: `Você é o agente inteligente do Gaga List. Seu objetivo é extrair a real intenção da frase do usuário.
+        Regras:
+        - Seja extremamente carismático, natural e breve na sua 'naturalResponse'. 
+        - Não seja robótico.
+        - Se a ação for desconhecida (UNKNOWN), na naturalResponse pergunte o que o usuário deseja fazer.`
+      },
+      { role: "user", content: rawText }
+    ],
+    response_format: zodResponseFormat(AlexaIntentSchema, "alexa_intent"),
+  });
+
+  return completion.choices[0].message.parsed as ParsedAlexaIntent;
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { request, session } = body;
 
-    // Log para depuração na Vercel
     console.log("Alexa Request:", JSON.stringify(body, null, 2));
 
-    // Validar se é uma Intenção (Intent)
+    // Fluxo de Interrupção Padrão (Amazon)
     if (request?.type === 'IntentRequest') {
       const intentName = request.intent.name;
-
-      if (intentName === 'AddItemIntent') {
-        const item = request.intent.slots?.Item?.value;
-        const listName = request.intent.slots?.List?.value;
-
-        if (!item || !listName) {
-          return respondWithAlexa("Desculpe, não entendi o item ou a lista. Pode repetir?");
-        }
-
-        // 1. Validar se o usuário vinculou a conta
-        const accessToken = session?.user?.accessToken;
-        if (!accessToken) {
-          return respondWithAlexa(
-            "Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", 
-            true
-          );
-        }
-        
-        // 2. Inicializar o cliente do Supabase passando o Token do usuário
-        // Isso ativa o RLS! O código agora rodará com as permissões restritas do dono da conta.
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
-        );
-
-        // Pega o usuário logado para usarmos o ID dele nas inserções
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          return respondWithAlexa("Ocorreu um erro de autenticação com a sua conta.", true);
-        }
-        
-        const USER_ID = user.id;
-        
-        // 3. Buscar se a lista já existe para esse usuário
-        let { data: listData, error: listError } = await supabase
-          .from('lists')
-          .select('id')
-          .eq('owner_id', USER_ID)
-          .ilike('title', listName)
-          .single();
-
-        let listId = listData?.id;
-
-        // 4. Se não existir, cria a lista na hora!
-        if (!listId) {
-          const { data: newList, error: createListError } = await supabase
-            .from('lists')
-            .insert({
-              title: listName,
-              owner_id: USER_ID
-            })
-            .select('id')
-            .single();
-            
-          if (createListError) throw createListError;
-          listId = newList.id;
-        }
-
-        // 5. Insere o item na tabela
-        const { error: itemError } = await supabase
-          .from('items')
-          .insert({
-            name: item,
-            list_id: listId,
-            added_by: USER_ID,
-            quantity: 1,
-            is_purchased: false
-          });
-
-        if (itemError) throw itemError;
-
-        return respondWithAlexa(`Adicionei ${item} na sua lista de ${listName}. Algo mais?`, false);
-      }
-
-      if (intentName === 'ReadListsIntent') {
-        const accessToken = session?.user?.accessToken;
-        if (!accessToken) {
-          return respondWithAlexa(
-            "Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", 
-            true
-          );
-        }
-
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
-        );
-
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return respondWithAlexa("Ocorreu um erro de autenticação.", true);
-
-        // Busca todas as listas (não deletadas)
-        const { data: lists, error: listError } = await supabase
-          .from('lists')
-          .select('title')
-          .eq('owner_id', user.id)
-          .is('deleted_at', null);
-
-        if (listError || !lists) {
-          return respondWithAlexa("Não consegui buscar suas listas no momento.", true);
-        }
-
-        if (lists.length === 0) {
-          return respondWithAlexa("Você ainda não tem nenhuma lista cadastrada no Gaga List.", true);
-        }
-
-        const titles = lists.map(l => l.title);
-        let textResponse = `Você tem ${lists.length} ${lists.length === 1 ? 'lista' : 'listas'}. `;
-        
-        if (lists.length === 1) {
-          textResponse += `O nome dela é ${titles[0]}.`;
-        } else if (lists.length === 2) {
-          textResponse += `Elas são: ${titles[0]} e ${titles[1]}.`;
-        } else {
-          const last = titles.pop();
-          textResponse += `Elas são: ${titles.join(', ')} e ${last}.`;
-        }
-
-        return respondWithAlexa(textResponse + " Algo mais?", false);
-      }
-
-      if (intentName === 'CheckItemIntent') {
-        const item = request.intent.slots?.Item?.value;
-        const listName = request.intent.slots?.List?.value;
-
-        if (!item) {
-          return respondWithAlexa("Qual item você quer marcar como comprado?", false);
-        }
-
-        const accessToken = session?.user?.accessToken;
-        if (!accessToken) return respondWithAlexa("Você precisa vincular sua conta primeiro.", true);
-
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
-        );
-        
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return respondWithAlexa("Ocorreu um erro de autenticação.", true);
-
-        let listId = null;
-        if (listName) {
-          const { data: listData } = await supabase.from('lists').select('id').eq('owner_id', user.id).ilike('title', listName).single();
-          if (!listData) return respondWithAlexa(`Não encontrei a lista de ${listName}.`, false);
-          listId = listData.id;
-        }
-
-        let query = supabase.from('items').update({ is_purchased: true }).ilike('name', `%${item}%`).eq('is_purchased', false);
-        if (listId) {
-           query = query.eq('list_id', listId);
-        } else {
-           // Procura em qualquer lista do usuário
-           // RLS vai garantir que o usuário só atualize itens de listas que ele tem acesso
-        }
-        
-        const { data: updatedItems, error: updateError } = await query.select();
-
-        if (updateError || !updatedItems || updatedItems.length === 0) {
-          return respondWithAlexa(`Não encontrei ${item} pendente nas suas listas.`, false);
-        }
-
-        return respondWithAlexa(`Pronto! Marquei ${item} como comprado. Algo mais?`, false);
-      }
-
       if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent' || intentName === 'AMAZON.NoIntent') {
         return respondWithAlexa("Até a próxima!", true);
       }
     }
 
-    // Se a intenção for de Launch (quando o usuário diz apenas "Alexa, abrir Gaga List")
-    if (request?.type === 'LaunchRequest') {
-      return respondWithAlexa("Bem-vindo ao Gaga List! O que você deseja fazer?", false);
+    // 1. Validar Account Linking no início
+    const accessToken = session?.user?.accessToken;
+    if (!accessToken) {
+      return respondWithAlexa("Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", true);
     }
 
-    // Fallback caso não entenda
-    return respondWithAlexa("Desculpe, não entendi o que você quis fazer na sua lista.");
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return respondWithAlexa("Ocorreu um erro de autenticação.", true);
+    const USER_ID = user.id;
+
+    // Se for Launch Request ("Alexa, abrir Gaga List")
+    if (request?.type === 'LaunchRequest') {
+      return respondWithAlexa("Opa, Gaga List na escuta! O que você precisa anotar?", false);
+    }
+
+    // 2. Extrair o Texto Bruto (Aqui assumimos que a Alexa vai mandar o slot {Query})
+    // No seu Alexa Console, você deve criar um "AgentIntent" com um slot chamado "Query" usando o tipo "AMAZON.SearchQuery".
+    let rawText = "";
+    if (request?.type === 'IntentRequest') {
+      // Pega o texto de um slot catch-all, se existir
+      rawText = request.intent.slots?.Query?.value || "";
+    }
+
+    if (!rawText) {
+      return respondWithAlexa("Desculpe, não ouvi direito. O que você quer fazer?", false);
+    }
+
+    // 3. Acionar o Agente (LLM)
+    console.log("Acionando Agente para:", rawText);
+    const intentData = await processUserUtterance(rawText);
+    console.log("Agente Respondeu:", intentData);
+
+    if (intentData.action === "UNKNOWN") {
+      return respondWithAlexa(intentData.naturalResponse, false);
+    }
+
+    // 4. Executar Lógica de Negócio com os Dados Estruturados
+    let targetListId = null;
+
+    // Resolve a lista
+    if (intentData.listName) {
+      const { data: listData } = await supabase
+        .from('lists')
+        .select('id')
+        .eq('owner_id', USER_ID)
+        .ilike('title', intentData.listName)
+        .single();
+        
+      if (listData) {
+        targetListId = listData.id;
+      } else if (intentData.action === "ADD_ITEM") {
+        // Cria a lista automaticamente se for inserção
+        const { data: newList } = await supabase
+          .from('lists')
+          .insert({ title: intentData.listName, owner_id: USER_ID })
+          .select('id').single();
+        targetListId = newList?.id;
+      }
+    }
+
+    // Handlers Específicos
+    if (intentData.action === "ADD_ITEM" && intentData.item) {
+      const { error } = await supabase.from('items').insert({
+        name: intentData.item,
+        list_id: targetListId, // Se for null, vai ficar órfão, idealmente ter uma lista Padrão.
+        added_by: USER_ID,
+        quantity: 1,
+        notes: intentData.notes || null
+      });
+      if (error) throw error;
+    } 
+    
+    else if (intentData.action === "CHECK_ITEM" && intentData.item) {
+      let query = supabase.from('items').update({ is_purchased: true }).ilike('name', `%${intentData.item}%`).eq('is_purchased', false);
+      if (targetListId) query = query.eq('list_id', targetListId);
+      
+      const { data: updated } = await query.select();
+      if (!updated || updated.length === 0) {
+        return respondWithAlexa(`Não achei o item ${intentData.item} pendente. Algo mais?`, false);
+      }
+    }
+
+    else if (intentData.action === "LIST_ITEMS") {
+      const { data: lists } = await supabase.from('lists').select('title').eq('owner_id', USER_ID).is('deleted_at', null);
+      if (lists && lists.length > 0) {
+        const titles = lists.map(l => l.title);
+        const formatTitle = titles.length > 1 ? titles.slice(0, -1).join(', ') + ' e ' + titles[titles.length - 1] : titles[0];
+        return respondWithAlexa(`Você tem ${lists.length} listas. Elas são: ${formatTitle}. Algo mais?`, false);
+      } else {
+        return respondWithAlexa("Você não tem nenhuma lista cadastrada. Algo mais?", false);
+      }
+    }
+
+    // 5. Retornar a fala mágica criada pelo LLM
+    return respondWithAlexa(intentData.naturalResponse + " Algo mais?", false);
+
   } catch (error) {
-    console.error("Erro na rota da Alexa:", error);
-    return respondWithAlexa("Ocorreu um erro ao processar o seu pedido no Gaga List.", true);
+    console.error("Erro Fatal no Agente Alexa:", error);
+    return respondWithAlexa("Nossa, deu um curto circuito aqui na minha inteligência. Pode tentar de novo?", false);
   }
 }
 
-// Função auxiliar para formatar a resposta da Alexa
 function respondWithAlexa(text: string, shouldEndSession = false) {
   return NextResponse.json({
     version: "1.0",
     response: {
-      outputSpeech: {
-        type: "PlainText",
-        text: text
-      },
+      outputSpeech: { type: "PlainText", text },
       shouldEndSession
     }
   });
