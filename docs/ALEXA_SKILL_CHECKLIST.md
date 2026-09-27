@@ -60,13 +60,13 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
 
 ### Fase D: Account Linking (Opcional, porém Recomendado)
 *(Se você quiser segurança e RLS)*
-- [ ] **1.** Vá em **Tools > Account Linking**.
-- [ ] **2.** Habilite o Account Linking.
-- [ ] **3.** Em *Grant type*, selecione *Auth Code Grant*.
-- [ ] **4.** Preencha os campos de URI, ID e Secret coletados na Sessão 1.
-- [ ] **5.** Salve as configurações.
+- [x] **1.** Vá em **Tools > Account Linking**.
+- [x] **2.** Habilite o Account Linking.
+- [x] **3.** Em *Grant type*, selecione *Auth Code Grant*.
+- [x] **4.** Preencha os campos de URI, ID e Secret coletados na Sessão 1.
+- [x] **5.** Salve as configurações.
 
 ### Fase E: Teste
-- [ ] **1.** Vá na aba **Test** e habilite o teste para "Development".
-- [ ] **2.** Digite "pedir ao gaga list para adicionar maçã na lista de mercado".
-- [ ] **3.** Confira o log no seu terminal local (ou Vercel) e veja se o JSON chegou.
+- [x] **1.** Vá na aba **Test** e habilite o teste para "Development".
+- [x] **2.** Digite "pedir ao gaga list para adicionar maçã na lista de mercado".
+- [x] **3.** Confira o log no seu terminal local (ou Vercel) e veja se o JSON chegou.
