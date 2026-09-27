@@ -62,6 +62,7 @@ export default function PeoplePage() {
 
   useEffect(() => {
     fetchFriends()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, supabase])
 
   const handleInviteByEmail = async (e: React.FormEvent) => {

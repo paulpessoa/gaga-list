@@ -26,7 +26,7 @@ type ParsedAlexaIntent = z.infer<typeof AlexaIntentSchema>;
  * Função Core do Agente: Processa o texto livre e retorna a intenção estruturada.
  */
 async function processUserUtterance(rawText: string): Promise<ParsedAlexaIntent> {
-  const completion = await openai.beta.chat.completions.parse({
+  const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini", // Baixa latência é obrigatória para a Alexa (máx 8s)
     messages: [
       {
@@ -39,10 +39,28 @@ async function processUserUtterance(rawText: string): Promise<ParsedAlexaIntent>
       },
       { role: "user", content: rawText }
     ],
-    response_format: zodResponseFormat(AlexaIntentSchema, "alexa_intent"),
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "alexa_intent",
+        strict: true,
+        schema: {
+          type: "object",
+          properties: {
+            action: { type: "string", enum: ["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "UNKNOWN"] },
+            item: { type: ["string", "null"] },
+            listName: { type: ["string", "null"] },
+            notes: { type: ["string", "null"] },
+            naturalResponse: { type: "string" }
+          },
+          required: ["action", "item", "listName", "notes", "naturalResponse"],
+          additionalProperties: false
+        }
+      }
+    },
   });
 
-  return completion.choices[0].message.parsed as ParsedAlexaIntent;
+  return JSON.parse(completion.choices[0].message.content!) as ParsedAlexaIntent;
 }
 
 export async function POST(req: Request) {
