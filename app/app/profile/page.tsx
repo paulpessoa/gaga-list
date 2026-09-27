@@ -23,7 +23,8 @@ import {
   X,
   Trash2,
   Pencil,
-  KeyRound
+  KeyRound,
+  Bot
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -401,6 +402,36 @@ export default function ProfilePage() {
             <span className="text-sm font-bold text-[#e5e2e1] tracking-tight">
               Central de Ajuda
             </span>
+          </div>
+          <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-[#53E076] transition-all" />
+        </Link>
+      </section>
+
+      {/* Integrações / Desenvolvedor */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 ml-1">
+          <Bot className="w-3.5 h-3.5 text-zinc-400" />
+          <h2 className="text-[10px] font-bold tracking-wide text-zinc-400">
+            Integrações
+          </h2>
+        </div>
+        <Link
+          href="/app/developer"
+          onClick={() => trigger("light")}
+          className="p-7 rounded-[2rem] flex items-center justify-between group hover:border-[#53E076]/40 transition-all bg-[#1c1b1b] border border-[#3d4a3d]/40 shadow-xl"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-violet-500/10 text-violet-400 flex items-center justify-center border border-violet-500/10">
+              <Bot className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-[#e5e2e1] tracking-tight block">
+                Conectar IA (MCP)
+              </span>
+              <span className="text-[10px] text-zinc-500 font-bold tracking-wide opacity-60">
+                Gere um token para usar com Claude e outras IAs
+              </span>
+            </div>
           </div>
           <ChevronRight className="w-5 h-5 text-zinc-600 group-hover:text-[#53E076] transition-all" />
         </Link>

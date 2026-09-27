@@ -13,7 +13,8 @@ import {
   X,
   HelpCircle,
   Plus,
-  Camera
+  Camera,
+  Bot
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -47,6 +48,21 @@ const FAQ_DATA = [
       {
         q: "O que é o modo 'Cadê Tu?'",
         a: "É o nosso radar GPS. Se você e seus colaboradores ativarem a localização, poderão ver a distância entre vocês dentro do mercado em tempo real."
+      }
+    ]
+  },
+  {
+    category: "Integrações e IA",
+    icon: Bot,
+    color: "text-violet-400 bg-violet-500/10",
+    questions: [
+      {
+        q: "Como conecto o GagaList a uma IA como Claude?",
+        a: "Vá em Ajustes > Integrações > Conectar IA (MCP) e gere um token pessoal. Cole esse token na configuração de conectores MCP da sua IA para ela ler e editar suas listas."
+      },
+      {
+        q: "O que é o token gl_live_...?",
+        a: "É a sua chave de acesso pessoal para o Model Context Protocol (MCP). Trate-o como uma senha: quem tiver o token consegue ver e editar suas listas. Copie-o assim que for gerado, pois ele não é exibido novamente, e revogue-o em Ajustes > Integrações se desconfiar que vazou."
       }
     ]
   },
