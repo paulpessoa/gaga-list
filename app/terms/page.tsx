@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, FileText, Users, Brain, ShieldAlert } from "lucide-react"
+import { ArrowLeft, FileText, Users, Brain, ShieldAlert, Shield } from "lucide-react"
 import Link from "next/link"
 
 export default function TermsPage() {
@@ -58,8 +58,16 @@ export default function TermsPage() {
           <p>Reservamo-nos o direito de atualizar estes termos para refletir novas funcionalidades ou mudanças regulatórias. O uso continuado do app após tais mudanças constitui aceitação dos novos termos.</p>
         </section>
 
-        <section className="pt-12 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 text-center">
-          Última atualização: 21 de Março de 2026 • Staff Level Governance
+        <section className="pt-12 border-t border-white/5 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-400">
+            <span>Veja também:</span>
+            <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 font-bold transition-colors inline-flex items-center gap-1">
+              <Shield className="w-3.5 h-3.5" /> Política de Privacidade
+            </Link>
+          </div>
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 text-center">
+            Última atualização: 21 de Março de 2026 • Staff Level Governance
+          </div>
         </section>
       </div>
     </main>

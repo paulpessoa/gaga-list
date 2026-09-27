@@ -142,6 +142,16 @@ function AlexaLinkContent() {
             </button>
           </form>
         )}
+
+        <div className="mt-6 pt-4 border-t border-gray-800/80 flex items-center justify-center gap-4 text-xs text-gray-500">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-[#53E076] transition-colors">
+            Privacidade
+          </a>
+          <span>•</span>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-[#53E076] transition-colors">
+            Termos de Uso
+          </a>
+        </div>
       </div>
     </div>
   );

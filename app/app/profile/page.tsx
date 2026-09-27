@@ -24,7 +24,8 @@ import {
   Trash2,
   Pencil,
   KeyRound,
-  Bot
+  Bot,
+  FileText
 } from "lucide-react"
 import Link from "next/link"
 import { useHaptic } from "@/hooks/use-haptic"
@@ -513,7 +514,26 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
 
-        <footer className="text-center space-y-1">
+        <footer className="text-center space-y-3 pt-4">
+          <div className="flex items-center justify-center gap-4 text-xs font-semibold text-zinc-500">
+            <Link
+              href="/privacy"
+              onClick={() => trigger("light")}
+              className="hover:text-[#53E076] transition-colors flex items-center gap-1.5"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              Privacidade
+            </Link>
+            <span className="text-zinc-700">•</span>
+            <Link
+              href="/terms"
+              onClick={() => trigger("light")}
+              className="hover:text-[#53E076] transition-colors flex items-center gap-1.5"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              Termos de Uso
+            </Link>
+          </div>
           <p className="text-[10px] text-zinc-600 font-bold tracking-widest">
             Gaga List v1.1.0
           </p>

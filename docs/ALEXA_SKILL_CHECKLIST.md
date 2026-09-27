@@ -13,6 +13,9 @@ Estas são as informações do seu projeto Next.js que a Alexa vai precisar:
   - *Access Token URI*: (Ex: `https://<seu-dominio>.com/api/auth/token`)
   - *Client ID*: (ID do App OAuth que você registrará)
   - *Client Secret*: (Segredo do App OAuth)
+- [ ] **Links de Compliance e Distribuição (Obrigatórios na Amazon):**
+  - *Privacy Policy URL*: `https://<seu-dominio>.com/privacy`
+  - *Terms of Use URL*: `https://<seu-dominio>.com/terms`
 
 ---
 
@@ -70,3 +73,12 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
 - [x] **1.** Vá na aba **Test** e habilite o teste para "Development".
 - [x] **2.** Digite "pedir ao gaga list para adicionar maçã na lista de mercado".
 - [x] **3.** Confira o log no seu terminal local (ou Vercel) e veja se o JSON chegou.
+
+### Fase F: Distribuição e Privacidade (Distribution > Privacy & Compliance)
+*(Requisito para publicação e certificação na Amazon Alexa Skills Store)*
+- [ ] **1.** Acesse a aba superior **Distribution** > **Privacy & Compliance**.
+- [ ] **2.** No campo **Privacy Policy URL**, cole: `https://<seu-dominio>.com/privacy`.
+- [ ] **3.** No campo **Terms of Use URL**, cole: `https://<seu-dominio>.com/terms`.
+- [ ] **4.** Responda as perguntas regulatórias (ex: sem cobrança direta in-skill, não direcionado a menores de 13 anos, sem anúncios).
+- [ ] **5.** Salve as configurações.
+

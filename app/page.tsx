@@ -582,6 +582,18 @@ function LandingContent() {
                     : "Criar Conta"}
                 </button>
 
+                <p className="text-[10px] text-center text-zinc-500 pt-2">
+                  Ao continuar, você concorda com nossos{" "}
+                  <Link href="/terms" target="_blank" className="text-[#53E076] hover:underline">
+                    Termos
+                  </Link>{" "}
+                  e{" "}
+                  <Link href="/privacy" target="_blank" className="text-[#53E076] hover:underline">
+                    Privacidade
+                  </Link>
+                  .
+                </p>
+
                 {/* Mensagem de feedback */}
                 {message && (
                   <div
