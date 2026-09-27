@@ -3,6 +3,18 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+const MCP_TOOLS = [
+  { name: "get_active_lists", description: "Lista as listas de compras criadas por você.", write: false },
+  { name: "get_shared_lists", description: "Lista as listas que outras pessoas compartilharam com você.", write: false },
+  { name: "get_list_items", description: "Lista os itens de uma lista (sua ou compartilhada).", write: false },
+  { name: "get_list_collaborators", description: "Mostra o dono e os colaboradores de uma lista.", write: false },
+  { name: "create_list", description: "Cria uma nova lista de compras.", write: true },
+  { name: "add_items_to_list", description: "Adiciona um ou mais itens a uma lista.", write: true },
+  { name: "update_item", description: "Edita nome, quantidade, unidade, categoria, preço ou observações.", write: true },
+  { name: "toggle_item_status", description: "Marca um item como comprado ou pendente.", write: true },
+  { name: "remove_item", description: "Remove definitivamente um item de uma lista.", write: true },
+];
+
 const toHex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 
 export default function DeveloperSettings() {
@@ -97,6 +109,30 @@ export default function DeveloperSettings() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="bg-[#1c1b1b] border border-gray-800 rounded-lg p-6 shadow-sm mt-6">
+        <h2 className="text-xl font-semibold mb-2 text-white">Ferramentas disponíveis ({MCP_TOOLS.length})</h2>
+        <p className="text-gray-400 mb-4 text-sm">
+          Com o token conectado, a IA pode usar estas ferramentas nas suas listas.
+        </p>
+        <ul className="divide-y divide-gray-800">
+          {MCP_TOOLS.map((tool) => (
+            <li key={tool.name} className="py-3 flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <code className="text-[#53E076] text-sm break-all">{tool.name}</code>
+                <p className="text-gray-400 text-sm">{tool.description}</p>
+              </div>
+              <span
+                className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded ${
+                  tool.write ? "bg-amber-500/10 text-amber-400" : "bg-sky-500/10 text-sky-400"
+                }`}
+              >
+                {tool.write ? "escrita" : "leitura"}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
