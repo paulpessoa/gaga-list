@@ -57,7 +57,15 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
   - `quantas listas eu tenho`
   - `leia as minhas listas`
   - `me diga as minhas listas`
-- [ ] **8.** Clique em **Save Model** e depois **Build Model**.
+- [ ] **8.** Crie mais uma Intent clicando em **Add Intent** e nomeie como `CheckItemIntent`.
+- [ ] **9.** Adicione as **Utterances** para o `CheckItemIntent`:
+  - `marcar {Item} como comprado`
+  - `riscar {Item}`
+  - `já comprei {Item}`
+  - `marcar {Item} como comprado na lista de {List}`
+  - `riscar {Item} da {List}`
+- [ ] **10.** No `CheckItemIntent`, use os mesmos slots `Item` (`ITEM_TYPE`) e `List` (`LIST_TYPE`).
+- [ ] **11.** Clique em **Save Model** e depois **Build Model**.
 
 ### Fase C: Endpoint (Conectando com o Next.js)
 - [x] **1.** Vá no menu esquerdo em **Endpoint**.

@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
         if (itemError) throw itemError;
 
-        return respondWithAlexa(`Adicionei ${item} na sua lista de ${listName}.`, true);
+        return respondWithAlexa(`Adicionei ${item} na sua lista de ${listName}. Algo mais?`, false);
       }
 
       if (intentName === 'ReadListsIntent') {
@@ -134,13 +134,61 @@ export async function POST(req: Request) {
           textResponse += `Elas são: ${titles.join(', ')} e ${last}.`;
         }
 
-        return respondWithAlexa(textResponse, true);
+        return respondWithAlexa(textResponse + " Algo mais?", false);
+      }
+
+      if (intentName === 'CheckItemIntent') {
+        const item = request.intent.slots?.Item?.value;
+        const listName = request.intent.slots?.List?.value;
+
+        if (!item) {
+          return respondWithAlexa("Qual item você quer marcar como comprado?", false);
+        }
+
+        const accessToken = session?.user?.accessToken;
+        if (!accessToken) return respondWithAlexa("Você precisa vincular sua conta primeiro.", true);
+
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+        );
+        
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return respondWithAlexa("Ocorreu um erro de autenticação.", true);
+
+        let listId = null;
+        if (listName) {
+          const { data: listData } = await supabase.from('lists').select('id').eq('owner_id', user.id).ilike('title', listName).single();
+          if (!listData) return respondWithAlexa(`Não encontrei a lista de ${listName}.`, false);
+          listId = listData.id;
+        }
+
+        let query = supabase.from('items').update({ is_purchased: true }).ilike('name', `%${item}%`).eq('is_purchased', false);
+        if (listId) {
+           query = query.eq('list_id', listId);
+        } else {
+           // Procura em qualquer lista do usuário
+           // RLS vai garantir que o usuário só atualize itens de listas que ele tem acesso
+        }
+        
+        const { data: updatedItems, error: updateError } = await query.select();
+
+        if (updateError || !updatedItems || updatedItems.length === 0) {
+          return respondWithAlexa(`Não encontrei ${item} pendente nas suas listas.`, false);
+        }
+
+        return respondWithAlexa(`Pronto! Marquei ${item} como comprado. Algo mais?`, false);
+      }
+
+      if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent' || intentName === 'AMAZON.NoIntent') {
+        return respondWithAlexa("Até a próxima!", true);
       }
     }
 
     // Se a intenção for de Launch (quando o usuário diz apenas "Alexa, abrir Gaga List")
     if (request?.type === 'LaunchRequest') {
-      return respondWithAlexa("Bem-vindo ao Gaga List! O que você deseja adicionar?");
+      return respondWithAlexa("Bem-vindo ao Gaga List! O que você deseja fazer?", false);
     }
 
     // Fallback caso não entenda
