@@ -51,12 +51,12 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
 - [x] **6.** Clique em **Save Model** e depois **Build Model**.
 
 ### Fase C: Endpoint (Conectando com o Next.js)
-- [ ] **1.** Vá no menu esquerdo em **Endpoint**.
-- [ ] **2.** Escolha a opção **HTTPS**.
-- [ ] **3.** No campo `Default Region`, cole o seu **Endpoint HTTPS da API** (Aquele coletado na Sessão 1).
-- [ ] **4.** No dropdown de certificado SSL, escolha a opção:
+- [x] **1.** Vá no menu esquerdo em **Endpoint**.
+- [x] **2.** Escolha a opção **HTTPS**.
+- [x] **3.** No campo `Default Region`, cole o seu **Endpoint HTTPS da API** (Aquele coletado na Sessão 1).
+- [x] **4.** No dropdown de certificado SSL, escolha a opção:
   - Se for Vercel/ngrok: *"My development endpoint is a sub-domain of a domain that has a wildcard certificate from a certificate authority"*.
-- [ ] **5.** Salve as configurações.
+- [x] **5.** Salve as configurações.
 
 ### Fase D: Account Linking (Opcional, porém Recomendado)
 *(Se você quiser segurança e RLS)*
