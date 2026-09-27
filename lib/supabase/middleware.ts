@@ -55,7 +55,8 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/api/auth') &&
     !request.nextUrl.pathname.startsWith('/api/webhooks') && // Libera Webhooks do Stripe
     !request.nextUrl.pathname.startsWith('/api/mcp') && // Libera rota do MCP (autenticada via Token próprio)
-    !request.nextUrl.pathname.startsWith('/api/alexa') && // Libera rota da Alexa (webhook)
+    !request.nextUrl.pathname.startsWith('/api/alexa') && // Libera rotas da API da Alexa
+    !request.nextUrl.pathname.startsWith('/alexa/link') && // Libera página de frontend de vínculo da Alexa
     request.nextUrl.pathname !== '/'
   ) {
     // no user, potentially respond by redirecting the user to the login page

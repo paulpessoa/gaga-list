@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseServerClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs'; // Node.js é recomendado para integrações complexas (ex: ask-sdk), mas Edge também funciona para fetch manual.
 
@@ -23,16 +23,33 @@ export async function POST(req: Request) {
           return respondWithAlexa("Desculpe, não entendi o item ou a lista. Pode repetir?");
         }
 
-        // TODO: Account Linking
-        // 1. Pegar token do usuário a partir de session.user.accessToken
-        // 2. Usar o token para inicializar um Supabase client autenticado (RLS)
-        // const token = session?.user?.accessToken;
+        // 1. Validar se o usuário vinculou a conta
+        const accessToken = session?.user?.accessToken;
+        if (!accessToken) {
+          return respondWithAlexa(
+            "Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", 
+            true
+          );
+        }
         
-        // --- HACK PARA TESTE RÁPIDO (Seu User ID Fixo) ---
-        const USER_ID = '848e9b09-b1a0-42b9-8127-b8b54c4807b8';
+        // 2. Inicializar o cliente do Supabase passando o Token do usuário
+        // Isso ativa o RLS! O código agora rodará com as permissões restritas do dono da conta.
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+        );
+
+        // Pega o usuário logado para usarmos o ID dele nas inserções
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          return respondWithAlexa("Ocorreu um erro de autenticação com a sua conta.", true);
+        }
         
-        // 1. Buscar se a lista já existe para esse usuário
-        let { data: listData, error: listError } = await supabaseServerClient
+        const USER_ID = user.id;
+        
+        // 3. Buscar se a lista já existe para esse usuário
+        let { data: listData, error: listError } = await supabase
           .from('lists')
           .select('id')
           .eq('owner_id', USER_ID)
@@ -41,9 +58,9 @@ export async function POST(req: Request) {
 
         let listId = listData?.id;
 
-        // 2. Se não existir, cria a lista na hora!
+        // 4. Se não existir, cria a lista na hora!
         if (!listId) {
-          const { data: newList, error: createListError } = await supabaseServerClient
+          const { data: newList, error: createListError } = await supabase
             .from('lists')
             .insert({
               title: listName,
@@ -56,8 +73,8 @@ export async function POST(req: Request) {
           listId = newList.id;
         }
 
-        // 3. Insere o item na tabela
-        const { error: itemError } = await supabaseServerClient
+        // 5. Insere o item na tabela
+        const { error: itemError } = await supabase
           .from('items')
           .insert({
             name: item,
