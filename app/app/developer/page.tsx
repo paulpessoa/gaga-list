@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+
+type ApiToken = {
+  id: string;
+  name: string;
+  token_preview: string | null;
+  created_at: string;
+  last_used_at: string | null;
+};
 
 const MCP_TOOLS = [
   { name: "get_active_lists", description: "Lista as listas de compras criadas por você.", write: false },
@@ -17,12 +25,34 @@ const MCP_TOOLS = [
 
 const toHex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 
+const previewOf = (rawToken: string) => {
+  const hex = rawToken.replace("gl_live_", "");
+  return `gl_live_${hex.slice(0, 6)}…${hex.slice(-4)}`;
+};
+
 export default function DeveloperSettings() {
   const [tokenName, setTokenName] = useState("");
   const [generatedToken, setGeneratedToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [tokens, setTokens] = useState<ApiToken[]>([]);
+  const [isLoadingTokens, setIsLoadingTokens] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const supabase = createClient();
+
+  const fetchTokens = async () => {
+    setIsLoadingTokens(true);
+    const { data, error } = await (supabase as any)
+      .from("api_tokens")
+      .select("id, name, token_preview, created_at, last_used_at")
+      .order("created_at", { ascending: false });
+    if (!error && data) setTokens(data as ApiToken[]);
+    setIsLoadingTokens(false);
+  };
+
+  useEffect(() => {
+    fetchTokens();
+  }, []);
 
   const handleGenerateToken = async () => {
     if (!tokenName.trim()) return;
@@ -38,6 +68,7 @@ export default function DeveloperSettings() {
       const { error } = await (supabase as any).from("api_tokens").insert({
         user_id: user.id,
         token_hash: tokenHash,
+        token_preview: previewOf(rawToken),
         name: tokenName,
       });
 
@@ -45,6 +76,7 @@ export default function DeveloperSettings() {
 
       setGeneratedToken(rawToken);
       setTokenName("");
+      fetchTokens();
     } catch (err) {
       console.error(err);
       alert("Erro ao gerar token.");
@@ -58,6 +90,21 @@ export default function DeveloperSettings() {
       navigator.clipboard.writeText(generatedToken);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDeleteToken = async (token: ApiToken) => {
+    if (!confirm(`Excluir o token "${token.name}"? Qualquer IA conectada com ele para de funcionar.`)) return;
+    setDeletingId(token.id);
+    try {
+      const { error } = await (supabase as any).from("api_tokens").delete().eq("id", token.id);
+      if (error) throw error;
+      setTokens((prev) => prev.filter((t) => t.id !== token.id));
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir token.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -108,6 +155,39 @@ export default function DeveloperSettings() {
               </div>
             </div>
           )}
+
+          <div className="pt-4 border-t border-gray-800">
+            <h3 className="text-sm font-medium text-gray-200 mb-3">Tokens gerados</h3>
+            {isLoadingTokens ? (
+              <p className="text-gray-500 text-sm">Carregando...</p>
+            ) : tokens.length === 0 ? (
+              <p className="text-gray-500 text-sm">Nenhum token gerado ainda.</p>
+            ) : (
+              <ul className="divide-y divide-gray-800">
+                {tokens.map((token) => (
+                  <li key={token.id} className="py-3 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{token.name}</p>
+                      <code className="text-gray-500 text-xs break-all">
+                        {token.token_preview ?? "gerado antes do preview estar disponível"}
+                      </code>
+                      <p className="text-gray-600 text-xs mt-0.5">
+                        Criado em {new Date(token.created_at).toLocaleDateString("pt-BR")}
+                        {token.last_used_at && ` · usado em ${new Date(token.last_used_at).toLocaleDateString("pt-BR")}`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteToken(token)}
+                      disabled={deletingId === token.id}
+                      className="shrink-0 text-xs font-medium px-3 py-1.5 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === token.id ? "Excluindo..." : "Excluir"}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 
