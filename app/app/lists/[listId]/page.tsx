@@ -35,7 +35,9 @@ import {
   Mic,
   Camera,
   Loader2,
-  Filter
+  Filter,
+  Search,
+  X
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -235,6 +237,7 @@ export default function ListDetail({
 
   const [filter, setFilter] = useState<"pending" | "purchased" | "all">("all")
   const [sortBy, setSortBy] = useState<"name" | "recent" | "none">("none")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const pendingSum = useMemo(
     () =>
@@ -266,7 +269,14 @@ export default function ListDetail({
       result = result.filter((i) => i.is_purchased)
     }
 
-    // 2. Ordenação
+    // 2. Pesquisa
+    if (searchQuery.trim()) {
+      result = result.filter((i) => 
+        (i.name || "").toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // 3. Ordenação
     result.sort((a, b) => {
       const nameA = (a.name || "").toLowerCase().trim()
       const nameB = (b.name || "").toLowerCase().trim()
@@ -293,11 +303,12 @@ export default function ListDetail({
     })
     
     return result
-  }, [items, filter, sortBy])
+  }, [items, filter, sortBy, searchQuery])
 
   const handleClearFilters = () => {
     setFilter("all")
     setSortBy("none")
+    setSearchQuery("")
     trigger("light")
   }
 
@@ -448,6 +459,27 @@ export default function ListDetail({
                 <UserPlus className="w-3 h-3" />
               </div>
             </div>
+          </div>
+
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+              <Search className={`w-4 h-4 transition-colors ${searchQuery ? "text-[#53E076]" : "text-zinc-600"}`} />
+            </div>
+            <input
+              type="text"
+              placeholder="Pesquisar itens..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#1c1b1b] border border-[#3d4a3d]/40 rounded-2xl py-3 pl-12 pr-12 text-sm text-[#e5e2e1] placeholder:text-zinc-700 focus:outline-none focus:border-[#53E076]/40 transition-all shadow-inner"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="absolute inset-y-0 right-4 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide -mx-1">
