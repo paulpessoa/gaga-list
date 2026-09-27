@@ -51,7 +51,13 @@ Siga estes passos lá em [developer.amazon.com/alexa/console/ask](https://develo
 - [x] **5.** Na parte debaixo (Intent Slots), adicione:
   - **Item:** Crie um Slot Type customizado chamado `ITEM_TYPE` (adicione exemplos como: "maçã", "leite", "pão", "água").
   - **List:** Crie um Slot Type customizado chamado `LIST_TYPE` (adicione exemplos como: "mercado", "tarefas", "farmácia").
-- [x] **6.** Clique em **Save Model** e depois **Build Model**.
+- [ ] **6.** Crie outra Intent clicando em **Add Intent** e nomeie como `ReadListsIntent`.
+- [ ] **7.** Adicione as **Utterances** para o `ReadListsIntent`:
+  - `quais são as minhas listas`
+  - `quantas listas eu tenho`
+  - `leia as minhas listas`
+  - `me diga as minhas listas`
+- [ ] **8.** Clique em **Save Model** e depois **Build Model**.
 
 ### Fase C: Endpoint (Conectando com o Next.js)
 - [x] **1.** Vá no menu esquerdo em **Endpoint**.

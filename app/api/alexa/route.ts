@@ -88,6 +88,54 @@ export async function POST(req: Request) {
 
         return respondWithAlexa(`Adicionei ${item} na sua lista de ${listName}.`, true);
       }
+
+      if (intentName === 'ReadListsIntent') {
+        const accessToken = session?.user?.accessToken;
+        if (!accessToken) {
+          return respondWithAlexa(
+            "Você precisa vincular sua conta do Gaga List no aplicativo da Alexa primeiro.", 
+            true
+          );
+        }
+
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+        );
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return respondWithAlexa("Ocorreu um erro de autenticação.", true);
+
+        // Busca todas as listas (não deletadas)
+        const { data: lists, error: listError } = await supabase
+          .from('lists')
+          .select('title')
+          .eq('owner_id', user.id)
+          .is('deleted_at', null);
+
+        if (listError || !lists) {
+          return respondWithAlexa("Não consegui buscar suas listas no momento.", true);
+        }
+
+        if (lists.length === 0) {
+          return respondWithAlexa("Você ainda não tem nenhuma lista cadastrada no Gaga List.", true);
+        }
+
+        const titles = lists.map(l => l.title);
+        let textResponse = `Você tem ${lists.length} ${lists.length === 1 ? 'lista' : 'listas'}. `;
+        
+        if (lists.length === 1) {
+          textResponse += `O nome dela é ${titles[0]}.`;
+        } else if (lists.length === 2) {
+          textResponse += `Elas são: ${titles[0]} e ${titles[1]}.`;
+        } else {
+          const last = titles.pop();
+          textResponse += `Elas são: ${titles.join(', ')} e ${last}.`;
+        }
+
+        return respondWithAlexa(textResponse, true);
+      }
     }
 
     // Se a intenção for de Launch (quando o usuário diz apenas "Alexa, abrir Gaga List")
