@@ -172,27 +172,46 @@ export async function POST(req: Request) {
     } 
     
     else if (intentData.action === "CHECK_ITEM" && intentData.item) {
-      let query = supabase.from('items').update({ is_purchased: true }).ilike('name', `%${intentData.item}%`).eq('is_purchased', false);
+      // 1. Primeiro busca quantos itens existem com esse nome (que não estão comprados)
+      let query = supabase.from('items').select('id, list_id, lists(title)').ilike('name', `%${intentData.item}%`).eq('is_purchased', false);
       if (targetListId) query = query.eq('list_id', targetListId);
       
-      const { data: updated, error: updateError } = await query.select();
-      if (updateError) throw updateError;
+      const { data: foundItems, error: searchError } = await query;
+      if (searchError) throw searchError;
       
-      if (!updated || updated.length === 0) {
-        return respondWithAlexa(`Não achei nenhum item parecido com ${intentData.item} para riscar. Algo mais?`, false);
+      if (!foundItems || foundItems.length === 0) {
+        return respondWithAlexa(`Não achei nenhum item parecido com ${intentData.item} pendente. Algo mais?`, false);
       }
+
+      // 2. Desambiguação: Se achou em mais de uma lista e o usuário não especificou a lista
+      if (foundItems.length > 1) {
+        const listNames = foundItems.map((i: any) => i.lists?.title || 'Sem Nome').join(' e ');
+        return respondWithAlexa(`Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual lista você quer riscar?`, false);
+      }
+
+      // 3. Se achou apenas 1, atualiza
+      const { error: updateError } = await supabase.from('items').update({ is_purchased: true }).eq('id', foundItems[0].id);
+      if (updateError) throw updateError;
     }
     
     else if (intentData.action === "REMOVE_ITEM" && intentData.item) {
-      let query = supabase.from('items').delete().ilike('name', `%${intentData.item}%`);
+      let query = supabase.from('items').select('id, list_id, lists(title)').ilike('name', `%${intentData.item}%`);
       if (targetListId) query = query.eq('list_id', targetListId);
       
-      const { data: deleted, error: deleteError } = await query.select();
-      if (deleteError) throw deleteError;
+      const { data: foundItems, error: searchError } = await query;
+      if (searchError) throw searchError;
       
-      if (!deleted || deleted.length === 0) {
+      if (!foundItems || foundItems.length === 0) {
         return respondWithAlexa(`Não achei o item ${intentData.item} para excluir. Algo mais?`, false);
       }
+
+      if (foundItems.length > 1) {
+        const listNames = foundItems.map((i: any) => i.lists?.title || 'Sem Nome').join(' e ');
+        return respondWithAlexa(`Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual delas você quer excluir?`, false);
+      }
+
+      const { error: deleteError } = await supabase.from('items').delete().eq('id', foundItems[0].id);
+      if (deleteError) throw deleteError;
     }
 
     else if (intentData.action === "LIST_ITEMS") {
