@@ -13,7 +13,7 @@ const openai = new OpenAI({
 
 // Schema Zod para forçar a saída estruturada do LLM
 const AlexaIntentSchema = z.object({
-  action: z.enum(["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "UNKNOWN"]),
+  action: z.enum(["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "END_SESSION", "UNKNOWN"]),
   item: z.string().nullable().describe("O nome do item mencionado (ex: café, carvão)"),
   listName: z.string().nullable().describe("O nome da lista. Se não for especificada, retorne null."),
   notes: z.string().nullable().describe("Qualquer observação adicional sobre o item (urgência, marca, etc)."),
@@ -31,11 +31,16 @@ async function processUserUtterance(rawText: string): Promise<ParsedAlexaIntent>
     messages: [
       {
         role: "system",
-        content: `Você é o agente inteligente do Gaga List. Seu objetivo é extrair a real intenção da frase do usuário.
-        Regras:
-        - Seja extremamente carismático, natural e breve na sua 'naturalResponse'. 
-        - Não seja robótico.
-        - Se a ação for desconhecida (UNKNOWN), na naturalResponse pergunte o que o usuário deseja fazer.`
+        content: `Você é o agente inteligente do aplicativo Gaga List. Extraia a intenção do usuário.
+Regras de Classificação OBRIGATÓRIAS:
+- ADD_ITEM: Somente quando o usuário quiser INSERIR, ANOTAR, COLOCAR, COMPRAR algo novo na lista.
+- CHECK_ITEM: Quando o usuário disser que JÁ COMPROU, PEGOU, MARCAR COMO COMPRADO ou RISCAR da lista.
+- REMOVE_ITEM: Quando o usuário quiser APAGAR, EXCLUIR, TIRAR, REMOVER da lista (desistir do item).
+- LIST_ITEMS: Quando o usuário perguntar QUAIS LISTAS ele tem ou QUANTAS listas.
+- END_SESSION: Quando o usuário disser "só isso", "nada", "tchau", "encerrar", "pronto".
+- UNKNOWN: Apenas se não tiver nada a ver com listas.
+
+Gere uma 'naturalResponse' carismática e ultra-breve confirmando o que foi feito. Nunca diga "Posso ajudar em mais algo?" se for END_SESSION.`
       },
       { role: "user", content: rawText }
     ],
@@ -47,7 +52,7 @@ async function processUserUtterance(rawText: string): Promise<ParsedAlexaIntent>
         schema: {
           type: "object",
           properties: {
-            action: { type: "string", enum: ["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "UNKNOWN"] },
+            action: { type: "string", enum: ["ADD_ITEM", "LIST_ITEMS", "REMOVE_ITEM", "CHECK_ITEM", "END_SESSION", "UNKNOWN"] },
             item: { type: ["string", "null"] },
             listName: { type: ["string", "null"] },
             notes: { type: ["string", "null"] },
@@ -122,6 +127,10 @@ export async function POST(req: Request) {
     const intentData = await processUserUtterance(rawText);
     console.log("Agente Respondeu:", intentData);
 
+    if (intentData.action === "END_SESSION") {
+      return respondWithAlexa(intentData.naturalResponse, true);
+    }
+
     if (intentData.action === "UNKNOWN") {
       return respondWithAlexa(intentData.naturalResponse, false);
     }
@@ -166,9 +175,23 @@ export async function POST(req: Request) {
       let query = supabase.from('items').update({ is_purchased: true }).ilike('name', `%${intentData.item}%`).eq('is_purchased', false);
       if (targetListId) query = query.eq('list_id', targetListId);
       
-      const { data: updated } = await query.select();
+      const { data: updated, error: updateError } = await query.select();
+      if (updateError) throw updateError;
+      
       if (!updated || updated.length === 0) {
-        return respondWithAlexa(`Não achei o item ${intentData.item} pendente. Algo mais?`, false);
+        return respondWithAlexa(`Não achei nenhum item parecido com ${intentData.item} para riscar. Algo mais?`, false);
+      }
+    }
+    
+    else if (intentData.action === "REMOVE_ITEM" && intentData.item) {
+      let query = supabase.from('items').delete().ilike('name', `%${intentData.item}%`);
+      if (targetListId) query = query.eq('list_id', targetListId);
+      
+      const { data: deleted, error: deleteError } = await query.select();
+      if (deleteError) throw deleteError;
+      
+      if (!deleted || deleted.length === 0) {
+        return respondWithAlexa(`Não achei o item ${intentData.item} para excluir. Algo mais?`, false);
       }
     }
 
