@@ -10,9 +10,11 @@ function AlexaLinkContent() {
   const redirectUri = searchParams.get("redirect_uri");
   const clientId = searchParams.get("client_id");
 
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [paramsValid, setParamsValid] = useState<boolean | null>(null);
 
@@ -37,18 +39,7 @@ function AlexaLinkContent() {
       .catch(() => setParamsValid(false));
   }, [redirectUri, state, clientId]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-    if (loginError || !data.session) {
-      setError(loginError?.message === "Invalid login credentials" ? "E-mail ou senha incorretos." : loginError?.message || "Falha no login.");
-      setLoading(false);
-      return;
-    }
-
+  const authorize = async (refreshToken: string) => {
     const res = await fetch("/api/alexa/authorize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,7 +47,7 @@ function AlexaLinkContent() {
         client_id: clientId,
         redirect_uri: redirectUri,
         state,
-        refresh_token: data.session.refresh_token,
+        refresh_token: refreshToken,
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -67,6 +58,56 @@ function AlexaLinkContent() {
     }
 
     window.location.href = json.redirect;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setInfo("");
+
+    if (mode === "signup") {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/api/auth/confirm` },
+      });
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+      // Sem sessão = o projeto exige confirmação por e-mail. Esta página continua aberta para o login depois.
+      if (!data.session) {
+        setInfo("Conta criada! Confirme pelo link que enviamos para o seu e-mail e depois volte aqui para entrar.");
+        setMode("login");
+        setLoading(false);
+        return;
+      }
+      return authorize(data.session.refresh_token);
+    }
+
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+    if (loginError || !data.session) {
+      const message = loginError?.message || "";
+      setError(
+        message === "Invalid login credentials"
+          ? "E-mail ou senha incorretos."
+          : message === "Email not confirmed"
+            ? "Confirme seu e-mail pelo link que enviamos e tente de novo."
+            : message || "Falha no login."
+      );
+      setLoading(false);
+      return;
+    }
+
+    return authorize(data.session.refresh_token);
+  };
+
+  const switchMode = () => {
+    setMode(mode === "login" ? "signup" : "login");
+    setError("");
+    setInfo("");
   };
 
   if (!missingParams && paramsValid === null) {
@@ -90,14 +131,21 @@ function AlexaLinkContent() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Vincular Alexa</h1>
           <p className="text-gray-400 text-sm">
-            Entre com sua conta do Gaga List para usar suas listas por voz.
+            {mode === "login"
+              ? "Entre com sua conta do Gaga List para usar suas listas por voz."
+              : "Crie sua conta do Gaga List para usar suas listas por voz."}
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm text-center">
               {error}
+            </div>
+          )}
+          {info && (
+            <div className="bg-[#53E076]/10 border border-[#53E076]/20 text-[#53E076] px-4 py-2 rounded-lg text-sm text-center">
+              {info}
             </div>
           )}
 
@@ -121,7 +169,8 @@ function AlexaLinkContent() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              minLength={mode === "signup" ? 6 : undefined}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
               className="w-full bg-[#131313] border border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-[#53E076] transition-colors"
               placeholder="••••••••"
             />
@@ -132,9 +181,16 @@ function AlexaLinkContent() {
             disabled={loading}
             className="w-full bg-[#53E076] text-black font-semibold py-3 rounded-xl hover:bg-[#45c761] transition-colors disabled:opacity-50"
           >
-            {loading ? "Vinculando..." : "Entrar e Vincular"}
+            {loading ? "Aguarde..." : mode === "login" ? "Entrar e Vincular" : "Criar conta e Vincular"}
           </button>
         </form>
+
+        <p className="mt-5 text-center text-sm text-gray-400">
+          {mode === "login" ? "Ainda não tem conta?" : "Já tem conta?"}{" "}
+          <button type="button" onClick={switchMode} className="text-[#53E076] font-semibold hover:underline">
+            {mode === "login" ? "Criar conta" : "Entrar"}
+          </button>
+        </p>
 
         <div className="mt-6 pt-4 border-t border-gray-800/80 flex items-center justify-center gap-4 text-xs text-gray-500">
           <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-[#53E076] transition-colors">

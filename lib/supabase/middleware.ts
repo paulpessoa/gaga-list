@@ -57,6 +57,8 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/api/mcp') && // Libera rota do MCP (autenticada via Token próprio)
     !request.nextUrl.pathname.startsWith('/api/alexa') && // Libera rotas da API da Alexa
     !request.nextUrl.pathname.startsWith('/alexa/link') && // Libera página de frontend de vínculo da Alexa
+    request.nextUrl.pathname !== '/privacy' && // Públicas: a certificação da Alexa acessa sem login
+    request.nextUrl.pathname !== '/terms' &&
     request.nextUrl.pathname !== '/'
   ) {
     // no user, potentially respond by redirecting the user to the login page
