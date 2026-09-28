@@ -67,6 +67,21 @@ const FAQ_DATA = [
     ]
   },
   {
+    category: "Comandos da Alexa",
+    icon: Bot,
+    color: "text-blue-400 bg-blue-500/10",
+    questions: [
+      {
+        q: "O que eu posso pedir para a Alexa fazer?",
+        a: "Nossa Skill é super inteligente! Fale 'Alexa, abrir Gaga List' e depois você pode dizer coisas como: 'Anotar leite na lista', 'Já comprei o leite', 'Desmarcar o leite', 'Tirar o leite da lista', 'Mover o leite para a lista da fazenda', 'Mudar a quantidade de leite para 3 caixas', 'Adicionar o preço de 5 reais no leite', 'O leite é da categoria matinais', 'O que tem na lista de mercado?', 'Qual o valor total da lista?', e 'Eu já anotei leite?'. Tudo de forma natural!"
+      },
+      {
+        q: "Ela entende se eu tiver itens repetidos?",
+        a: "Sim! Se você disser 'Já comprei carvão' e tiver carvão cadastrado em duas listas diferentes (ex: Festa e Mercado), a Alexa não vai riscar errado. Ela vai te perguntar: 'Achei carvão na lista Festa e Mercado. De qual você quer riscar?'."
+      }
+    ]
+  },
+  {
     category: "Scanner e Voz",
     icon: Camera,
     color: "text-emerald-500 bg-emerald-500/10",
