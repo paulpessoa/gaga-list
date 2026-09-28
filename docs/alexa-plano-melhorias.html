@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plano Skill Alexa</title>
+<style>
+  :root{--bg:#f7f7f5;--card:#fff;--fg:#1b1b1b;--muted:#5f6368;--line:#e2e2de;--accent:#1f9d55;--crit:#c62828;--high:#d97706;--med:#2563eb;--code:#f0f0ec}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131313;--card:#1c1c1c;--fg:#ececec;--muted:#9aa0a6;--line:#2c2c2c;--accent:#53E076;--crit:#ef5350;--high:#f59e0b;--med:#60a5fa;--code:#242424}}
+  :root[data-theme="dark"]{--bg:#131313;--card:#1c1c1c;--fg:#ececec;--muted:#9aa0a6;--line:#2c2c2c;--accent:#53E076;--crit:#ef5350;--high:#f59e0b;--med:#60a5fa;--code:#242424}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  main{max-width:920px;margin:0 auto;padding:24px 16px 64px}
+  h1{font-size:1.6rem;margin:0 0 4px}
+  h2{font-size:1.15rem;margin:36px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h3{font-size:1rem;margin:18px 0 6px}
+  p.lead{color:var(--muted);margin:0 0 8px}
+  code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em;word-break:break-word}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;color:#fff;margin-right:6px;vertical-align:middle}
+  .crit{background:var(--crit)}.high{background:var(--high)}.med{background:var(--med)}.ok{background:var(--accent);color:#000}
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600}
+  .scroll{overflow-x:auto}
+  svg text{fill:var(--fg);font:12px system-ui,sans-serif}
+  svg .box{fill:var(--card);stroke:var(--line)}
+  svg .hl{fill:none;stroke:var(--accent);stroke-width:2}
+  svg .bad{fill:none;stroke:var(--crit);stroke-width:2;stroke-dasharray:4 3}
+  svg .arrow{stroke:var(--muted);stroke-width:1.5;fill:none;marker-end:url(#a)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:640px){.grid{grid-template-columns:1fr}}
+  ol li,ul li{margin:4px 0}
+  .ex{border-left:3px solid var(--accent);padding:6px 10px;background:var(--code);border-radius:0 6px 6px 0;margin:8px 0;font-size:.92rem}
+</style>
+</head>
+<body>
+<main>
+  <h1>Skill Alexa do Gaga List: plano de melhorias</h1>
+  <p class="lead">Baseado em <code>app/api/alexa/route.ts</code>, <code>app/api/alexa/token/route.ts</code>, <code>app/alexa/link/page.tsx</code> e nos docs da <code>main</code> (28/09/2026).</p>
+
+  <h2>1. Como funciona hoje</h2>
+  <div class="scroll">
+  <svg viewBox="0 0 880 200" width="100%" style="min-width:640px" role="img" aria-label="Fluxo atual da skill">
+    <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="currentColor" style="color:var(--muted)"/></marker></defs>
+    <rect class="box" x="10" y="70" width="120" height="56" rx="8"/><text x="70" y="94" text-anchor="middle">Usuário fala</text><text x="70" y="110" text-anchor="middle">"anotar leite"</text>
+    <rect class="box" x="170" y="70" width="140" height="56" rx="8"/><text x="240" y="94" text-anchor="middle">Alexa (AgentIntent)</text><text x="240" y="110" text-anchor="middle">slot {Query} = texto</text>
+    <rect class="box" x="350" y="70" width="150" height="56" rx="8"/><text x="425" y="94" text-anchor="middle">POST /api/alexa</text><text x="425" y="110" text-anchor="middle">getUser (Supabase)</text>
+    <rect class="box" x="540" y="20" width="150" height="56" rx="8"/><text x="615" y="44" text-anchor="middle">gpt-4o-mini</text><text x="615" y="60" text-anchor="middle">JSON: ação + resposta</text>
+    <rect class="box" x="540" y="120" width="150" height="56" rx="8"/><text x="615" y="144" text-anchor="middle">Supabase (RLS)</text><text x="615" y="160" text-anchor="middle">insert/update/select</text>
+    <rect class="box" x="730" y="70" width="140" height="56" rx="8"/><text x="800" y="94" text-anchor="middle">Fala de volta</text><text x="800" y="110" text-anchor="middle">+ "Algo mais?"</text>
+    <path class="arrow" d="M130,98 H168"/><path class="arrow" d="M310,98 H348"/>
+    <path class="arrow" d="M500,90 L538,52"/><path class="arrow" d="M615,76 V118"/><path class="arrow" d="M690,148 L728,108"/>
+  </svg>
+  </div>
+  <p>A arquitetura "1 intent + LLM" é boa: mantém o modelo de interação pequeno e deixa a inteligência no código. <strong>A ideia é manter o desenho e corrigir as bordas.</strong></p>
+
+  <h2>2. Diagnóstico por prioridade</h2>
+
+  <div class="card"><span class="tag crit">CRÍTICO</span><strong>Vazamento do refresh token no vínculo de conta</strong>
+    <p><code>/alexa/link</code> aceita qualquer <code>redirect_uri</code> e manda o refresh token (só em base64) para ela. Um link malicioso como <code>/alexa/link?redirect_uri=https://site-do-atacante&amp;state=x</code>, clicado por alguém logado que aperte "Autorizar", entrega a sessão da conta ao atacante. O <code>/api/alexa/token</code> também não confere <code>client_id</code>/<code>client_secret</code>.</p>
+    <p><strong>Correção:</strong> aceitar só os redirect URLs da Amazon (lista em env); o <code>code</code> passa a ser um valor aleatório de uso único, que expira em 5 min e fica salvo numa tabela <code>alexa_auth_codes</code>; o endpoint de token valida o client secret via HTTP Basic.</p>
+  </div>
+
+  <div class="card"><span class="tag crit">CRÍTICO</span><strong>Alexa e navegador compartilham a mesma sessão</strong>
+    <p>O vínculo reaproveita o refresh token da sessão do navegador. O Supabase <em>rotaciona</em> refresh tokens: quando um dos dois (web ou Alexa) renova primeiro, o token do outro fica inválido. Se o reuso for detectado, a sessão inteira pode ser revogada. O sintoma é a Alexa "desvincular sozinha" ou o app web deslogar.</p>
+    <p><strong>Correção:</strong> criar uma <em>sessão dedicada</em> para a Alexa no servidor (<code>admin.generateLink</code> + <code>verifyOtp</code>, ou login com <code>persistSession:false</code>). Assim cada lado tem o próprio token.</p>
+  </div>
+
+  <div class="card"><span class="tag crit">CRÍTICO</span><strong>"Anotar leite" sem citar a lista quebra</strong>
+    <p>Sem <code>listName</code>, o insert vai com <code>list_id = null</code> (a coluna é NOT NULL), estoura erro e a Alexa responde "curto circuito". É o comando mais comum.</p>
+    <p><strong>Correção:</strong> ordem de fallback: lista citada, depois a última lista usada na sessão, depois a lista mais recente (ou a única). A resposta diz onde anotou: <em>"Anotei leite no Mercado."</em></p>
+  </div>
+
+  <div class="card"><span class="tag high">ALTO</span><strong>Requisitos de certificação da Amazon</strong>
+    <ul>
+      <li><strong>Verificar assinatura e timestamp</strong> da requisição (<code>SignatureCertChainUrl</code>/<code>Signature-256</code>) e o <code>applicationId</code> = <code>ALEXA_SKILL_ID</code>. Isso é obrigatório para endpoint próprio; sem essa checagem a skill é reprovada na certificação.</li>
+      <li><strong>Reprompt</strong> em toda resposta com a sessão aberta (hoje não tem).</li>
+      <li><strong>Card <code>LinkAccount</code></strong> quando não houver token ou ele expirar (hoje só fala um texto).</li>
+      <li>Tratar <code>AMAZON.HelpIntent</code> e <code>AMAZON.FallbackIntent</code>.</li>
+    </ul>
+  </div>
+
+  <div class="card"><span class="tag high">ALTO</span><strong>A Alexa pode "mentir" sobre o que fez</strong>
+    <p>O <code>naturalResponse</code> é gerado pelo LLM <em>antes</em> de tocar no banco. Em ADD/CHECK/UPDATE ele é falado mesmo que nada tenha sido salvo (ex.: CALCULATE_TOTAL sem lista cai no fallback e o LLM pode inventar um valor).</p>
+    <p><strong>Correção:</strong> o LLM só <em>interpreta</em>; as frases saem de templates baseados no resultado real. Tirar o campo <code>naturalResponse</code> também diminui tokens e latência.</p>
+  </div>
+
+  <div class="card"><span class="tag high">ALTO</span><strong>Logs com token de acesso</strong>
+    <p><code>console.log("Alexa Request:", body)</code> grava o <code>accessToken</code> nos logs da Vercel. Logar só <code>request.type</code>, o nome do intent e o <code>requestId</code>.</p>
+  </div>
+
+  <div class="card"><span class="tag med">MÉDIO</span><strong>Busca de listas e itens frágil</strong>
+    <ul>
+      <li><code>ilike(title, 'mercado')</code> + <code>.single()</code>: "mercado" não encontra "Mercado do Mês", e dá erro se houver 2 resultados.</li>
+      <li>Filtra <code>owner_id</code>, então <strong>listas compartilhadas</strong> ficam de fora; também não filtra <code>deleted_at</code>.</li>
+      <li><strong>Melhor e barato:</strong> mandar os títulos das listas do usuário no prompt. O LLM devolve o título exato, sem precisar de busca fuzzy no banco.</li>
+    </ul>
+  </div>
+
+  <div class="card"><span class="tag med">MÉDIO</span><strong>Experiência de voz</strong>
+    <ul>
+      <li><strong>Vários itens numa frase:</strong> "anotar leite, pão e ovos" hoje vira 1 item só. O schema pode passar a ter <code>items: [{name, quantity, unit}]</code>.</li>
+      <li><strong>One-shot encerra:</strong> se a sessão começou com o comando ("Alexa, pede pro gaga list anotar leite"), executa e fecha. O "Algo mais?" fica só quando o usuário abriu a skill.</li>
+      <li><strong>Listas longas:</strong> ler até 8 itens e completar com "e mais 12. Quer ouvir o resto?".</li>
+      <li><strong>Dinheiro em pt-BR:</strong> "12 reais e 50 centavos" em vez de "12.50 reais".</li>
+      <li><strong>Desfazer de verdade:</strong> guardar a última operação em <code>sessionAttributes</code> (<code>{op, itemId, snapshot}</code>) e reverter. É um recurso pequeno e poupa o usuário quando a Alexa entende errado.</li>
+      <li>Criar lista nova só depois de confirmar ("Não achei a lista Mercados. Crio?"), para evitar listas duplicadas por erro de transcrição.</li>
+    </ul>
+  </div>
+
+  <div class="card"><span class="tag med">MÉDIO</span><strong>Latência e custo</strong>
+    <ul>
+      <li>Rodar <code>getUser</code> e a busca de listas em paralelo (<code>Promise.all</code>) e só depois chamar o LLM.</li>
+      <li><code>max_tokens</code> baixo + <code>temperature: 0</code>. O <code>gpt-4o-mini</code> continua uma boa escolha pelo custo.</li>
+      <li>O <code>token/route.ts</code> usa <code>Buffer</code> com <code>runtime = 'edge'</code>, onde o <code>Buffer</code> não é garantido. Trocar para <code>nodejs</code>.</li>
+    </ul>
+  </div>
+
+  <h2>3. Vínculo de conta: fluxo proposto</h2>
+  <div class="scroll">
+  <svg viewBox="0 0 880 250" width="100%" style="min-width:640px" role="img" aria-label="Fluxo proposto de account linking">
+    <rect class="box" x="10" y="20" width="150" height="60" rx="8"/><text x="85" y="45" text-anchor="middle">App Alexa</text><text x="85" y="62" text-anchor="middle">"Vincular conta"</text>
+    <rect class="box" x="210" y="20" width="190" height="60" rx="8"/><text x="305" y="42" text-anchor="middle">/alexa/link</text><text x="305" y="58" text-anchor="middle">valida client_id +</text><text x="305" y="72" text-anchor="middle">redirect_uri (allowlist)</text>
+    <rect class="hl" x="210" y="20" width="190" height="60" rx="8"/>
+    <rect class="box" x="450" y="20" width="200" height="60" rx="8"/><text x="550" y="42" text-anchor="middle">POST /api/alexa/authorize</text><text x="550" y="58" text-anchor="middle">cria sessão DEDICADA</text><text x="550" y="72" text-anchor="middle">salva code aleatório (5 min)</text>
+    <rect class="hl" x="450" y="20" width="200" height="60" rx="8"/>
+    <rect class="box" x="700" y="20" width="170" height="60" rx="8"/><text x="785" y="45" text-anchor="middle">redirect Amazon</text><text x="785" y="62" text-anchor="middle">?code=abc&amp;state=…</text>
+    <rect class="box" x="450" y="160" width="200" height="70" rx="8"/><text x="550" y="182" text-anchor="middle">POST /api/alexa/token</text><text x="550" y="198" text-anchor="middle">confere Basic auth</text><text x="550" y="214" text-anchor="middle">troca code (uso único)</text>
+    <rect class="hl" x="450" y="160" width="200" height="70" rx="8"/>
+    <rect class="box" x="700" y="160" width="170" height="70" rx="8"/><text x="785" y="185" text-anchor="middle">Amazon guarda</text><text x="785" y="202" text-anchor="middle">access + refresh</text><text x="785" y="218" text-anchor="middle">(renova sozinha)</text>
+    <path class="arrow" d="M160,50 H208"/><path class="arrow" d="M400,50 H448"/><path class="arrow" d="M650,50 H698"/>
+    <path class="arrow" d="M785,80 V110 H550 V158"/><path class="arrow" d="M650,195 H698"/>
+    <text x="10" y="130" style="fill:var(--muted)">Verde = muda em relação a hoje</text>
+  </svg>
+  </div>
+
+  <h2>4. Ajustes no Alexa Developer Console</h2>
+  <p>Os dois docs atuais divergem (<code>AMAZON.SearchQuery</code> num, <code>CATCH_ALL_TYPE</code> no outro; Authorization URI do Supabase num, <code>/alexa/link</code> no código). O que vale:</p>
+  <div class="scroll">
+  <table>
+    <tr><th>Seção</th><th>Configuração</th><th>Por quê</th></tr>
+    <tr><td><strong>Invocation</strong></td><td><code>gaga list</code></td><td>Mantém. Vale testar "gagá list" no Test para ver como a Alexa transcreve.</td></tr>
+    <tr><td><strong>Intents</strong></td><td><code>AgentIntent</code> com slot <code>Query</code> do tipo <code>CATCH_ALL_TYPE</code> (custom)</td><td>O <code>AMAZON.SearchQuery</code> não aceita a utterance <code>{Query}</code> sozinha. O custom type é o jeito conhecido de capturar texto livre.</td></tr>
+    <tr><td></td><td>Manter <code>AMAZON.HelpIntent</code>, <code>StopIntent</code>, <code>CancelIntent</code>, <code>NavigateHomeIntent</code>, <code>FallbackIntent</code> + adicionar <code>YesIntent</code> e <code>NoIntent</code></td><td>Help/Stop/Cancel são exigidos. Yes/No servem para as confirmações ("Crio a lista?").</td></tr>
+    <tr><td></td><td>Fallback sensitivity: <strong>Low</strong></td><td>Para o Fallback não "roubar" frases que deveriam cair no AgentIntent.</td></tr>
+    <tr><td><strong>Endpoint</strong></td><td>HTTPS: <code>https://&lt;domínio&gt;/api/alexa</code></td><td>Com domínio próprio: "has a certificate from a trusted CA". Com <code>*.vercel.app</code>: opção "wildcard".</td></tr>
+    <tr><td><strong>Account Linking</strong></td><td>Auth Code Grant<br>Authorization URI: <code>https://&lt;domínio&gt;/alexa/link</code><br>Access Token URI: <code>https://&lt;domínio&gt;/api/alexa/token</code><br>Client ID/Secret: <em>valores que você inventa</em> e coloca no <code>.env</code><br>Scheme: HTTP Basic · Scope: <code>lists</code><br>Domain list: <code>&lt;domínio&gt;</code></td><td>O doc atual aponta para o <code>/auth/v1/authorize</code> do Supabase, mas o código usa <code>/alexa/link</code>. Deixar a config igual ao código.</td></tr>
+    <tr><td></td><td>Copiar os <strong>Alexa Redirect URLs</strong> exibidos na página para <code>ALEXA_REDIRECT_URIS</code></td><td>Formam a allowlist que fecha a falha crítica.</td></tr>
+    <tr><td></td><td>"Allow users to enable skill without account linking": <strong>desligado</strong></td><td>A skill não funciona sem conta.</td></tr>
+    <tr><td><strong>Distribution</strong></td><td>Frases de exemplo: <em>"Alexa, abrir gaga list"</em>, <em>"Alexa, pede pro gaga list anotar leite"</em>, <em>"Alexa, pergunta pro gaga list o que falta no mercado"</em><br>Ícones 108 e 512 px, categoria Shopping, Privacy/Terms URL</td><td>A 1ª frase precisa ter o invocation name. Frases que a skill não suporta levam à reprovação.</td></tr>
+    <tr><td><strong>Versionamento</strong></td><td>Exportar o JSON do modelo (Build → JSON Editor) para <code>alexa/interactionModel.pt-BR.json</code></td><td>Recriar a skill vira um copiar e colar, e o modelo fica versionado junto com o código.</td></tr>
+  </table>
+  </div>
+
+  <h3>Novas variáveis de ambiente</h3>
+  <div class="ex"><code>ALEXA_SKILL_ID</code> · <code>ALEXA_CLIENT_ID</code> · <code>ALEXA_CLIENT_SECRET</code> · <code>ALEXA_REDIRECT_URIS</code> (separadas por vírgula) · <code>SUPABASE_SERVICE_ROLE_KEY</code> (já deve existir; é usada para a sessão dedicada)</div>
+
+  <h2>5. Ordem de execução sugerida</h2>
+  <div class="grid">
+    <div class="card"><span class="tag crit">Fase 1</span><strong>Segurança (antes de qualquer beta)</strong>
+      <ol><li>Allowlist de <code>redirect_uri</code> + validar <code>client_id</code></li><li>Tabela <code>alexa_auth_codes</code> + sessão dedicada</li><li>Token route: Basic auth, runtime nodejs</li><li>Verificar assinatura + skill ID</li><li>Parar de logar o token</li></ol>
+      <p>Depois: <strong>re-vincular</strong> a conta no app Alexa.</p></div>
+    <div class="card"><span class="tag high">Fase 2</span><strong>Funcional mínimo</strong>
+      <ol><li>Fallback de lista no ADD</li><li>Títulos das listas no prompt (inclui compartilhadas)</li><li>Respostas por template (sem <code>naturalResponse</code>)</li><li>Reprompt, Help, Fallback, card LinkAccount</li><li>One-shot encerra a sessão</li></ol></div>
+    <div class="card"><span class="tag med">Fase 3</span><strong>Experiência</strong>
+      <ol><li>Vários itens por frase</li><li>Desfazer real</li><li>Leitura paginada + valores em reais</li><li>Confirmação ao criar lista</li></ol></div>
+    <div class="card"><span class="tag ok">Fase 4</span><strong>Publicação</strong>
+      <ol><li>JSON do modelo no repo</li><li>Unificar os 2 docs em 1</li><li>Beta test com 2 ou 3 pessoas</li><li>Submeter para certificação</li></ol></div>
+  </div>
+
+  <h2>6. Exemplo: como fica o handler depois</h2>
+  <div class="ex"><pre style="margin:0;white-space:pre-wrap;font-size:.85rem"><code>// 1. valida (assinatura, skill id), 2. auth + listas em paralelo
+const [{ data: { user } }, { data: lists }] = await Promise.all([
+  supabase.auth.getUser(),
+  supabase.from('lists').select('id,title').is('deleted_at', null),
+]);
+// 3. LLM só interpreta (recebe os títulos exatos)
+const intent = await parse(text, lists.map(l =&gt; l.title));
+// 4. executa e fala o resultado REAL
+const list = resolveList(intent.listName, lists, session.attributes.lastListId);
+await addItems(list.id, intent.items);
+return speak(`Anotei ${joinPt(intent.items)} no ${list.title}.`, {
+  endSession: session.new,          // one-shot fecha
+  reprompt: 'Quer anotar mais alguma coisa?',
+  attrs: { lastListId: list.id, undo: { op: 'add', ids } },
+});</code></pre></div>
+</main>
+</body>
+</html>
