@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeft, Shield, Brain, MapPin, MessageCircle, FileText } from "lucide-react"
+import { ArrowLeft, Shield, Brain, MapPin, MessageCircle, FileText, Mic } from "lucide-react"
 import Link from "next/link"
 
 export default function PrivacyPage() {
@@ -59,6 +59,21 @@ export default function PrivacyPage() {
           <p>As mensagens trocadas no chat das listas são armazenadas para permitir a colaboração. Mensagens individuais enviadas através da Central de Avisos podem ser deletadas permanentemente ao limpar a lista de notificações.</p>
         </section>
 
+        <section className="space-y-4">
+          <div className="flex items-center gap-3 text-white font-black uppercase text-xs tracking-widest">
+            <Mic className="w-4 h-4 text-sky-400" />
+            <span>5. Alexa e Assistentes de IA</span>
+          </div>
+          <p>Você pode usar o Gaga List pela Alexa (skill Gaga List) ou conectá-lo a assistentes de IA, como o Claude, por meio de um token pessoal (MCP). Nesses casos:</p>
+          <ul className="list-disc pl-6 space-y-2 text-sm">
+            <li><strong>Alexa:</strong> sua voz é captada e transcrita pela Amazon, conforme a política de privacidade da Amazon. O Gaga List recebe apenas o texto do comando (por exemplo, &ldquo;anotar leite&rdquo;), não o áudio.</li>
+            <li>O texto do comando é enviado à OpenAI somente para identificar a ação desejada. Não guardamos o texto do comando; guardamos apenas o resultado na sua lista (o item anotado, riscado ou alterado).</li>
+            <li>Ao vincular a conta, a Alexa recebe uma credencial de acesso às suas listas. Não recebemos a senha nem os dados da sua conta Amazon. Para cancelar o acesso, desative a skill Gaga List no app da Alexa.</li>
+            <li><strong>Tokens de IA (MCP):</strong> guardamos apenas uma versão cifrada (hash) do token. Você pode excluir um token a qualquer momento em Ajustes &gt; Integrações, e o acesso é cortado na hora.</li>
+            <li>A Alexa e os assistentes conectados só acessam listas das quais você é dono ou colaborador.</li>
+          </ul>
+        </section>
+
         <section className="pt-12 border-t border-white/5 flex flex-col items-center gap-3">
           <div className="flex items-center gap-2 text-xs text-zinc-400">
             <span>Veja também:</span>
@@ -67,7 +82,7 @@ export default function PrivacyPage() {
             </Link>
           </div>
           <div className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 text-center">
-            Última atualização: 21 de Março de 2026 • Staff Level Security
+            Última atualização: 28 de Setembro de 2026 • Staff Level Security
           </div>
         </section>
       </div>
