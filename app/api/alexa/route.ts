@@ -122,9 +122,17 @@ export async function POST(req: Request) {
       return respondWithAlexa("Desculpe, não ouvi direito. O que você quer fazer?", false);
     }
 
+    const sessionAttributes = session?.attributes || {};
+    let promptText = rawText;
+
+    // Injeta o contexto da conversa anterior se o usuário estiver respondendo a uma desambiguação
+    if (sessionAttributes.pendingAction && sessionAttributes.pendingItem) {
+      promptText = `[Contexto da conversa anterior: O usuário estava tentando executar a ação ${sessionAttributes.pendingAction} para o item "${sessionAttributes.pendingItem}". Ele agora está respondendo de qual lista ele quer realizar a ação.] Frase atual do usuário: "${rawText}"`;
+    }
+
     // 3. Acionar o Agente (LLM)
-    console.log("Acionando Agente para:", rawText);
-    const intentData = await processUserUtterance(rawText);
+    console.log("Acionando Agente para:", promptText);
+    const intentData = await processUserUtterance(promptText);
     console.log("Agente Respondeu:", intentData);
 
     if (intentData.action === "END_SESSION") {
@@ -186,7 +194,11 @@ export async function POST(req: Request) {
       // 2. Desambiguação: Se achou em mais de uma lista e o usuário não especificou a lista
       if (foundItems.length > 1) {
         const listNames = foundItems.map((i: any) => i.lists?.title || 'Sem Nome').join(' e ');
-        return respondWithAlexa(`Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual lista você quer riscar?`, false);
+        return respondWithAlexa(
+          `Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual lista você quer riscar?`, 
+          false,
+          { pendingAction: intentData.action, pendingItem: intentData.item }
+        );
       }
 
       // 3. Se achou apenas 1, atualiza
@@ -207,7 +219,11 @@ export async function POST(req: Request) {
 
       if (foundItems.length > 1) {
         const listNames = foundItems.map((i: any) => i.lists?.title || 'Sem Nome').join(' e ');
-        return respondWithAlexa(`Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual delas você quer excluir?`, false);
+        return respondWithAlexa(
+          `Achei ${intentData.item} em mais de uma lista: ${listNames}. De qual delas você quer excluir?`, 
+          false,
+          { pendingAction: intentData.action, pendingItem: intentData.item }
+        );
       }
 
       const { error: deleteError } = await supabase.from('items').delete().eq('id', foundItems[0].id);
@@ -215,6 +231,18 @@ export async function POST(req: Request) {
     }
 
     else if (intentData.action === "LIST_ITEMS") {
+      // Se especificou uma lista, lê os itens dessa lista
+      if (targetListId && intentData.listName) {
+        const { data: listItems } = await supabase.from('items').select('name').eq('list_id', targetListId).eq('is_purchased', false);
+        if (listItems && listItems.length > 0) {
+          const itemNames = listItems.map(i => i.name).join(', ');
+          return respondWithAlexa(`Na lista ${intentData.listName} você tem: ${itemNames}. Algo mais?`, false);
+        } else {
+          return respondWithAlexa(`A lista ${intentData.listName} está vazia ou tudo já foi comprado. Algo mais?`, false);
+        }
+      }
+
+      // Se não especificou lista, lê os nomes das listas
       const { data: lists } = await supabase.from('lists').select('title').eq('owner_id', USER_ID).is('deleted_at', null);
       if (lists && lists.length > 0) {
         const titles = lists.map(l => l.title);
@@ -234,9 +262,10 @@ export async function POST(req: Request) {
   }
 }
 
-function respondWithAlexa(text: string, shouldEndSession = false) {
+function respondWithAlexa(text: string, shouldEndSession = false, sessionAttributes = {}) {
   return NextResponse.json({
     version: "1.0",
+    sessionAttributes,
     response: {
       outputSpeech: { type: "PlainText", text },
       shouldEndSession
