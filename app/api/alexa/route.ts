@@ -79,12 +79,22 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { request, session } = body;
 
-    console.log("Alexa Request:", JSON.stringify(body, null, 2));
+    // Não logar o body inteiro: ele contém o accessToken do usuário
+    console.log("Alexa Request:", request?.type, request?.intent?.name ?? "", request?.requestId);
 
     if (request?.type === 'IntentRequest') {
       const intentName = request.intent.name;
-      if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent' || intentName === 'AMAZON.NoIntent') {
+      if (intentName === 'AMAZON.StopIntent' || intentName === 'AMAZON.CancelIntent' || intentName === 'AMAZON.NoIntent' || intentName === 'AMAZON.NavigateHomeIntent') {
         return respondWithAlexa("Até a próxima!", true);
+      }
+      if (intentName === 'AMAZON.HelpIntent') {
+        return respondWithAlexa("Você pode dizer, por exemplo: anotar leite no mercado, já comprei o pão, o que falta na lista de mercado, ou quanto deu a lista. O que você quer fazer?", false, session?.attributes);
+      }
+      if (intentName === 'AMAZON.FallbackIntent') {
+        return respondWithAlexa("Não entendi. Tente algo como: anotar arroz na lista de mercado.", false, session?.attributes);
+      }
+      if (intentName === 'AMAZON.YesIntent') {
+        return respondWithAlexa("Pode falar!", false, session?.attributes);
       }
     }
 
@@ -291,9 +301,13 @@ export async function POST(req: Request) {
 function respondWithAlexa(text: string, shouldEndSession = false, sessionAttributes = {}) {
   return NextResponse.json({
     version: "1.0",
-    sessionAttributes,
+    sessionAttributes: sessionAttributes || {},
     response: {
       outputSpeech: { type: "PlainText", text },
+      // A certificação exige reprompt sempre que a sessão fica aberta
+      ...(!shouldEndSession && {
+        reprompt: { outputSpeech: { type: "PlainText", text: "Quer fazer mais alguma coisa na sua lista?" } }
+      }),
       shouldEndSession
     }
   });

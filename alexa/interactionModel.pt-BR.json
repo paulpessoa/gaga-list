@@ -1,0 +1,305 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "gaga list",
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "LOW"
+        }
+      },
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        },
+        {
+          "name": "AgentIntent",
+          "slots": [
+            {
+              "name": "Query",
+              "type": "CATCH_ALL_TYPE"
+            }
+          ],
+          "samples": [
+            "{Query}",
+            "quero {Query}",
+            "por favor {Query}",
+            "pode {Query}",
+            "você pode {Query}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "CATCH_ALL_TYPE",
+          "values": [
+            {
+              "name": {
+                "value": "leite"
+              }
+            },
+            {
+              "name": {
+                "value": "arroz e feijão"
+              }
+            },
+            {
+              "name": {
+                "value": "anotar leite"
+              }
+            },
+            {
+              "name": {
+                "value": "adicionar arroz"
+              }
+            },
+            {
+              "name": {
+                "value": "comprar picanha"
+              }
+            },
+            {
+              "name": {
+                "value": "anotar dois quilos de arroz"
+              }
+            },
+            {
+              "name": {
+                "value": "coloca pão de forma na lista"
+              }
+            },
+            {
+              "name": {
+                "value": "adiciona sabão em pó na lista de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "anotar leite pão e ovos na lista de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "põe três caixas de leite integral na lista da casa"
+              }
+            },
+            {
+              "name": {
+                "value": "anotar vinte litros de leite de soja da marca x na lista de festa"
+              }
+            },
+            {
+              "name": {
+                "value": "já comprei o leite"
+              }
+            },
+            {
+              "name": {
+                "value": "peguei o pão"
+              }
+            },
+            {
+              "name": {
+                "value": "risca o carvão da lista de churrasco"
+              }
+            },
+            {
+              "name": {
+                "value": "marca o arroz como comprado"
+              }
+            },
+            {
+              "name": {
+                "value": "desmarca o feijão"
+              }
+            },
+            {
+              "name": {
+                "value": "faltou comprar o café"
+              }
+            },
+            {
+              "name": {
+                "value": "volta o açúcar para pendente"
+              }
+            },
+            {
+              "name": {
+                "value": "tira o refrigerante"
+              }
+            },
+            {
+              "name": {
+                "value": "remove a cerveja da lista de festa"
+              }
+            },
+            {
+              "name": {
+                "value": "apaga o detergente da lista de limpeza"
+              }
+            },
+            {
+              "name": {
+                "value": "muda a quantidade de carvão para cinco sacos"
+              }
+            },
+            {
+              "name": {
+                "value": "o leite custa cinco reais e cinquenta"
+              }
+            },
+            {
+              "name": {
+                "value": "coloca o preço de doze reais no queijo"
+              }
+            },
+            {
+              "name": {
+                "value": "o sabão é da categoria limpeza"
+              }
+            },
+            {
+              "name": {
+                "value": "troca o nome do suco para suco de uva"
+              }
+            },
+            {
+              "name": {
+                "value": "move o leite para a lista da fazenda"
+              }
+            },
+            {
+              "name": {
+                "value": "o que tem na lista de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "o que falta comprar"
+              }
+            },
+            {
+              "name": {
+                "value": "o que eu já comprei na lista de festa"
+              }
+            },
+            {
+              "name": {
+                "value": "quais são minhas listas"
+              }
+            },
+            {
+              "name": {
+                "value": "me fala os itens de limpeza da lista de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "lê a lista de reforma"
+              }
+            },
+            {
+              "name": {
+                "value": "quanto deu a lista de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "qual o total da lista de churrasco"
+              }
+            },
+            {
+              "name": {
+                "value": "quanto falta gastar na lista da casa"
+              }
+            },
+            {
+              "name": {
+                "value": "eu já anotei tomate"
+              }
+            },
+            {
+              "name": {
+                "value": "tem ovo na lista"
+              }
+            },
+            {
+              "name": {
+                "value": "procura detergente nas minhas listas"
+              }
+            },
+            {
+              "name": {
+                "value": "desfaz"
+              }
+            },
+            {
+              "name": {
+                "value": "desfazer a última ação"
+              }
+            },
+            {
+              "name": {
+                "value": "a de mercado"
+              }
+            },
+            {
+              "name": {
+                "value": "na lista de festa"
+              }
+            },
+            {
+              "name": {
+                "value": "nas duas"
+              }
+            },
+            {
+              "name": {
+                "value": "só isso"
+              }
+            },
+            {
+              "name": {
+                "value": "pronto"
+              }
+            },
+            {
+              "name": {
+                "value": "nada"
+              }
+            },
+            {
+              "name": {
+                "value": "tchau obrigado"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
