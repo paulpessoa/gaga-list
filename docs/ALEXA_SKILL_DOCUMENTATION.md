@@ -150,10 +150,12 @@ Amazon ─▶ POST /api/alexa/token (HTTP Basic client_id:secret)
 | "Alexa, abrir gaga list" | Abre a conversa ("O que você precisa anotar?") |
 | "Alexa, pede pro gaga list anotar leite" | Executa e **encerra** (one-shot) |
 | Dentro da conversa | Executa e pergunta "Algo mais?". "não", "só isso" ou "tchau" encerram |
-| "anotar leite" (sem lista) | Usa a última lista da conversa ou, se não houver, a lista editada mais recentemente |
+| "anotar leite" (sem lista) | Usa a última lista da conversa ou, se não houver, a lista com o item mexido mais recentemente |
+| "anotar arroz e leite" | Anota os dois itens de uma vez |
 | "anotar leite na lista de festa" (não existe) | Cria a lista "festa" |
 | "mercado" | Encontra "Mercado do Mês" (ignora acento, maiúsculas e "lista de") |
-| Item em 2 listas diferentes | Pergunta de qual lista. A resposta ("a de mercado") segue pelo `sessionAttributes` |
+| Item em 2 listas diferentes | Se estiver na lista em uso, usa ela. Senão pergunta de qual. A resposta ("atacado", "a primeira", "citroen c três") é resolvida sem GPT e retoma a ação original com quantidade e preço |
+| "desfaz" | Desfaz a última anotação, risco, alteração ou exclusão da conversa |
 | "o que falta comprar" | Lê os pendentes da lista padrão (no máximo 10 itens, depois "e mais N") |
 | "quanto deu a lista" | "O total da lista Mercado é 52 reais e 30 centavos" |
 | "ajuda" | Exemplos de comandos |
@@ -215,8 +217,6 @@ Para testar com o token de um usuário, coloque `"accessToken":"<jwt do supabase
 
 ## 9. Próximos passos
 
-- Vários itens por frase ("leite, pão e ovos")
-- Desfazer de verdade (guardar a última operação em `sessionAttributes`)
 - Confirmar antes de criar uma lista nova
 - Beta test e submissão para certificação
 
