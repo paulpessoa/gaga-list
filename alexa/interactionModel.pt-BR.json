@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "gaga list",
+      "invocationName": "gaga lista",
       "modelConfiguration": {
         "fallbackIntentSensitivity": {
           "level": "LOW"
