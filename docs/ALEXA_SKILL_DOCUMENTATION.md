@@ -39,7 +39,7 @@ Usuário ◀──fala── Alexa ◀──resposta do resultado real──┘
 
 | Variável | Valor | De onde vem |
 |---|---|---|
-| `ALEXA_SKILL_ID` | `amzn1.ask.skill.0ac2316e-2310-4484-b69b-cc0cdd52f520` | Console → lista de skills → "Copy Skill ID" |
+| `ALEXA_SKILL_ID` | `amzn1.ask.skill.05b114ad-fc47-4bfa-b35c-9ae9bd880895` | Console → lista de skills → "Copy Skill ID" |
 | `ALEXA_CLIENT_ID` | ex.: `gaga-list-alexa` | **Você inventa.** O mesmo valor vai no console (seção 3.4) |
 | `ALEXA_CLIENT_SECRET` | string aleatória longa | **Você gera:** `openssl rand -hex 32`. O mesmo valor vai no console |
 | `ALEXA_REDIRECT_URIS` | as 3 URLs separadas por vírgula | Console → Account Linking → "Alexa Redirect URLs" |
