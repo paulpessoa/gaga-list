@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.ai_usage_logs (
     user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     feature TEXT NOT NULL, -- e.g., 'ocr', 'recipe', 'vision'
     cost INTEGER NOT NULL, -- how many 'grãos' were spent
-    model_used TEXT, -- e.g., 'gemini-1.5-flash', 'whisper-large-v3'
+    model_used TEXT, -- e.g., 'gemini-3.8-flash', 'whisper-large-v3'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
