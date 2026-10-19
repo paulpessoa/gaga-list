@@ -87,6 +87,7 @@ export default function AdminSettingsPage() {
     { key: "cost_voice", label: "Custo Voz", icon: Mic, color: "text-purple-500", desc: "Grãos por comando de voz processado" },
     { key: "cost_suggestion", label: "Custo Sugestão", icon: Lightbulb, color: "text-amber-500", desc: "Grãos por benefícios e sugestões de IA" },
     { key: "cost_agent", label: "Custo Assistente", icon: Sparkles, color: "text-green-500", desc: "Grãos por mensagem enviada à assistente Gaga" },
+    { key: "cost_live_minute", label: "Custo Voz ao Vivo", icon: Mic, color: "text-green-500", desc: "Grãos por minuto de conversa por voz com a Gaga" },
     { key: "referral_bonus", label: "Bônus de Indicação", icon: Gift, color: "text-rose-500", desc: "Grãos dados a quem indica um amigo" },
   ]
 

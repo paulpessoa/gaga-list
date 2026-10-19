@@ -6,6 +6,7 @@ import { SettingsService } from "@/services/settings.service"
 import { getAvailableProviders, runAgent } from "@/lib/agent/run-agent"
 import type { ToolContext } from "@/lib/agent/tools"
 import { buildAgentSystemPrompt } from "@/lib/agent/prompt"
+import { loadPromptLists } from "@/lib/agent/server"
 
 export const runtime = "nodejs"
 export const maxDuration = 60
@@ -65,17 +66,12 @@ export async function POST(request: Request) {
       )
     }
 
-    // RLS já inclui as listas compartilhadas com o usuário
-    const { data: listRows } = await supabase
-      .from("lists")
-      .select("id, title, owner_id")
-      .is("deleted_at", null)
-      .order("updated_at", { ascending: false })
-    const lists = (listRows || []).map((l: any) => ({ id: l.id as string, title: l.title as string, shared: l.owner_id !== user.id }))
+    const db = supabase as unknown as SupabaseClient<any>
+    const lists = await loadPromptLists(db, user.id)
     const currentList = lists.find((l) => l.id === listId) || null
 
     const ctx: ToolContext = {
-      supabase: supabase as unknown as SupabaseClient<any>,
+      supabase: db,
       userId: user.id,
       changedListIds: new Set(),
       listsChanged: { value: false }

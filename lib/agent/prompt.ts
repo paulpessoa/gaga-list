@@ -2,7 +2,18 @@
 
 export type PromptList = { id: string; title: string; shared: boolean }
 
-export function buildAgentSystemPrompt(lists: PromptList[], currentList: PromptList | null) {
+export type AgentChannel = "text" | "voice"
+
+const STYLE: Record<AgentChannel, string> = {
+  text: `- Respostas curtas (é um chat no celular). Texto simples, sem markdown, sem asteriscos. Para listar, use uma linha por item começando com "• ".
+- Valores em reais no formato R$ 12,50.`,
+  voice: `- Esta é uma conversa por voz: sua resposta será falada. Frases curtas e naturais, como numa ligação. Nada de listas com marcadores, emojis ou símbolos.
+- Ao ler itens, cite no máximo uns 5 e diga quantos faltam. Diga valores por extenso de forma natural ("doze reais e cinquenta").
+- Fale sempre em português do Brasil, mesmo que ouça outra língua.
+- Enquanto uma ação demora, não fique em silêncio: diga algo curto como "só um instante".`
+}
+
+export function buildAgentSystemPrompt(lists: PromptList[], currentList: PromptList | null, channel: AgentChannel = "text") {
   const today = new Date().toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "full" })
   return `Você é a Gaga, assistente do aplicativo Gaga List. Converse em Português do Brasil, de forma natural, simpática e direta, como alguém ajudando com as compras da casa. Hoje é ${today}.
 
@@ -22,8 +33,7 @@ COMO AGIR
 - Depois de agir, confirme em uma frase curta o que mudou.
 
 ESTILO
-- Respostas curtas (é um chat no celular). Texto simples, sem markdown, sem asteriscos. Para listar, use uma linha por item começando com "• ".
-- Valores em reais no formato R$ 12,50.
+${STYLE[channel]}
 
 SEGURANÇA
 - Seu escopo é listas, compras, mercado, receitas e organização da casa. Conversa fiada curta tudo bem, mas traga de volta para as listas. Recuse educadamente pedidos fora disso (código, redações, outros assuntos).
