@@ -10,12 +10,26 @@ export function getGeminiApiKey(): string | undefined {
 
 /**
  * Modelo padrão do Gemini usado em todo o projeto.
- * Usamos 'gemini-3.8-flash-lite' por excelente custo-benefício e velocidade.
+ * Usamos 'gemini-3.5-flash-lite', o Flash-Lite mais recente, por excelente custo-benefício e velocidade.
+ * Não existe 'gemini-3.8-flash-lite' (a família 3.8 só tem Flash e as variantes de TTS/Live).
  */
-export const GEMINI_MODEL = "gemini-3.8-flash-lite"
+export const GEMINI_MODEL = "gemini-3.5-flash-lite"
+
+/**
+ * Modelo do Gemini usado pelo agente conversacional. O 3.5 Flash-Lite acertou os mesmos
+ * cenários de tool calling que o 3.8 Flash, sendo ~3x mais rápido e mais barato.
+ * Pode ser sobrescrito por GEMINI_AGENT_MODEL (ex.: "gemini-3.8-flash").
+ */
+export const GEMINI_AGENT_MODEL = process.env.GEMINI_AGENT_MODEL || GEMINI_MODEL
+
+/**
+ * Modelo da OpenAI usado como fallback do agente conversacional quando o Gemini falha.
+ * Pode ser sobrescrito pela variável OPENAI_AGENT_MODEL.
+ */
+export const OPENAI_AGENT_MODEL = process.env.OPENAI_AGENT_MODEL || "gpt-4o-mini"
 
 export const GEMINI_FALLBACK_MODELS = [
-  "gemini-3.8-flash-lite",
+  "gemini-3.5-flash-lite",
   "gemini-3.1-flash-lite"
 ]
 

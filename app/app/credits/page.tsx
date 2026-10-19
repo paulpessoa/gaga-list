@@ -39,6 +39,7 @@ const FEATURE_ICONS: Record<string, any> = {
   vision: Camera,
   voice: Mic,
   suggestion: Lightbulb,
+  agent: Sparkles,
   referral_bonus: Sparkles
 }
 
@@ -48,6 +49,7 @@ const FEATURE_COLORS: Record<string, string> = {
   vision: "text-blue-500 bg-blue-500/10 border-blue-500/20",
   voice: "text-rose-500 bg-rose-500/10 border-rose-500/20",
   suggestion: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  agent: "text-[#53E076] bg-[#1DB954]/10 border-[#53E076]/20",
   referral_bonus: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
 }
 
@@ -57,6 +59,7 @@ const FEATURE_LABELS: Record<string, string> = {
   vision: "Análise de Imagem",
   voice: "Comando de Voz",
   suggestion: "Sugestão Inteligente",
+  agent: "Assistente Gaga",
   referral_bonus: "Bônus de Indicação"
 }
 
@@ -72,6 +75,7 @@ export default function CreditsPage() {
     { id: 'vision', label: 'Visão', cost: costs.cost_vision, color: 'blue', icon: Camera },
     { id: 'voice', label: 'Áudio', cost: costs.cost_voice, color: 'rose', icon: Mic },
     { id: 'suggestion', label: 'Dicas', cost: costs.cost_suggestion, color: 'amber', icon: Lightbulb },
+    { id: 'agent', label: 'Assistente', cost: costs.cost_agent, color: 'emerald', icon: Sparkles },
   ]
 
   const [credits, setCredits] = useState<number>(0)

@@ -12,6 +12,7 @@ export const DEFAULT_AI_COSTS = {
   cost_vision: Number(process.env.NEXT_PUBLIC_COST_VISION) || 4,
   cost_voice: Number(process.env.NEXT_PUBLIC_COST_VOICE) || 1,
   cost_suggestion: Number(process.env.NEXT_PUBLIC_COST_SUGGESTION) || 1,
+  cost_agent: Number(process.env.NEXT_PUBLIC_COST_AGENT) || 1,
   referral_bonus: Number(process.env.NEXT_PUBLIC_REFERRAL_BONUS) || 50
 }
 

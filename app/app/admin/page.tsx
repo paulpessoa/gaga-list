@@ -33,11 +33,12 @@ import { CuratorProductModal } from "@/components/dashboard/curator-product-moda
 
 // Configura��o de custos das APIs
 const API_COSTS: Record<string, { model: string; estimated_brl: number }> = {
-  recipe: { model: "Gemini 1.5 Flash", estimated_brl: 0.005 },
+  recipe: { model: "Gemini 3.5 Flash-Lite", estimated_brl: 0.005 },
   ocr: { model: "GPT-4o-mini", estimated_brl: 0.02 },
   vision: { model: "GPT-4o-mini", estimated_brl: 0.03 },
   voice: { model: "Whisper + Gemini", estimated_brl: 0.015 },
-  suggestion: { model: "Llama 3.3", estimated_brl: 0.002 }
+  suggestion: { model: "Llama 3.3", estimated_brl: 0.002 },
+  agent: { model: "Gemini 3.5 Flash-Lite (fallback GPT-4o-mini)", estimated_brl: 0.01 }
 }
 
 export default function AdminPage() {
