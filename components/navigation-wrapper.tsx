@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { TabBar } from "./ui/tab-bar"
 import { VisionScanner } from "./ui/vision-scanner"
 import { ScannedProductModal } from "./lists/scanned-product-modal"
+import { AgentChat } from "./agent/agent-chat"
 import { useUser } from "@/hooks/use-user"
 import { createClient } from "@/lib/supabase/client"
 import { MyProductsService } from "@/services/my-products.service"
@@ -127,6 +128,8 @@ export function NavigationWrapper() {
         onAddToList={handleAddToList}
         isSaving={isSaving}
       />
+
+      {user && pathname.startsWith("/app") && <AgentChat listId={listId} />}
     </>
   )
 }
