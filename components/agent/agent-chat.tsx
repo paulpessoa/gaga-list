@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
-import { Sparkles, Send, Loader2, X, RotateCcw } from "lucide-react"
+import { Sparkles, Send, Loader2, X, RotateCcw, Mic, PhoneOff } from "lucide-react"
 import { useHaptic } from "@/hooks/use-haptic"
+import { useLiveAgent, type LiveStatus } from "@/hooks/use-live-agent"
 import { useAICosts } from "@/hooks/use-ai-costs"
 import { useAICreditCheck } from "@/hooks/use-ai-credit-check"
 import { aiCreditModal } from "@/hooks/use-ai-credit-modal"
@@ -20,6 +21,16 @@ const SUGGESTIONS = [
   "Quanto vai dar a compra?",
   "Monta uma lista pra um churrasco"
 ]
+
+const LIVE_STATUS_LABEL: Record<LiveStatus, string> = {
+  idle: "",
+  connecting: "Conectando...",
+  listening: "Pode falar, estou ouvindo",
+  speaking: "Gaga falando · fale para interromper",
+  working: "Mexendo na sua lista..."
+}
+
+const formatElapsed = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
 
 interface AgentChatProps {
   /** Lista aberta na tela, usada como lista padrão pelo agente. */
@@ -41,6 +52,27 @@ export function AgentChat({ listId }: AgentChatProps) {
   const { trigger } = useHaptic()
   const { costs } = useAICosts()
   const { checkAndAct } = useAICreditCheck()
+
+  const live = useLiveAgent({
+    listId,
+    onTurn: (turn) => setMessages((prev) => [...prev, turn]),
+    onEnd: (error) => {
+      if (error) setMessages((prev) => [...prev, { role: "assistant", content: error, isError: true }])
+    }
+  })
+
+  const startLive = () => {
+    trigger("medium")
+    // Chamado de forma síncrona dentro do toque, para o iOS liberar o áudio
+    checkAndAct(costs.cost_live_minute, () => {
+      void live.start(messages.filter((m) => !m.isError))
+    })
+  }
+
+  const closePanel = () => {
+    live.stop()
+    setIsOpen(false)
+  }
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -141,7 +173,7 @@ export function AgentChat({ listId }: AgentChatProps) {
                 {messages.length > 0 && (
                   <button
                     onClick={() => setMessages([])}
-                    disabled={isSending}
+                    disabled={isSending || live.isActive}
                     className="p-3 rounded-2xl bg-[#1c1b1b] text-zinc-500 hover:text-white transition-all disabled:opacity-40"
                     aria-label="Nova conversa"
                   >
@@ -149,7 +181,7 @@ export function AgentChat({ listId }: AgentChatProps) {
                   </button>
                 )}
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={closePanel}
                   className="p-3 rounded-2xl bg-[#1c1b1b] text-zinc-500 hover:text-white transition-all"
                   aria-label="Fechar"
                 >
@@ -166,7 +198,7 @@ export function AgentChat({ listId }: AgentChatProps) {
                       <Sparkles className="w-7 h-7 text-[#53E076]" />
                     </div>
                     <p className="text-xs text-zinc-400 font-bold max-w-[240px]">
-                      Me peça para anotar, riscar, mover ou somar itens das suas listas.
+                      Me peça para anotar, riscar, mover ou somar itens das suas listas. Toque no microfone para conversar por voz.
                     </p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2">
@@ -174,7 +206,8 @@ export function AgentChat({ listId }: AgentChatProps) {
                       <button
                         key={s}
                         onClick={() => checkAndAct(costs.cost_agent, () => send(s))}
-                        className="text-xs font-bold text-zinc-300 bg-[#1c1b1b] border border-[#3d4a3d]/60 rounded-full px-4 py-2 active:scale-95 transition-transform"
+                        disabled={live.isActive}
+                        className="text-xs font-bold text-zinc-300 bg-[#1c1b1b] border border-[#3d4a3d]/60 rounded-full px-4 py-2 active:scale-95 transition-transform disabled:opacity-40"
                       >
                         {s}
                       </button>
@@ -211,7 +244,70 @@ export function AgentChat({ listId }: AgentChatProps) {
             </div>
 
             <footer className="p-6 px-6 bg-[#131313] border-t border-[#3d4a3d]/60 sm:rounded-b-[2.5rem]">
+              {live.isActive ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-full min-h-[3.5rem] text-center text-sm leading-relaxed">
+                    {live.userText && <p className="text-zinc-400 italic">“{live.userText}”</p>}
+                    {live.assistantText && <p className="text-zinc-200">{live.assistantText}</p>}
+                    {!live.userText && !live.assistantText && (
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 pt-4">
+                        {LIVE_STATUS_LABEL[live.status]}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <div className="relative w-16 h-16 flex items-center justify-center">
+                      <span
+                        className="absolute inset-0 rounded-full bg-[#53E076]/25 transition-transform duration-100"
+                        style={{ transform: `scale(${live.status === "listening" ? 1 + Math.min(live.level * 6, 0.6) : 1})` }}
+                        aria-hidden
+                      />
+                      <span
+                        className={`relative w-12 h-12 rounded-full flex items-center justify-center bg-[#1DB954] text-[#003914] ${
+                          live.status === "speaking" || live.status === "connecting" || live.status === "working" ? "animate-pulse" : ""
+                        }`}
+                      >
+                        {live.status === "connecting" || live.status === "working" ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : live.status === "speaking" ? (
+                          <Sparkles className="w-5 h-5" />
+                        ) : (
+                          <Mic className="w-5 h-5" />
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#53E076]">
+                        {LIVE_STATUS_LABEL[live.status]}
+                      </span>
+                      <span className="text-[10px] font-bold text-zinc-500">
+                        {formatElapsed(live.elapsed)} · {costs.cost_live_minute} {costs.cost_live_minute === 1 ? "grão" : "grãos"}/min
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trigger("medium")
+                        live.stop()
+                      }}
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center bg-red-500 text-white shadow-xl active:scale-90 transition-transform"
+                      aria-label="Encerrar conversa por voz"
+                    >
+                      <PhoneOff className="w-6 h-6" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
               <form onSubmit={handleSubmit} className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={startLive}
+                  disabled={isSending}
+                  className="w-14 h-14 flex-shrink-0 rounded-2xl flex items-center justify-center transition-all active:scale-90 disabled:opacity-50 bg-[#1c1b1b] border border-[#53E076]/40 text-[#53E076]"
+                  aria-label="Conversar por voz"
+                >
+                  <Mic className="w-6 h-6" />
+                </button>
                 <input
                   type="text"
                   placeholder="Fale com a Gaga..."
@@ -229,6 +325,7 @@ export function AgentChat({ listId }: AgentChatProps) {
                   {isSending ? <Loader2 className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6" />}
                 </button>
               </form>
+              )}
             </footer>
           </div>
         </div>

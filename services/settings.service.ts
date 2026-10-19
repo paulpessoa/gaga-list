@@ -13,6 +13,8 @@ export const DEFAULT_AI_COSTS = {
   cost_voice: Number(process.env.NEXT_PUBLIC_COST_VOICE) || 1,
   cost_suggestion: Number(process.env.NEXT_PUBLIC_COST_SUGGESTION) || 1,
   cost_agent: Number(process.env.NEXT_PUBLIC_COST_AGENT) || 1,
+  // Medido: ~R$ 0,15/min no Gemini Live (pago). 10 grãos/min = R$ 0,20 no Broto, R$ 0,13 no Colheita, R$ 0,10 no Fazenda
+  cost_live_minute: Number(process.env.NEXT_PUBLIC_COST_LIVE_MINUTE) || 10,
   referral_bonus: Number(process.env.NEXT_PUBLIC_REFERRAL_BONUS) || 50
 }
 

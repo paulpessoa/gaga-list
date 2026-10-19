@@ -23,6 +23,16 @@ export const GEMINI_MODEL = "gemini-3.5-flash-lite"
 export const GEMINI_AGENT_MODEL = process.env.GEMINI_AGENT_MODEL || GEMINI_MODEL
 
 /**
+ * Modelo e voz do modo de conversa por voz em tempo real (Gemini Live API).
+ * Podem ser sobrescritos por GEMINI_LIVE_MODEL e GEMINI_LIVE_VOICE.
+ */
+export const GEMINI_LIVE_MODEL = process.env.GEMINI_LIVE_MODEL || "gemini-3.8-live"
+export const GEMINI_LIVE_VOICE = process.env.GEMINI_LIVE_VOICE || "Aoede"
+
+/** Duração máxima de uma sessão de voz (o Live exige reconexão a cada ~10 min). */
+export const LIVE_MAX_MINUTES = 10
+
+/**
  * Modelo da OpenAI usado como fallback do agente conversacional quando o Gemini falha.
  * Pode ser sobrescrito pela variável OPENAI_AGENT_MODEL.
  */
