@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/client"
 import { MyProductsService } from "@/services/my-products.service"
 import { useHaptic } from "@/hooks/use-haptic"
 import { useLists } from "@/hooks/use-lists"
+import { getContextualAction } from "./navigation/nav-items"
 
 export function NavigationWrapper() {
   const pathname = usePathname()
@@ -87,24 +88,18 @@ export function NavigationWrapper() {
     }
   }
 
-  const hideOnPaths = ["/", "/login", "/api/auth/confirm"]
-  const shouldHide = hideOnPaths.includes(pathname)
+  // A navegação do app só faz sentido dentro de /app. Páginas públicas
+  // (landing, termos, privacidade, convite, Alexa) e o /admin têm layout próprio.
+  if (!pathname.startsWith("/app")) return null
 
-  if (shouldHide) return null
-
-  // Contextual Button Logic
-  let actionButton = undefined
-  if (pathname === "/app") {
-    actionButton = {
-      label: "Nova Lista",
-      onClick: () => window.dispatchEvent(new CustomEvent("open-create-list"))
-    }
-  } else if (listId) {
-    actionButton = {
-      label: "Novo Item",
-      onClick: () => window.dispatchEvent(new CustomEvent("open-create-item"))
-    }
-  }
+  // Botão contextual (FAB): mesma regra usada pela SideNav no desktop
+  const action = getContextualAction(pathname)
+  const actionButton = action
+    ? {
+        label: action.label,
+        onClick: () => window.dispatchEvent(new CustomEvent(action.event))
+      }
+    : undefined
 
   return (
     <>

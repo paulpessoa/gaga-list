@@ -121,7 +121,7 @@ export function CreateListModal({
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
-        <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d]/60 shadow-2xl">
+        <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[2.5rem] h-[auto] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d]/60 shadow-2xl md:bottom-6 md:mx-auto md:max-w-xl md:rounded-[2.5rem] md:border">
           <div className="p-4 bg-[#131313] rounded-t-[2.5rem] flex-1 overflow-y-auto custom-scrollbar pb-12">
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-[#201f1f] mb-8" />
 

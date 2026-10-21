@@ -25,7 +25,7 @@ export function SelectListDrawer({
     <Drawer.Root open={isOpen} onOpenChange={(val) => !val && onClose()}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" />
-        <Drawer.Content className="bg-[#1c1b1b] flex flex-col rounded-t-[2.5rem] h-[auto] max-h-[80vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d] shadow-2xl">
+        <Drawer.Content className="bg-[#1c1b1b] flex flex-col rounded-t-[2.5rem] h-[auto] max-h-[80vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t border-[#3d4a3d] shadow-2xl md:bottom-6 md:mx-auto md:max-w-xl md:rounded-[2.5rem] md:border">
           <div className="p-4 bg-[#1c1b1b] rounded-t-[2.5rem] flex-1 overflow-y-auto pb-12">
             <div className="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-[#3d4a3d] mb-8" />
             

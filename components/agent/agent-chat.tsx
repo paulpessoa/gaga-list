@@ -146,7 +146,7 @@ export function AgentChat({ listId }: AgentChatProps) {
               trigger("medium")
               setIsOpen(true)
             }}
-            className="fixed bottom-28 right-5 z-50 w-14 h-14 rounded-[1.5rem] flex items-center justify-center bg-[#1c1b1b] border border-[#53E076]/40 text-[#53E076] shadow-2xl neon-glow-sm active:scale-90 transition-transform"
+            className="fixed bottom-28 right-5 md:bottom-8 md:right-8 z-50 w-14 h-14 rounded-[1.5rem] flex items-center justify-center bg-[#1c1b1b] border border-[#53E076]/40 text-[#53E076] shadow-2xl neon-glow-sm active:scale-90 transition-transform"
             aria-label="Falar com a assistente Gaga"
           >
             <Sparkles className="w-6 h-6" />
