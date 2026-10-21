@@ -46,9 +46,6 @@ export async function updateSession(request: NextRequest) {
     console.error('Middleware getUser error:', err);
   }
 
-  console.log('Middleware Path:', request.nextUrl.pathname);
-  console.log('Middleware User:', user?.id);
-  console.log('Middleware Cookies:', request.cookies.getAll().map(c => c.name));
 
   if (
     !user &&
