@@ -619,7 +619,7 @@ function RecipesContent() {
       >
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]" />
-          <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[3.5rem] h-[92vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t-2 border-[#53E076]/20">
+          <Drawer.Content className="bg-[#131313] flex flex-col rounded-t-[3.5rem] h-[92vh] mt-24 fixed bottom-0 left-0 right-0 z-[101] outline-none border-t-2 border-[#53E076]/20 md:bottom-6 md:mx-auto md:max-w-3xl md:h-[88vh] md:rounded-[3rem] md:border-2">
             {viewingRecipe && (
               <div className="p-4 bg-[#131313] rounded-t-[3.5rem] flex-1 overflow-y-auto pb-20 custom-scrollbar">
                 <div className="mx-auto w-12 h-1.5 rounded-full bg-[#1c1b1b] mb-8 shadow-inner" />

@@ -1,18 +1,12 @@
 "use client"
 
-import {
-  LayoutGrid,
-  UtensilsCrossed,
-  Users,
-  User,
-  Plus,
-  Bell
-} from "lucide-react"
+import { Plus } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useNotifications } from "@/providers/notification-provider"
 import { useHaptic } from "@/hooks/use-haptic"
 import { motion, AnimatePresence } from "framer-motion"
+import { PRIMARY_NAV, isNavActive } from "@/components/navigation/nav-items"
 
 interface TabBarProps {
   onScanClick?: () => void
@@ -27,21 +21,14 @@ interface TabBarProps {
  * TabBar — Navegação principal do GagaList Pro.
  * Design: Glassmorphism com identidade "Electric Sophistication".
  * Cor ativa: Neon Green (#53E076) com glow effect.
+ * Só aparece no mobile (< md). No tablet/desktop quem navega é a SideNav.
  */
 export function TabBar({ onScanClick, actionButton }: TabBarProps) {
   const pathname = usePathname()
   const { unreadCount } = useNotifications()
   const { trigger } = useHaptic()
 
-  const isActive = (path: string) => pathname === path
-
-  const navItems = [
-    { href: "/app",          icon: LayoutGrid,      label: "Listas"   },
-    { href: "/app/recipes",  icon: UtensilsCrossed, label: "Receitas" },
-    { href: "/app/notifications", icon: Bell,       label: "Mensagens" },
-    { href: "/app/people",   icon: Users,           label: "Pessoas"  },
-    { href: "/app/profile",  icon: User,            label: "Perfil"   },
-  ]
+  const isActive = (path: string) => isNavActive(pathname, path)
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 md:hidden pointer-events-none">
@@ -92,7 +79,7 @@ export function TabBar({ onScanClick, actionButton }: TabBarProps) {
           role="navigation"
           aria-label="Navegação principal"
         >
-          {navItems.map(({ href, icon: Icon, label }) => {
+          {PRIMARY_NAV.map(({ href, icon: Icon, label }) => {
             const active = isActive(href)
             return (
               <Link

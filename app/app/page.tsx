@@ -263,7 +263,7 @@ export default function AppPage() {
   }, [])
 
   return (
-    <main className="min-h-screen p-5 md:p-10 max-w-4xl mx-auto flex flex-col gap-8 bg-[#131313]">
+    <main className="min-h-screen p-5 md:p-10 max-w-4xl xl:max-w-6xl mx-auto flex flex-col gap-8 bg-[#131313]">
       <header className="flex flex-col gap-6">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-1">
@@ -328,7 +328,7 @@ export default function AppPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 auto-rows-fr pb-32">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 auto-rows-fr pb-32 md:pb-12">
         {isLoading ? (
           [1, 2].map((i) => (
             <div key={i} className="h-[180px] bg-[#201f1f] rounded-[2rem] animate-pulse" />

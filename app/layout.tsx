@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css"
 import Providers from "./providers"
 import Script from "next/script"
 import { NavigationWrapper } from "@/components/navigation-wrapper"
-import { DesktopBlocker } from "@/components/ui/desktop-blocker"
 
 /**
  * Inter é a fonte oficial do Design System GagaList Pro.
@@ -80,7 +79,6 @@ export default function RootLayout({
         `}
       >
         <Providers>
-          <DesktopBlocker />
           {children}
           <NavigationWrapper />
         </Providers>
