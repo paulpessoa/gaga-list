@@ -85,7 +85,7 @@ export function SideNav() {
       {profile?.is_admin && (
         <div className="mt-auto">
           <SideNavLink
-            item={{ href: "/app/admin", icon: ShieldCheck, label: "Painel Admin" }}
+            item={{ href: "/admin", icon: ShieldCheck, label: "Painel Admin" }}
             active={pathname.startsWith("/app/admin") || pathname.startsWith("/admin")}
             subtle
           />
