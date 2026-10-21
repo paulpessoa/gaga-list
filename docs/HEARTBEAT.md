@@ -1,6 +1,13 @@
 # ❤️ HEARTBEAT (Recovery State)
 *Este arquivo é a caixa-preta do projeto. Atualizado a cada turn significante.*
 
+## 🔁 Retomada rápida (Out/2026)
+Leia `docs/REVISAO-2026-10.md` (status dos PRs e pendências) e `docs/MIGRATIONS-GEMINI.md`.
+Prompt de continuidade:
+> Leia docs/HEARTBEAT.md e docs/REVISAO-2026-10.md. Confira no GitHub quais PRs (#12 admin, #13 limpeza) já foram mergeados.
+> Atualize a main, e siga a seção "Limpeza que ficou para depois" e "Próximos passos de UX desktop", um PR pequeno por tema,
+> rodando `npx tsc --noEmit` e `npx next build --no-lint` antes de cada push. Não aplique migrations sem me perguntar.
+
 ## 📍 Estado Atual
 - **Data:** 05 de Maio de 2026
 - **Status:** Produção-Pronto (MVP High-End).
